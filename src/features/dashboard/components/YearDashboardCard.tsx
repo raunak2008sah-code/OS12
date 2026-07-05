@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { getNowIST } from '@/lib/time'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -61,9 +62,10 @@ export function YearDashboardCard() {
 
   const currentMonth = useMemo(() => {
     if (!months.length) return 'Loading...'
-    const now = new Date()
+    const now = getNowIST()
     const match = months.find(m => {
-      const d = new Date(m.month_date)
+      const d = getNowIST() // assuming m.month_date is UTC or just mapping the month/year
+      d.setTime(Date.parse(m.month_date))
       return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
     })
     return match?.name ?? months[0]?.name ?? 'Unknown'
@@ -71,9 +73,10 @@ export function YearDashboardCard() {
 
   const currentPhase = useMemo(() => {
     if (!phases.length || !months.length) return 'Loading...'
-    const now = new Date()
+    const now = getNowIST()
     const currentMonthObj = months.find(m => {
-      const d = new Date(m.month_date)
+      const d = getNowIST()
+      d.setTime(Date.parse(m.month_date))
       return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
     })
     if (!currentMonthObj) return phases[0]?.name ?? 'Unknown'

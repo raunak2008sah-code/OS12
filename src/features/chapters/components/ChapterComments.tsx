@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { MessageSquare, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatIST } from '@/lib/time'
 import type { Comment } from '@/lib/supabase/types'
 
 interface ChapterCommentsProps {
@@ -73,7 +74,7 @@ export function ChapterComments({ comments, currentUserId, onAddComment, onDelet
                         {(comment as any).profiles?.display_name || 'User'}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {new Date(comment.created_at).toLocaleString()}
+                        {formatIST(new Date(comment.created_at), 'Pp')}
                       </span>
                     </div>
                     {isAuthor && (

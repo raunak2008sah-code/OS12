@@ -2,6 +2,8 @@ import { useMemo, useEffect, useRef } from 'react'
 import { CalendarRange } from 'lucide-react'
 import type { RoadmapPhase } from '@/lib/supabase/types'
 
+import { getNowIST } from '@/lib/time'
+
 interface YearTimelineProps {
   phases: RoadmapPhase[]
 }
@@ -10,7 +12,7 @@ export function YearTimeline({ phases }: YearTimelineProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const currentPhaseIndex = useMemo(() => {
-    const now = new Date()
+    const now = getNowIST()
     const index = phases.findIndex(p => {
       const start = new Date(p.start_date)
       const end = new Date(p.end_date)

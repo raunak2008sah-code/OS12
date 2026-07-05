@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AlertTriangle, Plus, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatIST } from '@/lib/time'
 import type { Mistake } from '@/lib/supabase/types'
 
 interface ChapterMistakesProps {
@@ -103,7 +104,7 @@ export function ChapterMistakes({ mistakes, onAddMistake, onToggleResolved }: Ch
                         </span>
                       ))}
                       <span className="text-xs text-muted-foreground">
-                        {new Date(mistake.created_at).toLocaleDateString()}
+                        {formatIST(new Date(mistake.created_at), 'PPP')}
                       </span>
                     </div>
                     <p className={`text-sm whitespace-pre-wrap ${mistake.is_resolved ? 'text-muted-foreground line-through' : 'text-foreground'}`}>

@@ -12,17 +12,17 @@ import {
   useRoadmapWeeks,
   useMilestones
 } from '@/lib/supabase/queries'
+import { getNowIST, getEndOfDayIST } from '@/lib/time'
 
 export default function YearRoadmapPage() {
   const { data: phases = [] } = useRoadmapPhases()
   const { data: months = [] } = useRoadmapMonths()
 
   const currentPhaseIndex = useMemo(() => {
-    const now = new Date()
+    const now = getNowIST()
     const index = phases.findIndex(p => {
-      const start = new Date(p.start_date)
-      const end = new Date(p.end_date)
-      end.setHours(23, 59, 59, 999)
+      const start = new Date(p.start_date) // Assuming Supabase dates can be parsed
+      const end = getEndOfDayIST(new Date(p.end_date))
       return now >= start && now <= end
     })
     return index === -1 ? 0 : index
@@ -46,8 +46,7 @@ export default function YearRoadmapPage() {
   const currentMilestones = useMemo(() => {
     if (!currentPhase) return allMilestones.slice(0, 5) // fallback
     const start = new Date(currentPhase.start_date)
-    const end = new Date(currentPhase.end_date)
-    end.setHours(23, 59, 59, 999)
+    const end = getEndOfDayIST(new Date(currentPhase.end_date))
     return allMilestones.filter(m => {
       if (!m.target_date) return false
       const mDate = new Date(m.target_date)

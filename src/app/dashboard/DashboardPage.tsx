@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+
 import { Calendar, Sparkles } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { YearDashboardCard } from '@/features/dashboard/components/YearDashboardCard'
@@ -6,12 +6,18 @@ import { BacklogBanner } from '@/features/dashboard/components/BacklogBanner'
 import { TodaysFocus } from '@/features/dashboard/components/TodaysFocus'
 import { FriendSnapshot } from '@/features/dashboard/components/FriendSnapshot'
 
+import { CalendarWidget } from '@/features/dashboard/components/CalendarWidget'
+import { CountdownWidget } from '@/features/dashboard/components/CountdownWidget'
+import { isSundayIST } from '@/lib/time'
+import { useTime } from '@/hooks/useTime'
+
 /**
  * Section 13.3 — The Sunday Planning Ritual
  * "If the Sunday ritual is skipped, the whole week runs on guesswork."
  */
 function SundayRitualPrompt() {
-  const isSunday = useMemo(() => new Date().getDay() === 0, [])
+  const now = useTime(60000)
+  const isSunday = isSundayIST(now)
   if (!isSunday) return null
 
   return (
@@ -57,13 +63,20 @@ export default function DashboardPage() {
       {/* Sunday Ritual Prompt — only on Sundays (Section 13.3) */}
       <SundayRitualPrompt />
 
-      {/* Year Dashboard — the 13-row executive summary (Section 2) */}
-      <YearDashboardCard />
-
-      {/* Bottom grid — Today's Focus + Friend Snapshot */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <TodaysFocus />
-        <FriendSnapshot />
+      <div className="grid gap-6 md:grid-cols-12">
+        <div className="md:col-span-8 space-y-6">
+          <YearDashboardCard />
+          
+          <div className="grid gap-6 md:grid-cols-2">
+            <TodaysFocus />
+            <FriendSnapshot />
+          </div>
+        </div>
+        
+        <div className="md:col-span-4 space-y-6">
+          <CalendarWidget />
+          <CountdownWidget />
+        </div>
       </div>
     </div>
   )

@@ -5,6 +5,11 @@ export interface Profile {
   avatar_url: string | null
   exam_targets: string[] | null
   theme: string
+  timezone?: string
+  time_format?: string
+  week_starts_on?: number
+  accent_color?: string
+  target_hours_per_day?: number
   created_at: string
   updated_at: string
 }

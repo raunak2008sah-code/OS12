@@ -62,6 +62,43 @@ export default function SettingsPage() {
         </Card>
 
         <div className="md:col-span-1 space-y-2">
+          <h3 className="font-semibold text-lg">Regional & Time</h3>
+          <p className="text-sm text-muted-foreground">Configure timezone and calendar preferences.</p>
+        </div>
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base">Date & Time Preferences</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Timezone</label>
+              <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                <option value="UTC">UTC</option>
+                <option value="America/New_York">America/New_York (EST)</option>
+                <option value="Europe/London">Europe/London (GMT)</option>
+              </select>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1 space-y-3">
+                <label className="text-sm font-medium">Time Format</label>
+                <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                  <option value="12h">12-hour (1:00 PM)</option>
+                  <option value="24h">24-hour (13:00)</option>
+                </select>
+              </div>
+              <div className="flex-1 space-y-3">
+                <label className="text-sm font-medium">Week Starts On</label>
+                <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                  <option value="1">Monday</option>
+                  <option value="0">Sunday</option>
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="md:col-span-1 space-y-2">
           <h3 className="font-semibold text-lg">Account</h3>
           <p className="text-sm text-muted-foreground">Manage your personal profile and data.</p>
         </div>

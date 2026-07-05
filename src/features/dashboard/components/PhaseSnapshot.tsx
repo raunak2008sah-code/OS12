@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { Calendar, Compass } from 'lucide-react'
 import type { RoadmapPhase, RoadmapMonth } from '@/lib/supabase/types'
 
+import { getNowIST } from '@/lib/time'
+
 interface PhaseSnapshotProps {
   phases: RoadmapPhase[]
   months: RoadmapMonth[]
@@ -9,9 +11,10 @@ interface PhaseSnapshotProps {
 
 export function PhaseSnapshot({ phases, months }: PhaseSnapshotProps) {
   const { currentPhase, currentMonth } = useMemo(() => {
-    const now = new Date()
+    const now = getNowIST()
     const month = months.find(m => {
-      const date = new Date(m.month_date)
+      const date = getNowIST()
+      date.setTime(Date.parse(m.month_date))
       return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()
     })
     
