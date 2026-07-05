@@ -7,8 +7,8 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 
 interface ChapterResourcesProps {
-  resources: { id: string; name: string }[]
-  progress: (ResourceProgress & { resources: { name: string } | null })[]
+  resources: { id: string; name?: string; resource_name?: string; title?: string }[]
+  progress: (ResourceProgress & { resources: { name?: string; resource_name?: string; title?: string } | null })[]
   onToggle: (resourceId: string, status: string) => void
 }
 
@@ -86,7 +86,7 @@ export function ChapterResources({ resources, progress, onToggle }: ChapterResou
                       <div className="flex items-start gap-2.5">
                         <Icon className="h-4 w-4 shrink-0 mt-0.5" />
                         <div className="flex flex-col gap-1 flex-1">
-                          <span className="font-medium text-sm break-words group-hover:text-foreground transition-colors">{res.name}</span>
+                          <span className="font-medium text-sm break-words group-hover:text-foreground transition-colors">{res.name || res.resource_name || res.title || 'Unnamed Resource'}</span>
                           <span className="text-xs text-muted-foreground font-medium opacity-80">
                             {statusText}
                           </span>
