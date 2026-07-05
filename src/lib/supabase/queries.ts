@@ -450,3 +450,153 @@ export function useAllRevisions(userId?: string) {
     enabled: !!userId,
   })
 }
+
+export function useRevisions(userId?: string, chapterId?: string) {
+  return useQuery({
+    queryKey: ['revisions', userId, chapterId],
+    queryFn: async () => {
+      if (!userId || !chapterId) return []
+      const { data, error } = await supabase
+        .from('revision')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('chapter_id', chapterId)
+      if (error) throw error
+      return data as Revision[]
+    },
+    enabled: !!userId && !!chapterId,
+  })
+}
+
+export function useToggleRevision() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ userId, chapterId, revisionDay, status }: { userId: string; chapterId: string; revisionDay: number; status: string }) => {
+      const { error } = await supabase.from('revision').upsert({ 
+        user_id: userId, 
+        chapter_id: chapterId, 
+        revision_day: revisionDay, 
+        status, 
+        completed_at: status === 'completed' ? new Date().toISOString() : null 
+      } as any, { onConflict: 'user_id,chapter_id,revision_day' })
+      if (error) throw error
+    },
+    onSuccess: (_, { userId, chapterId }) => {
+      void queryClient.invalidateQueries({ queryKey: ['revisions', userId, chapterId] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allRevisions(userId) })
+    },
+  })
+}
+
+export function useResourceProgress(userId?: string, chapterId?: string) {
+  return useQuery({
+    queryKey: queryKeys.resourceProgress(userId, chapterId),
+    queryFn: async () => {
+      if (!userId || !chapterId) return []
+      const { data, error } = await supabase
+        .from('resource_progress')
+        .select('*, resources(*)')
+        .eq('user_id', userId)
+        .eq('chapter_id', chapterId)
+      if (error) throw error
+      return data as (ResourceProgress & { resources: { name: string, description: string | null, order_index: number } | null })[]
+    },
+    enabled: !!userId && !!chapterId,
+  })
+}
+
+export function useToggleResourceProgress() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ userId, chapterId, resourceId, status }: { userId: string; chapterId: string; resourceId: string; status: string }) => {
+      const { error } = await supabase.from('resource_progress').upsert({ 
+        user_id: userId, 
+        chapter_id: chapterId, 
+        resource_id: resourceId, 
+        status, 
+        completed_at: status === 'completed' ? new Date().toISOString() : null 
+      } as any, { onConflict: 'user_id,chapter_id,resource_id' })
+      if (error) throw error
+    },
+    onSuccess: (_, { userId, chapterId }) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.resourceProgress(userId, chapterId) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allResourceProgress(userId) })
+    },
+  })
+}
+
+export function useResources() {
+  return useQuery({
+    queryKey: ['resources'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('resources').select('*').order('order_index')
+      if (error) throw error
+      return data as { id: string, name: string, description: string | null, order_index: number }[]
+    },
+  })
+}
+
+export function useFormulaSheet(userId?: string, chapterId?: string) {
+  return useQuery({
+    queryKey: ['formulaSheet', userId, chapterId],
+    queryFn: async () => {
+      if (!userId || !chapterId) return null
+      const { data, error } = await supabase
+        .from('formula_sheet')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('chapter_id', chapterId)
+        .maybeSingle()
+      if (error) throw error
+      return data as FormulaSheet | null
+    },
+    enabled: !!userId && !!chapterId,
+  })
+}
+
+export function useSaveFormulaSheet() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ userId, chapterId, content }: { userId: string; chapterId: string; content: string }) => {
+      const { data, error } = await supabase.from('formula_sheet').upsert({
+        user_id: userId,
+        chapter_id: chapterId,
+        content,
+        updated_at: new Date().toISOString()
+      } as any, { onConflict: 'user_id,chapter_id' }).select().single()
+      if (error) throw error
+      return data as FormulaSheet
+    },
+    onSuccess: (data, { userId, chapterId }) => {
+      queryClient.setQueryData(['formulaSheet', userId, chapterId], data)
+      void queryClient.invalidateQueries({ queryKey: queryKeys.formulaSheets(userId) })
+    },
+  })
+}
+
+export function useAddMistake() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (mistake: { user_id: string; chapter_id: string; content: string; tags: string[] }) => {
+      const { error } = await supabase.from('mistakes').insert(mistake as any)
+      if (error) throw error
+    },
+    onSuccess: (_, { user_id, chapter_id }) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.mistakes(chapter_id, user_id) })
+    },
+  })
+}
+
+export function useToggleMistakeResolved() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ mistakeId, isResolved }: { mistakeId: string; isResolved: boolean; userId: string; chapterId: string }) => {
+      // @ts-ignore
+      const { error } = await supabase.from('mistakes').update({ is_resolved: isResolved }).eq('id', mistakeId)
+      if (error) throw error
+    },
+    onSuccess: (_, { userId, chapterId }) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.mistakes(chapterId, userId) })
+    },
+  })
+}

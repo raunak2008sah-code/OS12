@@ -19,11 +19,11 @@ import {
 } from '@/lib/supabase/queries'
 
 export default function SubjectDetailPage() {
-  const { id } = useParams<{ id: string }>()
+  const { subjectId } = useParams<{ subjectId: string }>()
   const { user } = useAuth()
   
-  const { data: subject, isLoading: loadingSubject } = useSubject(id || '')
-  const { data: chapters = [], isLoading: loadingChapters } = useChapters(id)
+  const { data: subject, isLoading: loadingSubject } = useSubject(subjectId || '')
+  const { data: chapters = [], isLoading: loadingChapters } = useChapters(subjectId)
   
   const { data: progress = [], isLoading: loadingProgress } = useAllChapterProgress(user?.id)
   const { data: resources = [], isLoading: loadingResources } = useAllResourceProgress(user?.id)
