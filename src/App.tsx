@@ -16,6 +16,7 @@ const ChapterDetailPage = lazy(() => import('@/app/chapters/ChapterDetailPage'))
 const ProgressHubPage = lazy(() => import('@/app/progress/ProgressHubPage'))
 const ComparePage = lazy(() => import('@/app/compare/ComparePage'))
 const ManualPage = lazy(() => import('@/app/manual/ManualPage'))
+const SettingsPage = lazy(() => import('@/app/settings/SettingsPage'))
 
 export default function App() {
   return (
@@ -74,6 +75,11 @@ export default function App() {
                 <Route path="manual" element={
                   <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
                     <ManualPage />
+                  </Suspense>
+                } />
+                <Route path="settings" element={
+                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                    <SettingsPage />
                   </Suspense>
                 } />
               </>
