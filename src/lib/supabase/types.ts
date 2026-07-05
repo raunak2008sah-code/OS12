@@ -54,15 +54,6 @@ export interface RoadmapMonth {
   created_at: string
 }
 
-export interface RoadmapMilestone {
-  id: string
-  name: string
-  description: string | null
-  target_date: string
-  status: 'upcoming' | 'completed' | 'missed'
-  created_at: string
-}
-
 export interface RoadmapMonthWorkload {
   id: string
   month_id: string
@@ -82,14 +73,6 @@ export interface RoadmapMonthResource {
   created_at: string
 }
 
-export interface Progress {
-  id: string
-  user_id: string
-  chapter_id: string
-  step_key: string
-  completed_at: string
-}
-
 export interface Note {
   id: string
   chapter_id: string
@@ -105,7 +88,7 @@ export interface Comment {
   user_id: string
   content: string | null
   created_at: string
-  profiles?: Profile // Added for joining with author data
+  profiles?: Profile
 }
 
 export interface Mistake {
@@ -119,17 +102,112 @@ export interface Mistake {
   updated_at: string
 }
 
-export interface MonthlyProgress {
+// OS10 NEW TABLES
+export interface Resource {
+  id: string
+  name: string
+  description: string | null
+  order_index: number
+}
+
+export interface ChapterProgress {
+  id: string
+  user_id: string
+  chapter_id: string
+  status: string
+  completed_at: string | null
+}
+
+export interface ResourceProgress {
+  id: string
+  user_id: string
+  chapter_id: string
+  resource_id: string
+  status: string
+  completed_at: string | null
+}
+
+export interface RoadmapWeek {
+  id: string
+  month_id: string
+  week_number: number
+  focus: string
+  books_practice: string
+  checkpoint: string
+  created_at: string
+}
+
+export interface RoadmapTask {
+  id: string
+  week_id: string
+  task_name: string
+  is_completed: boolean
+  created_at: string
+}
+
+export interface Milestone {
+  id: string
+  name: string
+  condition: string
+  target_date: string | null
+  created_at: string
+}
+
+export interface FormulaSheet {
+  id: string
+  user_id: string
+  chapter_id: string
+  content: string
+  last_reviewed_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Revision {
+  id: string
+  user_id: string
+  chapter_id: string
+  revision_day: number
+  status: string
+  completed_at: string | null
+}
+
+export interface Backlog {
+  id: string
+  user_id: string
+  chapter_id: string
+  escalation_level: string
+  cleared_at: string | null
+  created_at: string
+}
+
+export interface MonthlyReview {
   id: string
   user_id: string
   month: string
-  went_well: string | null
-  didnt_go_well: string | null
-  one_change: string | null
-  lessons_learned: string | null
-  goals_next_month: string | null
+  went_well: string
+  didnt_go_well: string
+  change_for_next_month: string
   created_at: string
-  updated_at: string | null
+}
+
+export interface WeeklyReview {
+  id: string
+  user_id: string
+  week_date: string
+  planned_vs_done: string
+  has_backlog: boolean
+  energy_level: number
+  adjustment_needed: string | null
+  created_at: string
+}
+
+export interface CompareProfile {
+  id: string
+  user_id: string
+  friend_id: string
+  status: string
+  created_at: string
 }
 
 export interface Database {
@@ -140,14 +218,24 @@ export interface Database {
       chapters: { Row: Chapter; Insert: Partial<Chapter>; Update: Partial<Chapter> }
       roadmap_phases: { Row: RoadmapPhase; Insert: Partial<RoadmapPhase>; Update: Partial<RoadmapPhase> }
       roadmap_months: { Row: RoadmapMonth; Insert: Partial<RoadmapMonth>; Update: Partial<RoadmapMonth> }
-      progress: { Row: Progress; Insert: Partial<Progress>; Update: Partial<Progress> }
+      roadmap_month_workloads: { Row: RoadmapMonthWorkload; Insert: Partial<RoadmapMonthWorkload>; Update: Partial<RoadmapMonthWorkload> }
+      roadmap_month_resources: { Row: RoadmapMonthResource; Insert: Partial<RoadmapMonthResource>; Update: Partial<RoadmapMonthResource> }
       notes: { Row: Note; Insert: Partial<Note>; Update: Partial<Note> }
       comments: { Row: Comment; Insert: Partial<Comment>; Update: Partial<Comment> }
       mistakes: { Row: Mistake; Insert: Partial<Mistake>; Update: Partial<Mistake> }
-      monthly_progress: { Row: MonthlyProgress; Insert: Partial<MonthlyProgress>; Update: Partial<MonthlyProgress> }
-      roadmap_milestones: { Row: RoadmapMilestone; Insert: Partial<RoadmapMilestone>; Update: Partial<RoadmapMilestone> }
-      roadmap_month_workloads: { Row: RoadmapMonthWorkload; Insert: Partial<RoadmapMonthWorkload>; Update: Partial<RoadmapMonthWorkload> }
-      roadmap_month_resources: { Row: RoadmapMonthResource; Insert: Partial<RoadmapMonthResource>; Update: Partial<RoadmapMonthResource> }
+      
+      resources: { Row: Resource; Insert: Partial<Resource>; Update: Partial<Resource> }
+      chapter_progress: { Row: ChapterProgress; Insert: Partial<ChapterProgress>; Update: Partial<ChapterProgress> }
+      resource_progress: { Row: ResourceProgress; Insert: Partial<ResourceProgress>; Update: Partial<ResourceProgress> }
+      roadmap_weeks: { Row: RoadmapWeek; Insert: Partial<RoadmapWeek>; Update: Partial<RoadmapWeek> }
+      roadmap_tasks: { Row: RoadmapTask; Insert: Partial<RoadmapTask>; Update: Partial<RoadmapTask> }
+      milestones: { Row: Milestone; Insert: Partial<Milestone>; Update: Partial<Milestone> }
+      formula_sheet: { Row: FormulaSheet; Insert: Partial<FormulaSheet>; Update: Partial<FormulaSheet> }
+      revision: { Row: Revision; Insert: Partial<Revision>; Update: Partial<Revision> }
+      backlog: { Row: Backlog; Insert: Partial<Backlog>; Update: Partial<Backlog> }
+      monthly_reviews: { Row: MonthlyReview; Insert: Partial<MonthlyReview>; Update: Partial<MonthlyReview> }
+      weekly_reviews: { Row: WeeklyReview; Insert: Partial<WeeklyReview>; Update: Partial<WeeklyReview> }
+      compare_profiles: { Row: CompareProfile; Insert: Partial<CompareProfile>; Update: Partial<CompareProfile> }
     }
   }
 }

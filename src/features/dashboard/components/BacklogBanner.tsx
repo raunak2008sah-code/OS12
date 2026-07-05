@@ -1,93 +1,100 @@
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { AlertTriangle, AlertCircle, AlertOctagon, ChevronRight } from 'lucide-react'
-import type { Chapter, Progress, RoadmapMonth } from '@/lib/supabase/types'
-import { WORKFLOW_STEPS } from '@/features/chapter-workflow/constants'
+import { AlertTriangle, AlertCircle, XCircle, CheckCircle2 } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { useBacklog } from '@/lib/supabase/queries'
+import { useAuth } from '@/hooks/useAuth'
 
-interface BacklogBannerProps {
-  chapters: Chapter[]
-  progress: Progress[]
-  months: RoadmapMonth[]
+/**
+ * Section 15.1 — Backlog Escalation Table
+ *
+ * 0 chapters  → GREEN  → Continue as planned
+ * 1 chapter   → YELLOW → Clear within current week using buffer time
+ * 2 chapters  → ORANGE → Freeze new content in that subject; pause NDA-extra + Income
+ * 3+ chapters → RED    → Full stop on new content for up to 3 days; triage NCERT + PYQ only
+ */
+
+interface EscalationLevel {
+  color: string
+  bgColor: string
+  borderColor: string
+  icon: React.ElementType
+  title: string
+  description: string
 }
 
-export function BacklogBanner({ chapters, progress, months }: BacklogBannerProps) {
-  // Compute backlog:
-  // We need to know the "current" month. Let's assume current date determines it.
-  const backlogChapters = useMemo(() => {
-    const now = new Date()
-    // Find the current roadmap month based on month_date
-    const currentMonthIndex = months.findIndex(m => {
-      const date = new Date(m.month_date)
-      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()
-    })
-    
-    if (currentMonthIndex <= 0) return [] // First month or not started, no backlog possible
+const ESCALATION_LEVELS: Record<string, EscalationLevel> = {
+  GREEN: {
+    color: 'text-green-700 dark:text-green-400',
+    bgColor: 'bg-green-50 dark:bg-green-950/30',
+    borderColor: 'border-green-200 dark:border-green-800',
+    icon: CheckCircle2,
+    title: 'Backlog Clear',
+    description: 'Continue as planned.',
+  },
+  YELLOW: {
+    color: 'text-yellow-700 dark:text-yellow-400',
+    bgColor: 'bg-yellow-50 dark:bg-yellow-950/30',
+    borderColor: 'border-yellow-200 dark:border-yellow-800',
+    icon: AlertCircle,
+    title: 'Yellow Flag — 1 Chapter Behind',
+    description: 'Clear it within the current week using buffer time before adding new content.',
+  },
+  ORANGE: {
+    color: 'text-orange-700 dark:text-orange-400',
+    bgColor: 'bg-orange-50 dark:bg-orange-950/30',
+    borderColor: 'border-orange-200 dark:border-orange-800',
+    icon: AlertTriangle,
+    title: 'Orange Flag — 2 Chapters Behind',
+    description: 'Freeze all new content in that subject until cleared. Income roadmap and NDA-extra time pause.',
+  },
+  RED: {
+    color: 'text-red-700 dark:text-red-400',
+    bgColor: 'bg-red-50 dark:bg-red-950/30',
+    borderColor: 'border-red-200 dark:border-red-800',
+    icon: XCircle,
+    title: 'Red Flag — 3+ Chapters Behind',
+    description: 'Full stop on new content across all subjects for up to 3 days. Triage using only NCERT + PYQ core per chapter until back to zero.',
+  },
+}
 
-    const backlog = chapters.filter(c => {
-      if (c.is_placeholder) return false
-      
-      // Check if chapter belongs to a strictly PAST month
-      const chapterMonthIndex = months.findIndex(m => m.name === c.month)
-      if (chapterMonthIndex === -1 || chapterMonthIndex >= currentMonthIndex) {
-        return false // Future or current month chapters are not backlog
-      }
+function getEscalationKey(count: number): string {
+  if (count === 0) return 'GREEN'
+  if (count === 1) return 'YELLOW'
+  if (count === 2) return 'ORANGE'
+  return 'RED'
+}
 
-      // Check completion
-      const chapterProgress = progress.filter(p => p.chapter_id === c.id)
-      const isComplete = WORKFLOW_STEPS.every(step => 
-        chapterProgress.some(p => p.step_key === step.key)
-      )
-      
-      return !isComplete
-    })
+export function BacklogBanner() {
+  const { user } = useAuth()
+  const { data: backlogItems = [] } = useBacklog(user?.id)
+  const count = backlogItems.length
 
-    return backlog
-  }, [chapters, progress, months])
+  // Don't render when backlog is clear
+  if (count === 0) return null
 
-  if (backlogChapters.length === 0) return null
-
-  const count = backlogChapters.length
-  
-  // Escalation logic based on PRD §15.1
-  let config = {
-    color: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-700 dark:text-yellow-400',
-    icon: <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500" />,
-    title: '1 Chapter Behind',
-    message: 'Action: Use Sunday buffer slot to clear this immediately.',
-  }
-
-  if (count === 2) {
-    config = {
-      color: 'bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-400',
-      icon: <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-500" />,
-      title: '2 Chapters Behind',
-      message: 'Action: Cancel Sunday mock tests and freeze extracurriculars until cleared.',
-    }
-  } else if (count >= 3) {
-    config = {
-      color: 'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400',
-      icon: <AlertOctagon className="h-5 w-5 text-red-600 dark:text-red-500" />,
-      title: `${count} Chapters Behind (Code Red)`,
-      message: 'Action: Emergency protocol §21 active. Halt current progression, fallback to minimum viable execution.',
-    }
-  }
+  const key = getEscalationKey(count)
+  const level = ESCALATION_LEVELS[key]
+  const Icon = level.icon
 
   return (
-    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border p-4 shadow-sm ${config.color}`}>
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5 shrink-0">{config.icon}</div>
-        <div>
-          <h3 className="font-bold tracking-tight">{config.title}</h3>
-          <p className="mt-1 text-sm font-medium opacity-90">{config.message}</p>
+    <Card className={`${level.bgColor} ${level.borderColor} border`}>
+      <CardContent className="flex items-start gap-4 py-4">
+        <div className="mt-0.5 shrink-0">
+          <Icon className={`h-5 w-5 ${level.color}`} />
         </div>
-      </div>
-      
-      <Link 
-        to="/progress" 
-        className="flex items-center gap-1 self-start sm:self-auto rounded-lg bg-background/50 px-3 py-1.5 text-sm font-semibold hover:bg-background/80 transition-colors"
-      >
-        View Tracker <ChevronRight className="h-4 w-4" />
-      </Link>
-    </div>
+        <div className="space-y-1">
+          <p className={`text-sm font-semibold ${level.color}`}>
+            {level.title}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {level.description}
+          </p>
+          {count >= 3 && (
+            <p className="text-xs font-medium text-muted-foreground mt-2">
+              NEVER FREEZE: Science & Fun · NCERT · School
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -1,89 +1,91 @@
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { Users, ChevronRight } from 'lucide-react'
+import { Users, UserX } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { useFriendProfile, useAllChapterProgress, useChapters } from '@/lib/supabase/queries'
 import { useAuth } from '@/hooks/useAuth'
-import { useFriendProfile, useProgress } from '@/lib/supabase/queries'
-import type { Chapter } from '@/lib/supabase/types'
-import { WORKFLOW_STEPS } from '@/features/chapter-workflow/constants'
+import { useMemo } from 'react'
 
-interface FriendSnapshotProps {
-  chapters: Chapter[]
-}
-
-export function FriendSnapshot({ chapters }: FriendSnapshotProps) {
+export function FriendSnapshot() {
   const { user } = useAuth()
   const { data: friend } = useFriendProfile(user?.id)
-  const { data: friendProgress } = useProgress(friend?.id)
+  const { data: chapters = [] } = useChapters()
+  const { data: friendProgress = [] } = useAllChapterProgress(friend?.id)
+  const { data: myProgress = [] } = useAllChapterProgress(user?.id)
 
-  const stats = useMemo(() => {
-    if (!friendProgress || !chapters) return { percent: 0, latestChapter: null }
+  const myCompleted = useMemo(
+    () => myProgress.filter(p => p.status === 'Completed' || p.status === 'Fully Completed').length,
+    [myProgress]
+  )
+  const friendCompleted = useMemo(
+    () => friendProgress.filter(p => p.status === 'Completed' || p.status === 'Fully Completed').length,
+    [friendProgress]
+  )
+  const totalChapters = chapters.length || 1
 
-    const validChapters = chapters.filter(c => !c.is_placeholder)
-    const totalChapters = validChapters.length
-    if (totalChapters === 0) return { percent: 0, latestChapter: null }
-
-    let completedCount = 0
-    let latest: Chapter | null = null
-    let highestIndex = -1
-
-    validChapters.forEach(chapter => {
-      const p = friendProgress.filter(fp => fp.chapter_id === chapter.id)
-      const isComplete = WORKFLOW_STEPS.every(step => p.some(sp => sp.step_key === step.key))
-      
-      if (isComplete) {
-        completedCount++
-      } else if (p.length > 0) {
-        // If not complete but has progress, this is their active chapter
-        if (chapter.order_index && chapter.order_index > highestIndex) {
-          highestIndex = chapter.order_index
-          latest = chapter
-        }
-      }
-    })
-
-    return {
-      percent: Math.round((completedCount / totalChapters) * 100),
-      latestChapter: latest as Chapter | null
-    }
-  }, [chapters, friendProgress])
-
-  if (!friend) return null
+  if (!friend) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            Friend Snapshot
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <UserX className="h-10 w-10 text-muted-foreground/40 mb-3" />
+            <p className="font-medium text-foreground">No peers connected</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              When another user joins, their progress will appear here.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex items-center justify-between border-b border-border pb-4">
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-muted-foreground" />
-          <h2 className="font-semibold tracking-tight text-foreground">{friend.display_name}'s Status</h2>
-        </div>
-        <Link to="/compare" className="text-muted-foreground hover:text-primary transition-colors">
-          <ChevronRight className="h-5 w-5" />
-        </Link>
-      </div>
-
-      <div className="mt-4 flex flex-col gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Current Focus
-          </p>
-          <h3 className="mt-1 text-sm font-medium text-foreground line-clamp-1">
-            {stats.latestChapter ? stats.latestChapter.name : 'All caught up / Planning'}
-          </h3>
-        </div>
-
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center justify-between text-xs font-medium">
-            <span className="text-muted-foreground">Overall Completion</span>
-            <span className="text-foreground">{stats.percent}%</span>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-primary" />
+          Friend Snapshot
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <span className="text-sm font-semibold text-primary">
+              {friend.display_name?.charAt(0)?.toUpperCase() ?? friend.email?.charAt(0)?.toUpperCase() ?? '?'}
+            </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
-            <div 
-              className="h-full bg-primary/40 transition-all duration-500 ease-out"
-              style={{ width: `${stats.percent}%` }}
-            />
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              {friend.display_name || friend.email?.split('@')[0] || 'Anonymous'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {friendCompleted} / {totalChapters} chapters completed
+            </p>
           </div>
         </div>
-      </div>
-    </div>
+
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">You</span>
+              <span className="tabular-nums font-medium">{Math.round((myCompleted / totalChapters) * 100)}%</span>
+            </div>
+            <Progress value={(myCompleted / totalChapters) * 100} className="h-2" />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">{friend.display_name || 'Friend'}</span>
+              <span className="tabular-nums font-medium">{Math.round((friendCompleted / totalChapters) * 100)}%</span>
+            </div>
+            <Progress value={(friendCompleted / totalChapters) * 100} className="h-2" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

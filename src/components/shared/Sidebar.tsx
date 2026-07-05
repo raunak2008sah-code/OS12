@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { name: 'Subjects', to: '/subjects', icon: BookOpen },
   { name: 'Progress', to: '/progress', icon: TrendingUp },
   { name: 'Compare', to: '/compare', icon: Users },
+  { name: 'Manual', to: '/manual', icon: BookOpen },
 ]
 
 export default function Sidebar() {
