@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from './client'
-import type { Subject, RoadmapPhase, RoadmapMonth, Chapter, Progress, Note, Comment, MonthlyProgress } from './types'
+import type { Subject, RoadmapPhase, RoadmapMonth, Chapter, Progress, Note, Comment, MonthlyProgress, Profile } from './types'
 
 export const queryKeys = {
   subjects: ['subjects'] as const,
@@ -13,6 +13,8 @@ export const queryKeys = {
   monthlyProgress: (userId?: string, month?: string) => ['monthlyProgress', userId, month] as const,
   notes: (chapterId: string, userId?: string) => ['notes', chapterId, userId] as const,
   comments: (chapterId: string) => ['comments', chapterId] as const,
+  friendProfile: (currentUserId?: string) => ['friendProfile', currentUserId] as const,
+  allProgress: (userId?: string) => ['allProgress', userId] as const,
 }
 
 export function useSubjects() {
@@ -240,3 +242,24 @@ export function useSaveMonthlyProgress() {
     },
   })
 }
+
+export function useFriendProfile(currentUserId?: string) {
+  return useQuery({
+    queryKey: queryKeys.friendProfile(currentUserId),
+    queryFn: async () => {
+      if (!currentUserId) return null
+      // Get all profiles except current user
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('id', currentUserId)
+        .limit(1)
+        .maybeSingle()
+      if (error) throw error
+      return data as Profile | null
+    },
+    enabled: !!currentUserId,
+  })
+}
+
+// Re-using useProgress for the friend is possible by just passing their ID.
