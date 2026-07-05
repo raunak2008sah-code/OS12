@@ -18,9 +18,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
   const [resourcesExpanded, setResourcesExpanded] = useState(false)
   const [deliverablesExpanded, setDeliverablesExpanded] = useState(false)
 
-  if (!weeks || weeks.length === 0) return null
-
-  const activeWeek = weeks.find(w => w.id === activeWeekId) || weeks[0]
+  const activeWeek = weeks && weeks.length > 0 ? (weeks.find(w => w.id === activeWeekId) || weeks[0]) : null
 
   return (
     <div className="flex flex-col gap-6">
