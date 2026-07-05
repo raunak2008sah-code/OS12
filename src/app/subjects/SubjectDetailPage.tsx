@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useSubject, useChapters, useProgress } from '@/lib/supabase/queries'
+import { useSubject, useChapters, useAllProgress } from '@/lib/supabase/queries'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingState, ErrorState, EmptyState } from '@/components/shared/StateBlocks'
-import { ProgressBar } from '@/components/shared/ProgressBar'
-import { StatusBadge, type ChapterStatus } from '@/features/chapter-workflow/components/StatusBadge'
-import { ChevronLeft, Calendar, Clock, ArrowRight } from 'lucide-react'
+import { ChevronLeft, Calendar, Clock, AlertCircle } from 'lucide-react'
+import { ChapterCard } from '@/features/subjects/components/ChapterCard'
+import { FilterBar } from '@/features/subjects/components/FilterBar'
+import { WORKFLOW_STEPS } from '@/features/chapter-workflow/constants'
+import type { Progress } from '@/lib/supabase/types'
 
 export default function SubjectDetailPage() {
   const { subjectId } = useParams<{ subjectId: string }>()
@@ -12,7 +15,12 @@ export default function SubjectDetailPage() {
   
   const { data: subject, isLoading: subjectLoading, error: subjectError, refetch: refetchSubject } = useSubject(subjectId!)
   const { data: chapters, isLoading: chaptersLoading, error: chaptersError, refetch: refetchChapters } = useChapters(subjectId)
-  const { data: progress, isLoading: progressLoading, error: progressError, refetch: refetchProgress } = useProgress(user?.id)
+  const { data: progress, isLoading: progressLoading, error: progressError, refetch: refetchProgress } = useAllProgress(user?.id)
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedPhase, setSelectedPhase] = useState('all')
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [selectedDifficulty, setSelectedDifficulty] = useState('all')
 
   const isLoading = subjectLoading || chaptersLoading || progressLoading
   const error = subjectError || chaptersError || progressError
@@ -31,107 +39,140 @@ export default function SubjectDetailPage() {
     return <EmptyState title="Subject Not Found" description="The requested subject does not exist or you don't have access." />
   }
 
-  // Calculate progress for each chapter
-  const WORKFLOW_STEPS = 5 // Total steps in a chapter workflow
-  
-  const enrichedChapters = chapters?.map(chapter => {
-    const chapterProgress = progress?.filter(p => p.chapter_id === chapter.id) || []
-    const completedSteps = chapterProgress.length
-    const completionPercentage = Math.round((completedSteps / WORKFLOW_STEPS) * 100)
-    
-    let status: ChapterStatus = 'not_started'
-    if (completedSteps > 0 && completedSteps < WORKFLOW_STEPS) status = 'in_progress'
-    if (completedSteps === WORKFLOW_STEPS) status = 'mastered'
-    
-    // Sort progress by completed_at to find last updated
-    const lastUpdated = chapterProgress.length > 0 
-      ? new Date(Math.max(...chapterProgress.map(p => new Date(p.completed_at).getTime())))
-      : null
+  // Filter out placeholder chapters
+  const activeChapters = chapters?.filter(c => !c.is_placeholder) || []
 
-    return {
-      ...chapter,
-      completedSteps,
-      completionPercentage,
-      status,
-      lastUpdated
-    }
-  }) || []
+  // Extract unique phases for filter
+  const uniquePhases = Array.from(new Set(activeChapters.map(c => c.phase).filter(Boolean)))
+    .map(p => ({ label: p!, value: p! }))
+    
+  const statuses = [
+    { label: 'Completed', value: 'completed' },
+    { label: 'In Progress', value: 'in_progress' },
+    { label: 'Not Started', value: 'not_started' },
+  ]
+  const difficulties = [
+    { label: 'Easy', value: 'easy' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Hard', value: 'hard' },
+  ]
+
+  // Enriched chapters for filtering and stats
+  const enrichedChapters = activeChapters.map(chapter => {
+    const chapterProgress = progress?.filter((p: Progress) => p.chapter_id === chapter.id) || []
+    const completedCount = chapterProgress.length
+    const isCompleted = completedCount === WORKFLOW_STEPS.length
+    const isStarted = completedCount > 0
+    
+    let statusValue = 'not_started'
+    if (isCompleted) statusValue = 'completed'
+    else if (isStarted) statusValue = 'in_progress'
+
+    return { ...chapter, statusValue, isCompleted, chapterProgress }
+  })
+
+  // Compute Subject Stats
+  const estimatedRemainingHours = enrichedChapters
+    .filter(c => !c.isCompleted)
+    .reduce((acc, c) => acc + (c.estimated_hours ? Number(c.estimated_hours) : 4), 0)
+
+  const overallProgressPercent = enrichedChapters.length > 0
+    ? Math.round((enrichedChapters.reduce((acc, c) => acc + c.chapterProgress.length, 0) / (enrichedChapters.length * WORKFLOW_STEPS.length)) * 100)
+    : 0
+
+  const weakChaptersCount = enrichedChapters.filter(c => c.difficulty === 'hard' && !c.isCompleted).length
+
+  // Apply Filters
+  const filteredChapters = enrichedChapters.filter(c => {
+    if (searchQuery && !(c.name || '').toLowerCase().includes(searchQuery.toLowerCase())) return false
+    if (selectedPhase !== 'all' && c.phase !== selectedPhase) return false
+    if (selectedStatus !== 'all' && c.statusValue !== selectedStatus) return false
+    if (selectedDifficulty !== 'all' && c.difficulty !== selectedDifficulty) return false
+    return true
+  })
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in-50 duration-500 pb-16 mx-auto max-w-6xl">
       <div>
-        <Link to="/subjects" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-4">
+        <Link to="/subjects" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-4 transition-colors">
           <ChevronLeft className="mr-1 h-4 w-4" />
           Back to Subjects
         </Link>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">{subject.name}</h1>
-        
-        <div className="mt-4 flex flex-wrap gap-4">
-          {subject.batch_days && subject.batch_days.length > 0 && (
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Calendar className="mr-2 h-4 w-4 text-primary/70" />
-              <span>{subject.batch_days.join(', ')}</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{subject.name}</h1>
+            <div className="mt-2 flex items-center gap-3 text-sm text-muted-foreground">
+              <span className="inline-flex items-center rounded-md border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary uppercase tracking-wider">
+                {subject.is_batch_paced ? 'Batch Paced' : 'Self Paced'}
+              </span>
+              {subject.batch_days && subject.batch_days.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 text-primary/70" />
+                  <span>{subject.batch_days.join(', ')}</span>
+                </div>
+              )}
+              {subject.batch_time && (
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-primary/70" />
+                  <span>{subject.batch_time}</span>
+                </div>
+              )}
             </div>
-          )}
-          {subject.batch_time && (
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Clock className="mr-2 h-4 w-4 text-primary/70" />
-              <span>{subject.batch_time}</span>
+          </div>
+
+          <div className="flex items-center gap-4 bg-card border border-border p-3 rounded-xl shadow-sm">
+            <div className="flex flex-col">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Remaining Work</span>
+              <span className="text-lg font-bold text-foreground">{estimatedRemainingHours}h</span>
             </div>
-          )}
-          <div className="flex items-center text-sm text-muted-foreground">
-            <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-xs font-semibold text-primary">
-              {subject.is_batch_paced ? 'Batch Paced' : 'Self Paced'}
-            </span>
+            <div className="w-px h-8 bg-border"></div>
+            <div className="flex flex-col">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Overall Progress</span>
+              <span className="text-lg font-bold text-primary">{overallProgressPercent}%</span>
+            </div>
+            {weakChaptersCount > 0 && (
+              <>
+                <div className="w-px h-8 bg-border"></div>
+                <div className="flex flex-col text-orange-500">
+                  <span className="text-xs uppercase tracking-wider font-semibold opacity-80">Weak Chapters</span>
+                  <div className="flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    <span className="text-lg font-bold">{weakChaptersCount}</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">Chapters</h2>
-        
-        {enrichedChapters.length === 0 ? (
-          <EmptyState title="No Chapters" description="No chapters have been added to this subject yet." />
-        ) : (
-          <div className="grid gap-4">
-            {enrichedChapters.map((chapter) => (
-              <div key={chapter.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 sm:p-6 shadow-sm transition-all hover:border-primary/30">
-                <div className="space-y-3 sm:space-y-1 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold text-lg">{chapter.name}</h3>
-                    <StatusBadge status={chapter.status} />
-                  </div>
-                  
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                    <span>{chapter.jee_weight === 'high' ? 'High Weightage' : chapter.jee_weight === 'standard' ? 'Standard Weightage' : 'Low Weightage'}</span>
-                    {chapter.lastUpdated && (
-                      <span>Updated {chapter.lastUpdated.toLocaleDateString()}</span>
-                    )}
-                  </div>
-                </div>
+      <FilterBar 
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedPhase={selectedPhase}
+        onPhaseChange={setSelectedPhase}
+        phases={uniquePhases}
+        selectedStatus={selectedStatus}
+        onStatusChange={setSelectedStatus}
+        statuses={statuses}
+        selectedDifficulty={selectedDifficulty}
+        onDifficultyChange={setSelectedDifficulty}
+        difficulties={difficulties}
+      />
 
-                <div className="flex items-center gap-6 sm:w-[300px]">
-                  <div className="flex-1 space-y-1.5">
-                    <div className="flex justify-between text-xs font-medium">
-                      <span>{chapter.completedSteps}/{WORKFLOW_STEPS} Steps</span>
-                      <span>{chapter.completionPercentage}%</span>
-                    </div>
-                    <ProgressBar progress={chapter.completionPercentage} />
-                  </div>
-                  
-                  <Link 
-                    to={`/chapters/${chapter.id}`}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
-                  >
-                    <ArrowRight className="h-5 w-5" />
-                    <span className="sr-only">Go to chapter</span>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {filteredChapters.length === 0 ? (
+        <EmptyState title="No Chapters Found" description="Try adjusting your filters or search query." />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredChapters.map((chapter) => (
+            <ChapterCard 
+              key={chapter.id}
+              chapter={chapter}
+              progress={progress || []}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from './client'
-import type { Subject, RoadmapPhase, RoadmapMonth, Chapter, Progress, Note, Comment, MonthlyProgress, Profile, RoadmapMilestone, RoadmapMonthWorkload, RoadmapMonthResource } from './types'
+import type { Subject, RoadmapPhase, RoadmapMonth, Chapter, Progress, Note, Comment, MonthlyProgress, Profile, RoadmapMilestone, RoadmapMonthWorkload, RoadmapMonthResource, Mistake } from './types'
 
 export const queryKeys = {
   subjects: ['subjects'] as const,
@@ -15,6 +15,7 @@ export const queryKeys = {
   progress: (userId?: string, chapterId?: string) => ['progress', userId, chapterId] as const,
   monthlyProgress: (userId?: string, month?: string) => ['monthlyProgress', userId, month] as const,
   notes: (chapterId: string, userId?: string) => ['notes', chapterId, userId] as const,
+  mistakes: (chapterId?: string, userId?: string) => ['mistakes', chapterId, userId] as const,
   comments: (chapterId: string) => ['comments', chapterId] as const,
   friendProfile: (currentUserId?: string) => ['friendProfile', currentUserId] as const,
   allProgress: (userId?: string) => ['allProgress', userId] as const,
@@ -135,6 +136,19 @@ export function useProgress(userId?: string, chapterId?: string) {
       let query = supabase.from('progress').select('*').eq('user_id', userId)
       if (chapterId) query = query.eq('chapter_id', chapterId)
       const { data, error } = await query
+      if (error) throw error
+      return data as Progress[]
+    },
+    enabled: !!userId,
+  })
+}
+
+export function useAllProgress(userId?: string) {
+  return useQuery({
+    queryKey: queryKeys.allProgress(userId),
+    queryFn: async () => {
+      if (!userId) return []
+      const { data, error } = await supabase.from('progress').select('*').eq('user_id', userId)
       if (error) throw error
       return data as Progress[]
     },
@@ -280,6 +294,23 @@ export function useSaveMonthlyProgress() {
     onSuccess: (data, { userId, month }) => {
       queryClient.setQueryData(queryKeys.monthlyProgress(userId, month), data)
     },
+  })
+}
+
+export function useMistakes(chapterId?: string, userId?: string) {
+  return useQuery({
+    queryKey: queryKeys.mistakes(chapterId, userId),
+    queryFn: async () => {
+      if (!userId) return []
+      let query = supabase.from('mistakes').select('*').eq('user_id', userId)
+      if (chapterId) {
+        query = query.eq('chapter_id', chapterId)
+      }
+      const { data, error } = await query.order('created_at', { ascending: false })
+      if (error) throw error
+      return data as Mistake[]
+    },
+    enabled: !!userId,
   })
 }
 

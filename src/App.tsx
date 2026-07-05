@@ -6,6 +6,7 @@ import Layout from '@/components/shared/Layout'
 import LoginPage from '@/app/login/LoginPage'
 import AccessRestrictedPage from '@/app/access-restricted/AccessRestrictedPage'
 import { lazy, Suspense } from 'react'
+import { GlobalSearch } from '@/components/shared/GlobalSearch'
 
 const DashboardPage = lazy(() => import('@/app/dashboard/DashboardPage'))
 const YearRoadmapPage = lazy(() => import('@/app/roadmap/YearRoadmapPage'))
@@ -72,6 +73,7 @@ export default function App() {
               </>
             </Route>
           </Routes>
+          <GlobalSearch />
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

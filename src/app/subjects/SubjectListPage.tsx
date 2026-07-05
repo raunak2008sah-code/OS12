@@ -1,60 +1,75 @@
-import { useSubjects } from '@/lib/supabase/queries'
+import { useState } from 'react'
+import { useSubjects, useChapters, useAllProgress } from '@/lib/supabase/queries'
+import { useAuth } from '@/hooks/useAuth'
 import { LoadingState, ErrorState, EmptyState } from '@/components/shared/StateBlocks'
-import { Link } from 'react-router-dom'
-import { Clock, Calendar } from 'lucide-react'
+import { SubjectCard } from '@/features/subjects/components/SubjectCard'
+import { FilterBar } from '@/features/subjects/components/FilterBar'
 
 export default function SubjectListPage() {
-  const { data: subjects, isLoading, error, refetch } = useSubjects()
+  const { user } = useAuth()
+  const { data: subjects, isLoading: isLoadingSubjects, error: subjectsError, refetch: refetchSubjects } = useSubjects()
+  const { data: chapters, isLoading: isLoadingChapters, error: chaptersError } = useChapters()
+  const { data: progress, isLoading: isLoadingProgress } = useAllProgress(user?.id)
 
-  if (isLoading) return <LoadingState message="Loading subjects..." />
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedPhase, setSelectedPhase] = useState('all')
+
+  const isLoading = isLoadingSubjects || isLoadingChapters || isLoadingProgress
+  const error = subjectsError || chaptersError
+  const hasNoData = !subjects?.length
+
+  if (isLoading) return <LoadingState message="Loading subjects and progress..." />
   
   if (error) {
-    return <ErrorState error={error} onRetry={() => void refetch()} />
+    return <ErrorState error={error} onRetry={() => void refetchSubjects()} />
   }
 
-  if (!subjects?.length) {
+  if (hasNoData) {
     return <EmptyState title="No Subjects Found" description="There are no subjects configured in the curriculum." />
   }
 
+  // Filter subjects based on search query
+  const filteredSubjects = subjects.filter(sub => {
+    if (searchQuery && !sub.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false
+    }
+    // We could filter by phase if subjects had phases, but phases are on chapters. 
+    // We'll just filter by search query for now.
+    return true
+  })
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in-50 duration-500 pb-16 mx-auto max-w-6xl">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Subjects</h1>
-        <p className="text-muted-foreground mt-2">Manage your studies across different disciplines.</p>
+        <p className="text-muted-foreground mt-2">Your primary daily workspace. Manage workload and track progress.</p>
       </div>
 
+      <FilterBar 
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedPhase={selectedPhase}
+        onPhaseChange={setSelectedPhase}
+        phases={[]} // Subjects don't have phases, chapters do
+        selectedStatus="all"
+        onStatusChange={() => {}}
+        statuses={[]}
+      />
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {subjects.map((subject) => (
-          <div key={subject.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/20">
-            <div className="p-6">
-              <h3 className="font-semibold text-xl tracking-tight mb-4 group-hover:text-primary transition-colors">{subject.name}</h3>
-              
-              <div className="space-y-2.5">
-                {subject.batch_days && subject.batch_days.length > 0 && (
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="mr-2 h-4 w-4 text-primary/70" />
-                    <span>{subject.batch_days.join(', ')}</span>
-                  </div>
-                )}
-                {subject.batch_time && (
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="mr-2 h-4 w-4 text-primary/70" />
-                    <span>{subject.batch_time}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="mt-auto border-t border-border bg-muted/20 px-6 py-4 flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">
-                {subject.is_batch_paced ? 'Batch Paced' : 'Self Paced'}
-              </span>
-              <Link to={`/subjects/${subject.id}`} className="text-sm font-medium text-primary hover:underline underline-offset-4 focus:outline-none">
-                View chapters &rarr;
-              </Link>
-            </div>
-          </div>
+        {filteredSubjects.map((subject) => (
+          <SubjectCard 
+            key={subject.id} 
+            subject={subject} 
+            chapters={chapters || []}
+            progress={progress || []}
+          />
         ))}
+        {filteredSubjects.length === 0 && (
+          <div className="col-span-full">
+            <EmptyState title="No results" description={`No subjects match "${searchQuery}"`} />
+          </div>
+        )}
       </div>
     </div>
   )

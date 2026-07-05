@@ -27,6 +27,9 @@ export interface Chapter {
   month: string | null
   order_index: number | null
   week_number: number | null
+  difficulty: 'easy' | 'medium' | 'hard'
+  priority: 'low' | 'medium' | 'high'
+  estimated_hours: number
   jee_weight: 'none' | 'standard' | 'high'
   created_at: string
 }
@@ -105,6 +108,17 @@ export interface Comment {
   profiles?: Profile // Added for joining with author data
 }
 
+export interface Mistake {
+  id: string
+  user_id: string
+  chapter_id: string
+  content: string
+  tags: string[]
+  is_resolved: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface MonthlyProgress {
   id: string
   user_id: string
@@ -129,6 +143,7 @@ export interface Database {
       progress: { Row: Progress; Insert: Partial<Progress>; Update: Partial<Progress> }
       notes: { Row: Note; Insert: Partial<Note>; Update: Partial<Note> }
       comments: { Row: Comment; Insert: Partial<Comment>; Update: Partial<Comment> }
+      mistakes: { Row: Mistake; Insert: Partial<Mistake>; Update: Partial<Mistake> }
       monthly_progress: { Row: MonthlyProgress; Insert: Partial<MonthlyProgress>; Update: Partial<MonthlyProgress> }
       roadmap_milestones: { Row: RoadmapMilestone; Insert: Partial<RoadmapMilestone>; Update: Partial<RoadmapMilestone> }
       roadmap_month_workloads: { Row: RoadmapMonthWorkload; Insert: Partial<RoadmapMonthWorkload>; Update: Partial<RoadmapMonthWorkload> }
