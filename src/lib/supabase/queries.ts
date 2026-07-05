@@ -4,7 +4,7 @@ import type {
   Subject, RoadmapPhase, RoadmapMonth, Chapter, Note, Comment, Profile, 
   RoadmapMonthWorkload, RoadmapMonthResource, Mistake, ChapterProgress, 
   MonthlyReview, Backlog, ResourceProgress, WeeklyReview, FormulaSheet,
-  RoadmapWeek, Milestone
+  RoadmapWeek, Milestone, Revision
 } from './types'
 
 export const queryKeys = {
@@ -30,6 +30,8 @@ export const queryKeys = {
   backlog: (userId?: string) => ['backlog', userId] as const,
   latestWeeklyReview: (userId?: string) => ['latestWeeklyReview', userId] as const,
   formulaSheets: (userId?: string) => ['formulaSheets', userId] as const,
+  allNotes: (userId?: string) => ['allNotes', userId] as const,
+  allRevisions: (userId?: string) => ['allRevisions', userId] as const,
 }
 
 export function useSubjects() {
@@ -412,6 +414,38 @@ export function useFormulaSheets(userId?: string) {
         .eq('user_id', userId)
       if (error) throw error
       return data as FormulaSheet[]
+    },
+    enabled: !!userId,
+  })
+}
+
+export function useAllNotes(userId?: string) {
+  return useQuery({
+    queryKey: queryKeys.allNotes(userId),
+    queryFn: async () => {
+      if (!userId) return []
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', userId)
+      if (error) throw error
+      return data as Note[]
+    },
+    enabled: !!userId,
+  })
+}
+
+export function useAllRevisions(userId?: string) {
+  return useQuery({
+    queryKey: queryKeys.allRevisions(userId),
+    queryFn: async () => {
+      if (!userId) return []
+      const { data, error } = await supabase
+        .from('revision')
+        .select('*')
+        .eq('user_id', userId)
+      if (error) throw error
+      return data as Revision[]
     },
     enabled: !!userId,
   })
