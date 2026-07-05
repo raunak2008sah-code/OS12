@@ -62,7 +62,7 @@ export function ChapterResources({ resources, progress, onToggle }: ChapterResou
                     onClick={() => onToggle(res.id, nextStatus)}
                     className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${badgeStyle}`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Icon className="h-4 w-4 shrink-0" />
                       <span className="font-semibold text-sm truncate">{res.name}</span>
                     </div>
