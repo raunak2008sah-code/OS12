@@ -22,13 +22,13 @@
   --color-border: hsl(220 15% 90%);
   --color-input: hsl(220 15% 90%);
   --color-ring: hsl(222 15% 15%);
-  
+
   --color-chart-1: hsl(12 76% 61%);
   --color-chart-2: hsl(173 58% 39%);
   --color-chart-3: hsl(197 37% 24%);
   --color-chart-4: hsl(43 74% 66%);
   --color-chart-5: hsl(27 87% 67%);
-  
+
   --color-sidebar: hsl(0 0% 99.5%);
   --color-sidebar-foreground: hsl(222 15% 15%);
   --color-sidebar-primary: hsl(222 15% 15%);
@@ -37,11 +37,13 @@
   --color-sidebar-accent-foreground: hsl(222 15% 15%);
   --color-sidebar-border: hsl(220 15% 90%);
   --color-sidebar-ring: hsl(222 15% 15%);
-  
-  --radius: 16px; /* 16px as standard premium radius */
+
+  --radius: 16px;
+  /* 16px as standard premium radius */
 }
 
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -59,7 +61,12 @@
   }
 
   /* Form & Table Enhancements for Premium Look */
-  input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea, select {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
     border: 1px solid var(--color-border);
     border-radius: 12px;
     background-color: var(--color-background);
@@ -68,8 +75,13 @@
     font-size: 0.875rem;
     transition: all 0.3s ease;
   }
-  
-  input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="number"]:focus,
+  textarea:focus,
+  select:focus {
     outline: none;
     border-color: var(--color-ring);
     box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-ring);
@@ -80,7 +92,7 @@
     border-collapse: separate;
     border-spacing: 0;
   }
-  
+
   th {
     text-align: left;
     font-weight: 600;
@@ -92,20 +104,21 @@
     border-bottom: 1px solid var(--color-border);
     background-color: var(--color-muted);
   }
-  
+
   th:first-child {
     border-top-left-radius: 12px;
   }
+
   th:last-child {
     border-top-right-radius: 12px;
   }
-  
+
   td {
     padding: 1rem;
     border-bottom: 1px solid var(--color-border);
     transition: background-color 0.2s ease;
   }
-  
+
   tr:hover td {
     background-color: var(--color-muted);
   }
@@ -114,9 +127,11 @@
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background-color: var(--color-border);
     border-radius: 20px;
@@ -143,13 +158,13 @@
   --color-border: hsl(224 20% 16%);
   --color-input: hsl(224 20% 16%);
   --color-ring: hsl(210 20% 80%);
-  
+
   --color-chart-1: hsl(220 70% 50%);
   --color-chart-2: hsl(160 60% 45%);
   --color-chart-3: hsl(30 80% 55%);
   --color-chart-4: hsl(280 65% 60%);
   --color-chart-5: hsl(340 75% 55%);
-  
+
   --color-sidebar: hsl(224 20% 6%);
   --color-sidebar-foreground: hsl(210 20% 90%);
   --color-sidebar-primary: hsl(210 20% 98%);

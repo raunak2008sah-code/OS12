@@ -98,10 +98,14 @@ export default function YearRoadmapPage() {
             >
               <CalendarRange className="w-3.5 h-3.5" /> Jump to Today
             </button>
-            <div className="relative group">
-              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-              <input type="text" placeholder="Search roadmap..." className="pl-9 h-8 w-48 text-xs bg-muted/30 focus:bg-background border-border/50 rounded-lg" />
-            </div>
+            <button 
+              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground bg-muted/30 hover:bg-muted/60 border border-border/50 rounded-lg transition-colors"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Search...</span>
+              <kbd className="ml-2 px-1.5 py-0.5 bg-background border border-border/50 rounded text-[10px] font-mono">⌘K</kbd>
+            </button>
           </div>
         </header>
 
@@ -120,7 +124,7 @@ export default function YearRoadmapPage() {
 
           {/* Section 2: Month Dashboard Summary */}
           <section>
-            <MonthDashboard workload={workload || null} resources={resources} />
+            <MonthDashboard workload={workload || null} resources={resources} monthPhaseId={displayPhase?.id} />
           </section>
 
           {/* Section 3: Weekly Breakdowns & Details */}

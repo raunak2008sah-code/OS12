@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 
 import { 
@@ -138,11 +139,12 @@ export default function ChapterDetailPage() {
     await addComment({ userId, chapterId, content })
   }
 
+  const queryClient = useQueryClient()
+
   const handleDeleteComment = async (commentId: string) => {
-    // Basic implementation since it wasn't in queries.ts
+    if (!chapterId) return
     await supabase.from('comments').delete().eq('id', commentId)
-    // Would ideally invalidate query here, but we can rely on a fast reload or just implement it right here
-    window.location.reload()
+    queryClient.invalidateQueries({ queryKey: ['comments', chapterId] })
   }
 
   return (

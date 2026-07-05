@@ -55,6 +55,14 @@ export default function ProgressHubPage() {
       return { name: s.name, completed: subCompleted, total: subChapters.length, percent: pct }
     })
 
+    // Calculate "Most Difficult" subject = lowest completion %
+    const sortedByDifficulty = [...subjectStats].sort((a, b) => a.percent - b.percent)
+    const mostDifficult = sortedByDifficulty.length > 0 ? sortedByDifficulty[0].name : 'N/A'
+
+    // Calculate weekly target status: compare completed vs expected pace
+    const expectedPace = Math.round(totalChapters * 0.08) // ~8% per month
+    const weeklyTargetStatus = completedChapters >= expectedPace ? 'On Track' : 'Behind'
+
     return {
       overallPercent,
       completedChapters,
@@ -68,7 +76,9 @@ export default function ProgressHubPage() {
       completedRevisions,
       totalNotes: notes.length,
       totalFormulas: formulas.length,
-      subjectStats
+      subjectStats,
+      mostDifficult,
+      weeklyTargetStatus
     }
   }, [chapters, chapterProgress, backlog, mistakes, resourceProgress, revisions, notes, formulas, subjects])
 
@@ -141,11 +151,24 @@ export default function ProgressHubPage() {
             <CardContent>
               <div className="flex gap-3 justify-between items-end h-32 pt-4">
                 {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day, i) => {
-                  const activityScore = Math.min(100, 20 + (chapterProgress.length * (i + 1) % 80))
+                  // Real data: count chapter progress entries completed on each weekday
+                  const dayActivity = chapterProgress.filter(p => {
+                    if (!p.completed_at) return false
+                    const d = new Date(p.completed_at)
+                    // JS getDay: 0=Sun, 1=Mon... map i: 0=Mon → getDay()=1
+                    return d.getDay() === ((i + 1) % 7)
+                  }).length
+                  const maxActivity = Math.max(1, ...['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((_, j) =>
+                    chapterProgress.filter(p => {
+                      if (!p.completed_at) return false
+                      return new Date(p.completed_at).getDay() === ((j + 1) % 7)
+                    }).length
+                  ))
+                  const activityScore = Math.round((dayActivity / maxActivity) * 100)
                   return (
                     <div key={i} className="w-full flex flex-col items-center gap-2">
                       <div className="w-full bg-muted/30 rounded-lg relative h-24 overflow-hidden">
-                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-primary to-primary/40 rounded-lg transition-all duration-700" style={{ height: `${activityScore}%` }} />
+                        <div className="absolute bottom-0 w-full bg-gradient-to-t from-primary to-primary/40 rounded-lg transition-all duration-700" style={{ height: `${Math.max(5, activityScore)}%` }} />
                       </div>
                       <span className="text-[10px] font-semibold text-muted-foreground uppercase">{day}</span>
                     </div>
@@ -166,10 +189,10 @@ export default function ProgressHubPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <InsightRow label="Burnout Risk" value={stats.activeBacklogs > 5 ? 'High' : 'Low'} status={stats.activeBacklogs > 5 ? 'danger' : 'success'} />
-              <InsightRow label="Current Streak" value="5 Days" status="success" />
-              <InsightRow label="Weekly Target" value="On Track" status="success" />
-              <InsightRow label="Most Difficult" value="Physics" status="warning" />
+              <InsightRow label="Burnout Risk" value={stats.activeBacklogs > 5 ? 'High' : stats.activeBacklogs > 2 ? 'Medium' : 'Low'} status={stats.activeBacklogs > 5 ? 'danger' : stats.activeBacklogs > 2 ? 'warning' : 'success'} />
+              <InsightRow label="Chapters Done" value={`${stats.completedChapters}`} status={stats.completedChapters > 0 ? 'success' : 'warning'} />
+              <InsightRow label="Weekly Target" value={stats.weeklyTargetStatus} status={stats.weeklyTargetStatus === 'On Track' ? 'success' : 'warning'} />
+              <InsightRow label="Weakest Subject" value={stats.mostDifficult} status="warning" />
               
               <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/10">
                 <h4 className="font-bold text-primary text-sm mb-1.5">Next Best Action</h4>
