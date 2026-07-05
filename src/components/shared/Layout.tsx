@@ -1,9 +1,24 @@
-import { Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
 import Sidebar from '@/components/shared/Sidebar'
 import TopBar from '@/components/shared/TopBar'
 import BottomBar from '@/components/shared/BottomBar'
 
 export default function Layout() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+, or Cmd+, to open settings
+      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+        e.preventDefault()
+        navigate('/settings')
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [navigate])
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
