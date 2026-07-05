@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { getNowIST } from '@/lib/time'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import {
   useChapters,
@@ -141,42 +141,19 @@ export function YearDashboardCard() {
   ]
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Year Dashboard</CardTitle>
-        <CardDescription>Executive summary — update every Sunday during the planning ritual</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50 text-left font-medium">
-                <th className="p-3">Metric</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {metrics.map((m, i) => (
-                <tr
-                  key={m.label}
-                  className={`${i < metrics.length - 1 ? 'border-b' : ''} ${m.highlight ?? ''}`}
-                >
-                  <td className="p-3 font-medium">{m.label}</td>
-                  <td className="p-3">{typeof m.value === 'string' ? <span className="text-muted-foreground">{m.value}</span> : m.value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-4 text-xs text-muted-foreground space-y-1">
-          <p className="font-medium">How to Read This Page:</p>
-          <ul className="list-inside list-disc space-y-0.5">
-            <li>Backlog is the single most important row — if it is not GREEN, check Section 15 before doing anything else.</li>
-            <li>Progress bars are a percentage of combined board+JEE syllabus, not of time elapsed.</li>
-            <li>Blank/zero entries in July are expected — this page is a mirror, not a scoreboard.</li>
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      {metrics.map((m) => (
+        <Card key={m.label} className={`overflow-hidden ${m.highlight ? m.highlight : ''}`}>
+          <div className="p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+              {m.label}
+            </p>
+            <div className="text-sm font-medium">
+              {typeof m.value === 'string' ? <span className="text-foreground">{m.value}</span> : m.value}
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
   )
 }

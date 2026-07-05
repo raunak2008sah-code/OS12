@@ -63,19 +63,39 @@ export default function DashboardPage() {
       {/* Sunday Ritual Prompt — only on Sundays (Section 13.3) */}
       <SundayRitualPrompt />
 
-      <div className="grid gap-6 md:grid-cols-12">
+      <div className="grid gap-6 md:grid-cols-12 items-start">
         <div className="md:col-span-8 space-y-6">
           <YearDashboardCard />
           
           <div className="grid gap-6 md:grid-cols-2">
-            <TodaysFocus />
             <FriendSnapshot />
           </div>
         </div>
         
-        <div className="md:col-span-4 space-y-6">
+        <div className="md:col-span-4 space-y-6 sticky top-24">
           <CalendarWidget />
           <CountdownWidget />
+          {/* Upcoming Revision Placeholder */}
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upcoming Revision</p>
+                <p className="font-medium mt-1">Physics: Mechanics</p>
+              </div>
+              <div className="text-xs bg-orange-500/10 text-orange-500 font-bold px-2 py-1 rounded-md">Today</div>
+            </CardContent>
+          </Card>
+          {/* Next Milestone Placeholder */}
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Next Milestone</p>
+                <p className="font-medium mt-1">Complete Term 1 Syllabus</p>
+              </div>
+              <div className="text-xs bg-primary/10 text-primary font-bold px-2 py-1 rounded-md">Aug 30</div>
+            </CardContent>
+          </Card>
+          <TodaysFocus />
         </div>
       </div>
     </div>

@@ -171,7 +171,7 @@ export default function SubjectDetailPage() {
       </div>
 
       {/* Chapters Grid */}
-      <div className="space-y-4 mt-4">
+      <div className="space-y-8 mt-4">
         {filteredChapters.length === 0 ? (
           <div className="flex h-48 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/50 bg-muted/10 text-muted-foreground gap-3">
             <p className="font-medium">No chapters match your filters.</p>
@@ -185,23 +185,77 @@ export default function SubjectDetailPage() {
             </button>
           </div>
         ) : (
-          filteredChapters.map(chapter => (
-            <ChapterCard 
-              key={chapter.id}
-              chapter={chapter}
-              progress={progress.find(p => p.chapter_id === chapter.id)}
-              resources={resources.filter(r => r.chapter_id === chapter.id)}
-              notes={notes}
-              mistakes={mistakes}
-              formulaSheets={formulaSheets}
-              revisions={revisions}
-              backlog={backlog}
-              phases={phases}
-              months={months}
-            />
-          ))
+          <ChapterGroups 
+            chapters={filteredChapters} 
+            progress={progress} 
+            resources={resources} 
+            notes={notes} 
+            mistakes={mistakes} 
+            formulaSheets={formulaSheets} 
+            revisions={revisions} 
+            backlog={backlog} 
+            phases={phases} 
+            months={months} 
+          />
         )}
       </div>
+    </div>
+  )
+}
+
+function ChapterGroups({ chapters, progress, ...props }: any) {
+  const [showCompleted, setShowCompleted] = useState(false)
+
+  const active = chapters.filter((c: any) => {
+    const p = progress.find((pr: any) => pr.chapter_id === c.id)
+    return !p || (p.status !== 'Completed' && p.status !== 'Done')
+  })
+  const completed = chapters.filter((c: any) => {
+    const p = progress.find((pr: any) => pr.chapter_id === c.id)
+    return p?.status === 'Completed' || p?.status === 'Done'
+  })
+
+  return (
+    <div className="space-y-8">
+      {active.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold">Active Chapters</h2>
+          <div className="space-y-4">
+            {active.map((chapter: any) => (
+              <ChapterCard 
+                key={chapter.id}
+                chapter={chapter}
+                progress={progress.find((p: any) => p.chapter_id === chapter.id)}
+                {...props}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {completed.length > 0 && (
+        <div className="space-y-4">
+          <div 
+            className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
+            onClick={() => setShowCompleted(!showCompleted)}
+          >
+            <ChevronRight className={`h-5 w-5 transition-transform ${showCompleted ? 'rotate-90' : ''}`} />
+            <h2 className="text-lg font-bold">Completed Chapters ({completed.length})</h2>
+          </div>
+          {showCompleted && (
+            <div className="space-y-4">
+              {completed.map((chapter: any) => (
+                <ChapterCard 
+                  key={chapter.id}
+                  chapter={chapter}
+                  progress={progress.find((p: any) => p.chapter_id === chapter.id)}
+                  {...props}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

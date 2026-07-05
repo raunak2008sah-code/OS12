@@ -110,10 +110,10 @@ export default function YearRoadmapPage() {
         </header>
 
         {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-4">
           
           {/* Section 1: Horizontal Month Timeline */}
-          <section className="bg-card/50 border border-border/50 rounded-2xl p-4">
+          <section className="bg-card/50 border border-border/50 rounded-xl p-2 md:p-3">
             <YearTimeline 
               months={months} 
               activeMonthByTime={activeMonthByTime}

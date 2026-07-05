@@ -23,7 +23,7 @@ export function CalendarWidget() {
   const emptyDays = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm p-4 h-full">
+    <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-5 w-5 text-primary" />
