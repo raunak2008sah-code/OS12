@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { useMilestones, useAllRevisions, useChapters } from '@/lib/supabase/queries'
 import { Calendar, Sparkles, ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { YearDashboardCard } from '@/features/dashboard/components/YearDashboardCard'
@@ -77,29 +79,62 @@ export default function DashboardPage() {
           <CalendarWidget />
           <CountdownWidget />
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4">
-            <Card className="shadow-sm border-border/60">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Upcoming Revision</p>
-                  <p className="font-medium text-sm mt-0.5">Physics: Mechanics</p>
-                </div>
-                <div className="text-[10px] bg-orange-500/10 text-orange-500 font-bold px-2 py-1 rounded">Today</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="shadow-sm border-border/60">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Next Milestone</p>
-                  <p className="font-medium text-sm mt-0.5">Complete Term 1</p>
-                </div>
-                <div className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-1 rounded">Aug 30</div>
-              </CardContent>
-            </Card>
-          </div>
+          <SidebarWidgets />
         </div>
       </div>
+    </div>
+  )
+}
+
+function SidebarWidgets() {
+  const { user } = useAuth()
+  const { data: milestones = [] } = useMilestones()
+  const { data: revisions = [] } = useAllRevisions(user?.id)
+  const { data: chapters = [] } = useChapters()
+
+  // Find next milestone based on target_date
+  const sortedMilestones = [...milestones]
+    .filter(m => m.target_date)
+    .sort((a, b) => new Date(a.target_date!).getTime() - new Date(b.target_date!).getTime())
+  
+  const nextMilestone = sortedMilestones.find(m => new Date(m.target_date!) >= new Date()) || sortedMilestones[0]
+
+  // Find upcoming revision
+  const pendingRevisions = revisions.filter(r => r.status !== 'Completed')
+  const nextRevision = pendingRevisions[0]
+  const nextRevChapter = nextRevision ? chapters.find(c => c.id === nextRevision.chapter_id) : null
+
+  if (!nextMilestone && !nextRevChapter) return null;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 mt-4">
+      {nextRevChapter && nextRevision && (
+        <Card className="shadow-sm border-border/60">
+          <CardContent className="p-4 flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Upcoming Revision</p>
+              <p className="font-medium text-sm mt-0.5 truncate">{nextRevChapter.name}</p>
+            </div>
+            <div className="text-[10px] bg-orange-500/10 text-orange-500 font-bold px-2 py-1 rounded whitespace-nowrap">
+              Day {nextRevision.revision_day}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {nextMilestone && (
+        <Card className="shadow-sm border-border/60">
+          <CardContent className="p-4 flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Next Milestone</p>
+              <p className="font-medium text-sm mt-0.5 truncate">{nextMilestone.name}</p>
+            </div>
+            <div className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-1 rounded whitespace-nowrap">
+              {nextMilestone.target_date ? new Date(nextMilestone.target_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Soon'}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
