@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Settings, Moon, Sun, Monitor, Bell, Download, Upload, Trash2, User } from 'lucide-react'
+import { Settings, Moon, Sun, Monitor, Bell, Download, Upload, Trash2, User, Globe, Smartphone, ShieldAlert } from 'lucide-react'
 import { useTheme } from '@/hooks/useTheme'
 import { useAuth } from '@/hooks/useAuth'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -10,159 +11,234 @@ export default function SettingsPage() {
   const [accent, setAccent] = useState('blue')
 
   const handleExport = () => {
-    alert("Exporting data as JSON... (Not fully implemented in backend yet)")
+    alert("Exporting data as JSON... (Available in next release)")
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 pb-12">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
-          <Settings className="h-8 w-8 text-primary" />
-          Settings
-        </h1>
-        <p className="text-muted-foreground mt-2">Manage your account preferences and application settings.</p>
+    <div className="mx-auto max-w-[1400px] space-y-8">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Settings className="h-6 w-6 text-primary" />
+              Settings
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Manage your account, preferences, and OS12 behavior.</p>
+          </div>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 pb-12">
+        {/* Navigation Sidebar (Desktop) */}
+        <div className="hidden md:block md:col-span-3 space-y-1 sticky top-24 h-fit">
+          <SettingsNavButton icon={User} label="Profile" active />
+          <SettingsNavButton icon={Sun} label="Appearance" />
+          <SettingsNavButton icon={Globe} label="Timezone & Region" />
+          <SettingsNavButton icon={Bell} label="Notifications" />
+          <SettingsNavButton icon={ShieldAlert} label="Danger Zone" className="text-red-500 hover:text-red-500 hover:bg-red-500/10 mt-4" />
+        </div>
+
+        {/* Settings Content */}
+        <div className="md:col-span-9 space-y-10">
+          
+          {/* Profile Section */}
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold">Profile</h2>
+              <p className="text-sm text-muted-foreground">Manage your personal profile and data.</p>
+            </div>
+            <Card>
+              <CardContent className="p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                  <div className="flex items-center gap-5">
+                    <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl font-black text-primary shadow-inner border border-primary/20">
+                      {user?.email?.charAt(0).toUpperCase() || <User className="h-8 w-8" />}
+                    </div>
+                    <div>
+                      <p className="font-bold text-xl">{user?.email}</p>
+                      <p className="text-sm text-muted-foreground mt-1">Authorized OS12 User • Premium</p>
+                    </div>
+                  </div>
+                  <Button onClick={signOut} variant="outline" className="shrink-0 border-border/50 hover:bg-muted">
+                    Sign Out
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Appearance Section */}
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold">Appearance</h2>
+              <p className="text-sm text-muted-foreground">Customize how OS12 looks and feels.</p>
+            </div>
+            <Card>
+              <CardContent className="p-6 sm:p-8 space-y-8">
+                <div className="space-y-4">
+                  <label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Theme Preference</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <ThemeButton 
+                      icon={Sun} label="Light" active={theme === 'light'} 
+                      onClick={() => setTheme('light')} 
+                    />
+                    <ThemeButton 
+                      icon={Moon} label="Dark" active={theme === 'dark'} 
+                      onClick={() => setTheme('dark')} 
+                    />
+                    <ThemeButton 
+                      icon={Monitor} label="System" active={theme === 'system'} 
+                      onClick={() => setTheme('system')} 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4 pt-6 border-t border-border/30">
+                  <label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Accent Color</label>
+                  <div className="flex flex-wrap gap-4">
+                    {['blue', 'purple', 'green', 'orange', 'red'].map(c => (
+                      <button 
+                        key={c}
+                        onClick={() => setAccent(c)}
+                        className={`w-10 h-10 rounded-full border-2 transition-all ${accent === c ? 'scale-110 border-foreground shadow-lg' : 'border-transparent hover:scale-105'}`}
+                        style={{ backgroundColor: `var(--color-${c}-500, ${c})` }}
+                        aria-label={`${c} accent`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Regional & Time Section */}
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold">Regional & Time</h2>
+              <p className="text-sm text-muted-foreground">Configure timezone and calendar preferences.</p>
+            </div>
+            <Card>
+              <CardContent className="p-6 sm:p-8 space-y-6">
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-foreground">Timezone</label>
+                  <select className="w-full sm:max-w-md rounded-xl border border-border/50 bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all">
+                    <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                    <option value="UTC">UTC</option>
+                  </select>
+                  <p className="text-xs text-muted-foreground">All dates and deadlines are strictly calculated using this timezone.</p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-6 pt-6 border-t border-border/30">
+                  <div className="flex-1 space-y-3">
+                    <label className="text-sm font-semibold text-foreground">Time Format</label>
+                    <select className="w-full rounded-xl border border-border/50 bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all">
+                      <option value="12h">12-hour (1:00 PM)</option>
+                      <option value="24h">24-hour (13:00)</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 space-y-3">
+                    <label className="text-sm font-semibold text-foreground">Week Starts On</label>
+                    <select className="w-full rounded-xl border border-border/50 bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all">
+                      <option value="1">Monday</option>
+                      <option value="0">Sunday</option>
+                    </select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Notifications Section */}
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold">Notifications</h2>
+              <p className="text-sm text-muted-foreground">Control your alerts and reminders.</p>
+            </div>
+            <Card>
+              <CardContent className="p-0">
+                <div className="divide-y divide-border/30">
+                  <NotificationRow label="Daily Revision Reminders" desc="Get notified about pending spaced repetition tasks." />
+                  <NotificationRow label="Weekly Review Prompts" desc="Sunday ritual planning and reflection reminders." />
+                  <NotificationRow label="Backlog Warnings" desc="Alerts when chapters fall dangerously behind schedule." />
+                  <NotificationRow label="Mobile Push Notifications" desc="Send critical alerts to your mobile device." icon={Smartphone} />
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Danger Zone */}
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold text-red-500">Danger Zone</h2>
+              <p className="text-sm text-muted-foreground">Destructive actions and data exports.</p>
+            </div>
+            <Card className="border-red-500/20 bg-red-500/5">
+              <CardContent className="p-6 sm:p-8 space-y-6">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button onClick={handleExport} variant="outline" className="flex-1 border-red-500/20 hover:bg-red-500/10 text-foreground">
+                    <Download className="h-4 w-4 mr-2" /> Export JSON Backup
+                  </Button>
+                  <Button variant="outline" className="flex-1 border-red-500/20 hover:bg-red-500/10 text-foreground">
+                    <Upload className="h-4 w-4 mr-2" /> Import Backup
+                  </Button>
+                </div>
+                <div className="pt-6 border-t border-red-500/10">
+                  <Button className="w-full bg-red-500 hover:bg-red-600 text-white font-bold">
+                    <Trash2 className="h-4 w-4 mr-2" /> Factory Reset OS12
+                  </Button>
+                  <p className="text-xs text-center text-red-500/70 mt-3 font-medium">This will permanently delete all progress, notes, and mistakes. This action cannot be undone.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+        </div>
       </div>
+    </div>
+  )
+}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1 space-y-2">
-          <h3 className="font-semibold text-lg">Appearance</h3>
-          <p className="text-sm text-muted-foreground">Customize how OS12 looks and feels.</p>
-        </div>
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">Theme Preference</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex gap-4">
-              <button onClick={() => setTheme('light')} className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${theme === 'light' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
-                <Sun className="h-6 w-6" /> Light
-              </button>
-              <button onClick={() => setTheme('dark')} className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${theme === 'dark' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
-                <Moon className="h-6 w-6" /> Dark
-              </button>
-              <button onClick={() => setTheme('system')} className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${theme === 'system' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
-                <Monitor className="h-6 w-6" /> System
-              </button>
-            </div>
-            
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Accent Color</label>
-              <div className="flex gap-3">
-                {['blue', 'purple', 'green', 'orange', 'red'].map(c => (
-                  <button 
-                    key={c}
-                    onClick={() => setAccent(c)}
-                    className={`w-8 h-8 rounded-full border-2 transition-transform ${accent === c ? 'scale-110 border-foreground' : 'border-transparent'}`}
-                    style={{ backgroundColor: `var(--color-${c}-500, ${c})` }}
-                  />
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+function SettingsNavButton({ icon: Icon, label, active, className = '' }: any) {
+  return (
+    <button className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+      active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+    } ${className}`}>
+      <Icon className="h-4 w-4" />
+      {label}
+    </button>
+  )
+}
 
-        <div className="md:col-span-1 space-y-2">
-          <h3 className="font-semibold text-lg">Regional & Time</h3>
-          <p className="text-sm text-muted-foreground">Configure timezone and calendar preferences.</p>
-        </div>
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">Date & Time Preferences</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Timezone</label>
-              <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-                <option value="UTC">UTC</option>
-                <option value="America/New_York">America/New_York (EST)</option>
-                <option value="Europe/London">Europe/London (GMT)</option>
-              </select>
-            </div>
-            <div className="flex gap-4">
-              <div className="flex-1 space-y-3">
-                <label className="text-sm font-medium">Time Format</label>
-                <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                  <option value="12h">12-hour (1:00 PM)</option>
-                  <option value="24h">24-hour (13:00)</option>
-                </select>
-              </div>
-              <div className="flex-1 space-y-3">
-                <label className="text-sm font-medium">Week Starts On</label>
-                <select className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                  <option value="1">Monday</option>
-                  <option value="0">Sunday</option>
-                </select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+function ThemeButton({ icon: Icon, label, active, onClick }: any) {
+  return (
+    <button 
+      onClick={onClick} 
+      className={`flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all duration-300 ${
+        active 
+          ? 'border-primary bg-primary/5 text-primary shadow-sm' 
+          : 'border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30 text-muted-foreground hover:text-foreground'
+      }`}
+    >
+      <Icon className={`h-7 w-7 ${active ? 'fill-primary/20' : ''}`} /> 
+      <span className="font-semibold text-sm">{label}</span>
+    </button>
+  )
+}
 
-        <div className="md:col-span-1 space-y-2">
-          <h3 className="font-semibold text-lg">Account</h3>
-          <p className="text-sm text-muted-foreground">Manage your personal profile and data.</p>
+function NotificationRow({ label, desc, icon: Icon = Bell }: any) {
+  return (
+    <div className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors">
+      <div className="flex items-start gap-4">
+        <div className="mt-1">
+          <Icon className="h-5 w-5 text-muted-foreground" />
         </div>
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">Profile Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold text-primary">
-                {user?.email?.charAt(0).toUpperCase() || <User />}
-              </div>
-              <div>
-                <p className="font-semibold text-lg">{user?.email}</p>
-                <p className="text-sm text-muted-foreground">Authorized OS12 User</p>
-              </div>
-            </div>
-            <button onClick={signOut} className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-md font-medium text-sm">
-              Sign Out
-            </button>
-          </CardContent>
-        </Card>
-
-        <div className="md:col-span-1 space-y-2">
-          <h3 className="font-semibold text-lg">Notifications</h3>
-          <p className="text-sm text-muted-foreground">Control your email and push alerts.</p>
+        <div>
+          <p className="font-semibold text-sm text-foreground">{label}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
         </div>
-        <Card className="md:col-span-2">
-          <CardContent className="p-6 space-y-4">
-            {['Daily Revision Reminders', 'Weekly Review Prompts', 'Backlog Warnings'].map(label => (
-              <div key={label} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">{label}</span>
-                </div>
-                <div className="w-10 h-5 bg-primary rounded-full relative cursor-pointer">
-                  <div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full" />
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        <div className="md:col-span-1 space-y-2">
-          <h3 className="font-semibold text-lg text-red-500">Danger Zone</h3>
-          <p className="text-sm text-muted-foreground">Data export and account deletion.</p>
-        </div>
-        <Card className="md:col-span-2 border-red-500/20">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button onClick={handleExport} className="flex-1 flex items-center justify-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-md font-medium text-sm">
-                <Download className="h-4 w-4" /> Export Data
-              </button>
-              <button className="flex-1 flex items-center justify-center gap-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-md font-medium text-sm">
-                <Upload className="h-4 w-4" /> Import Backup
-              </button>
-            </div>
-            <div className="pt-4 border-t border-red-500/10">
-              <button className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 px-4 py-2 rounded-md font-medium text-sm transition-colors">
-                <Trash2 className="h-4 w-4" /> Reset All Progress
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+      </div>
+      <div className="w-11 h-6 bg-primary rounded-full relative cursor-pointer shrink-0 transition-colors">
+        <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform" />
       </div>
     </div>
   )

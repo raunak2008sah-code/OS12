@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, X, Book, Target, FileText, AlertTriangle, BookOpen } from 'lucide-react'
+import { Search, Book, Target, FileText, AlertTriangle, BookOpen, Settings, Map, ExternalLink } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { 
@@ -13,6 +13,7 @@ import {
 export function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -41,167 +42,168 @@ export function GlobalSearch() {
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50)
-    } else {
       setQuery('')
+      setSelectedIndex(0)
     }
   }, [isOpen])
 
-  if (!isOpen) return null
-
   const lowerQuery = query.toLowerCase()
-  const matchedSubjects = subjects.filter(s => s.name.toLowerCase().includes(lowerQuery))
-  const matchedChapters = chapters.filter(c => c.name?.toLowerCase().includes(lowerQuery))
-  const matchedNotes = notes.filter(n => n.content?.toLowerCase().includes(lowerQuery))
-  const matchedMistakes = mistakes.filter(m => m.content?.toLowerCase().includes(lowerQuery) || m.tags.some(t => t.toLowerCase().includes(lowerQuery)))
-  const matchedFormulas = formulas.filter(f => f.content?.toLowerCase().includes(lowerQuery))
+  
+  // Aggregate all results into a single flat list for keyboard navigation
+  const results: any[] = []
+
+  if (query.length > 0) {
+    // 1. Core pages
+    const pages = [
+      { id: 'p1', type: 'Page', title: 'Roadmap', path: '/roadmap', icon: Map, color: 'text-blue-500' },
+      { id: 'p2', type: 'Page', title: 'Settings', path: '/settings', icon: Settings, color: 'text-gray-500' }
+    ].filter(p => p.title.toLowerCase().includes(lowerQuery))
+    results.push(...pages)
+
+    // 2. Subjects
+    subjects.filter(s => s.name.toLowerCase().includes(lowerQuery)).forEach(s => {
+      results.push({ id: s.id, type: 'Subject', title: s.name, path: `/subjects/${s.id}`, icon: Book, color: 'text-primary' })
+    })
+
+    // 3. Chapters
+    chapters.filter(c => c.name?.toLowerCase().includes(lowerQuery)).forEach(c => {
+      const subject = subjects.find(s => s.id === c.subject_id)
+      results.push({ id: c.id, type: 'Chapter', title: c.name, subtitle: subject?.name, path: `/chapters/${c.id}`, icon: Target, color: 'text-blue-500' })
+    })
+
+    // 4. Notes
+    notes.filter(n => n.content?.toLowerCase().includes(lowerQuery)).forEach(n => {
+      const chap = chapters.find(c => c.id === n.chapter_id)
+      results.push({ id: n.id, type: 'Note', title: n.content?.substring(0, 50) + '...', subtitle: chap?.name, path: `/chapters/${n.chapter_id}`, icon: FileText, color: 'text-green-500' })
+    })
+
+    // 5. Mistakes
+    mistakes.filter(m => m.content?.toLowerCase().includes(lowerQuery) || m.tags.some(t => t.toLowerCase().includes(lowerQuery))).forEach(m => {
+      const chap = chapters.find(c => c.id === m.chapter_id)
+      results.push({ id: m.id, type: 'Mistake', title: m.content?.substring(0, 50) + '...', subtitle: chap?.name, path: `/chapters/${m.chapter_id}`, icon: AlertTriangle, color: 'text-red-500' })
+    })
+
+    // 6. Formulas
+    formulas.filter(f => f.content?.toLowerCase().includes(lowerQuery)).forEach(f => {
+      const chap = chapters.find(c => c.id === f.chapter_id)
+      results.push({ id: f.id, type: 'Formula', title: f.content?.substring(0, 50) + '...', subtitle: chap?.name, path: `/chapters/${f.chapter_id}`, icon: BookOpen, color: 'text-purple-500' })
+    })
+  }
 
   const handleSelect = (path: string) => {
     setIsOpen(false)
     navigate(path)
   }
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleNavigation = (e: KeyboardEvent) => {
+      if (!isOpen) return
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelectedIndex(prev => (prev + 1) % Math.max(1, results.length))
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelectedIndex(prev => (prev - 1 + results.length) % Math.max(1, results.length))
+      } else if (e.key === 'Enter' && results[selectedIndex]) {
+        e.preventDefault()
+        handleSelect(results[selectedIndex].path)
+      }
+    }
+    window.addEventListener('keydown', handleNavigation)
+    return () => window.removeEventListener('keydown', handleNavigation)
+  }, [isOpen, results, selectedIndex, handleSelect])
+
+  if (!isOpen) return null
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 bg-background/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] sm:pt-[20vh] bg-background/80 backdrop-blur-xl">
       <div className="fixed inset-0" onClick={() => setIsOpen(false)} />
       
-      <div className="relative w-full max-w-2xl rounded-xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center border-b border-border px-4 py-3">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-border/50 bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        {/* Input area */}
+        <div className="flex items-center border-b border-border/50 px-4 py-4">
           <Search className="h-5 w-5 text-muted-foreground mr-3 shrink-0" />
           <input
             ref={inputRef}
             type="text"
             className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground text-lg"
-            placeholder="Search subjects, chapters, notes, mistakes, formulas..."
+            placeholder="Search subjects, chapters, notes..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              setSelectedIndex(0)
+            }}
           />
-          <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors">
-            <X className="h-5 w-5" />
-          </button>
+          <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-border/50 bg-muted/30 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            <span className="text-xs">esc</span>
+          </kbd>
         </div>
 
-        <div className="max-h-[60vh] overflow-y-auto p-2">
+        {/* Results area */}
+        <div className="max-h-[50vh] overflow-y-auto custom-scrollbar p-2">
           {query.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <p>Type to search across the curriculum and your notes</p>
+            <div className="p-8 text-center text-sm text-muted-foreground/70">
+              Type to search across OS12
+            </div>
+          ) : results.length === 0 ? (
+            <div className="p-8 text-center text-sm text-muted-foreground/70">
+              No results found for "{query}"
             </div>
           ) : (
-            <div className="space-y-4">
-              {matchedSubjects.length > 0 && (
-                <div>
-                  <h3 className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Subjects</h3>
-                  <div className="mt-1 space-y-1">
-                    {matchedSubjects.map(sub => (
-                      <button
-                        key={sub.id}
-                        onClick={() => handleSelect(`/subjects/${sub.id}`)}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors text-left"
-                      >
-                        <Book className="h-4 w-4 text-primary" />
-                        <span className="font-medium">{sub.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {matchedChapters.length > 0 && (
-                <div>
-                  <h3 className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Chapters</h3>
-                  <div className="mt-1 space-y-1">
-                    {matchedChapters.map(chap => {
-                      const subject = subjects.find(s => s.id === chap.subject_id)
-                      return (
-                        <button
-                          key={chap.id}
-                          onClick={() => handleSelect(`/chapters/${chap.id}`)}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors text-left"
-                        >
-                          <Target className="h-4 w-4 text-blue-500" />
-                          <div className="flex flex-col">
-                            <span className="font-medium text-sm">{chap.name}</span>
-                            <span className="text-xs text-muted-foreground">{subject?.name}</span>
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {matchedNotes.length > 0 && (
-                <div>
-                  <h3 className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Notes</h3>
-                  <div className="mt-1 space-y-1">
-                    {matchedNotes.map(note => {
-                      const chap = chapters.find(c => c.id === note.chapter_id)
-                      return (
-                        <button
-                          key={note.id}
-                          onClick={() => handleSelect(`/chapters/${note.chapter_id}`)}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors text-left"
-                        >
-                          <FileText className="h-4 w-4 text-green-500 shrink-0" />
-                          <div className="flex flex-col truncate">
-                            <span className="font-medium text-sm truncate">{note.content?.substring(0, 50)}...</span>
-                            <span className="text-xs text-muted-foreground">{chap?.name}</span>
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {matchedMistakes.length > 0 && (
-                <div>
-                  <h3 className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mistakes</h3>
-                  <div className="mt-1 space-y-1">
-                    {matchedMistakes.map(mistake => {
-                      const chap = chapters.find(c => c.id === mistake.chapter_id)
-                      return (
-                        <button
-                          key={mistake.id}
-                          onClick={() => handleSelect(`/chapters/${mistake.chapter_id}`)}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors text-left"
-                        >
-                          <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
-                          <div className="flex flex-col truncate">
-                            <span className="font-medium text-sm truncate">{mistake.content?.substring(0, 50)}...</span>
-                            <span className="text-xs text-muted-foreground">{chap?.name}</span>
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {matchedFormulas.length > 0 && (
-                <div>
-                  <h3 className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Formulas</h3>
-                  <div className="mt-1 space-y-1">
-                    {matchedFormulas.map(formula => {
-                      const chap = chapters.find(c => c.id === formula.chapter_id)
-                      return (
-                        <button
-                          key={formula.id}
-                          onClick={() => handleSelect(`/chapters/${formula.chapter_id}`)}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors text-left"
-                        >
-                          <BookOpen className="h-4 w-4 text-purple-500 shrink-0" />
-                          <div className="flex flex-col truncate">
-                            <span className="font-medium text-sm truncate">{formula.content?.substring(0, 50)}...</span>
-                            <span className="text-xs text-muted-foreground">{chap?.name}</span>
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
+            <div className="space-y-1">
+              {results.map((item, index) => {
+                const Icon = item.icon
+                const isSelected = index === selectedIndex
+                return (
+                  <button
+                    key={`${item.type}-${item.id}`}
+                    onClick={() => handleSelect(item.path)}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={`w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all text-left group ${
+                      isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50 text-foreground'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4 overflow-hidden">
+                      <div className={`p-1.5 rounded-md ${isSelected ? 'bg-primary/20' : 'bg-muted'} ${item.color}`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex flex-col truncate">
+                        <span className="font-semibold text-sm truncate">{item.title}</span>
+                        {item.subtitle && (
+                          <span className={`text-xs truncate ${isSelected ? 'text-primary/70' : 'text-muted-foreground'}`}>
+                            {item.subtitle}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
+                        isSelected ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {item.type}
+                      </span>
+                      {isSelected && <ExternalLink className="h-4 w-4 opacity-50" />}
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           )}
+        </div>
+        
+        {/* Footer */}
+        <div className="border-t border-border/50 px-4 py-3 bg-muted/10 flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 rounded bg-muted/50 border border-border/50 font-mono">↓</kbd>
+            <kbd className="px-1.5 py-0.5 rounded bg-muted/50 border border-border/50 font-mono">↑</kbd>
+            <span>to navigate</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 rounded bg-muted/50 border border-border/50 font-mono">↵</kbd>
+            <span>to open</span>
+          </div>
         </div>
       </div>
     </div>

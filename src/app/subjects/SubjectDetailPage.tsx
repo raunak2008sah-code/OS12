@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ChevronLeft, Book, Clock, AlertCircle, CheckCircle } from 'lucide-react'
+import { ChevronRight, Book, Clock, AlertCircle, Target } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { FilterBar } from '@/features/subjects/components/FilterBar'
 import { ChapterCard } from '@/features/subjects/components/ChapterCard'
@@ -103,57 +103,58 @@ export default function SubjectDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="mx-auto max-w-[1400px] space-y-6">
+        {/* Skeleton header */}
+        <div className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
+          <div className="h-4 w-32 bg-muted/50 rounded-lg animate-pulse" />
+          <div className="h-8 w-64 bg-muted/50 rounded-lg animate-pulse mt-3" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1,2,3,4,5,6].map(i => (
+            <div key={i} className="h-40 bg-card border border-border/50 rounded-2xl animate-pulse" />
+          ))}
+        </div>
       </div>
     )
   }
 
-  if (!subject) return <div>Subject not found</div>
+  if (!subject) return <div className="text-center py-12 text-muted-foreground">Subject not found</div>
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 pb-12">
-      <Link to="/subjects" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ChevronLeft className="mr-1 h-4 w-4" />
-        Back to Subjects
-      </Link>
+    <div className="mx-auto max-w-[1400px] space-y-6 pb-12">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
+          <Link to="/subjects" className="hover:text-foreground transition-colors">Subjects</Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <span className="text-foreground font-medium">{subject.name}</span>
+        </nav>
 
-      <div className="flex flex-col gap-6 md:flex-row md:items-end justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
-            <Book className="h-8 w-8 text-primary" />
-            {subject.name}
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Manage chapters and resources for {subject.name}
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-4 bg-card p-4 rounded-xl border shadow-sm">
-          <div className="space-y-1 text-center border-r pr-4">
-            <div className="text-sm text-muted-foreground flex items-center gap-1 justify-center">
-              <CheckCircle className="h-4 w-4 text-green-500" /> Progress
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Book className="h-6 w-6" />
             </div>
-            <div className="text-xl font-bold">{completionStats.percent}%</div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{subject.name}</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {completionStats.total} chapters • {completionStats.completed} completed
+              </p>
+            </div>
           </div>
-          <div className="space-y-1 text-center border-r pr-4">
-            <div className="text-sm text-muted-foreground flex items-center gap-1 justify-center">
-              <Clock className="h-4 w-4 text-blue-500" /> Est. Time
-            </div>
-            <div className="text-xl font-bold">{completionStats.estimatedHours}h</div>
-          </div>
-          <div className="space-y-1 text-center">
-            <div className="text-sm text-muted-foreground flex items-center gap-1 justify-center">
-              <AlertCircle className={`h-4 w-4 ${completionStats.backlogs > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} /> Backlog
-            </div>
-            <div className={`text-xl font-bold ${completionStats.backlogs > 0 ? 'text-orange-500' : 'text-foreground'}`}>
-              {completionStats.backlogs}
-            </div>
+
+          {/* Stats pills */}
+          <div className="flex items-center gap-3 shrink-0 flex-wrap">
+            <StatPill icon={Target} label="Progress" value={`${completionStats.percent}%`} color="text-primary" />
+            <StatPill icon={Clock} label="Est. Time" value={`${completionStats.estimatedHours}h`} color="text-blue-500" />
+            <StatPill icon={AlertCircle} label="Backlogs" value={completionStats.backlogs.toString()} color={completionStats.backlogs > 0 ? 'text-orange-500' : 'text-muted-foreground'} />
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="sticky top-16 z-10 bg-background/95 backdrop-blur py-2">
+      {/* Filter bar */}
+      <div className="sticky top-[105px] z-[9] bg-background/95 backdrop-blur-sm py-2 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8">
         <FilterBar 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -169,17 +170,18 @@ export default function SubjectDetailPage() {
         />
       </div>
 
-      <div className="space-y-4 mt-6">
+      {/* Chapters Grid */}
+      <div className="space-y-4 mt-4">
         {filteredChapters.length === 0 ? (
-          <div className="flex h-40 flex-col items-center justify-center rounded-xl border border-dashed text-muted-foreground">
-            <p>No chapters match your filters.</p>
+          <div className="flex h-48 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/50 bg-muted/10 text-muted-foreground gap-3">
+            <p className="font-medium">No chapters match your filters.</p>
             <button onClick={() => {
               setSearchQuery('')
               setSelectedPhase('all')
               setSelectedStatus('all')
               setSelectedDifficulty('all')
-            }} className="mt-2 text-primary hover:underline">
-              Clear filters
+            }} className="text-sm text-primary hover:underline font-semibold">
+              Clear all filters
             </button>
           </div>
         ) : (
@@ -199,6 +201,18 @@ export default function SubjectDetailPage() {
             />
           ))
         )}
+      </div>
+    </div>
+  )
+}
+
+function StatPill({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
+  return (
+    <div className="flex items-center gap-2 bg-card border border-border/50 rounded-xl px-4 py-2.5 shadow-sm">
+      <Icon className={`h-4 w-4 ${color}`} />
+      <div>
+        <p className="text-xs text-muted-foreground font-medium">{label}</p>
+        <p className="text-lg font-bold text-foreground leading-none">{value}</p>
       </div>
     </div>
   )
