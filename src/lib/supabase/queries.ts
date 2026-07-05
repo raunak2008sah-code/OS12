@@ -1,12 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from './client'
-import type { Subject, RoadmapPhase, RoadmapMonth, Chapter, Progress, Note, Comment, MonthlyProgress, Profile } from './types'
+import type { Subject, RoadmapPhase, RoadmapMonth, Chapter, Progress, Note, Comment, MonthlyProgress, Profile, RoadmapMilestone, RoadmapMonthWorkload, RoadmapMonthResource } from './types'
 
 export const queryKeys = {
   subjects: ['subjects'] as const,
   subject: (id: string) => ['subject', id] as const,
   roadmapPhases: ['roadmapPhases'] as const,
   roadmapMonths: ['roadmapMonths'] as const,
+  roadmapMilestones: ['roadmapMilestones'] as const,
+  roadmapMonthWorkload: (monthId: string) => ['roadmapMonthWorkload', monthId] as const,
+  roadmapMonthResources: (monthId: string) => ['roadmapMonthResources', monthId] as const,
   chapters: (subjectId?: string) => ['chapters', subjectId] as const,
   chapter: (id: string) => ['chapter', id] as const,
   progress: (userId?: string, chapterId?: string) => ['progress', userId, chapterId] as const,
@@ -59,6 +62,43 @@ export function useRoadmapMonths() {
       if (error) throw error
       return data as RoadmapMonth[]
     },
+  })
+}
+
+export function useMilestones() {
+  return useQuery({
+    queryKey: queryKeys.roadmapMilestones,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('roadmap_milestones').select('*').order('target_date')
+      if (error) throw error
+      return data as RoadmapMilestone[]
+    },
+  })
+}
+
+export function useRoadmapMonthWorkload(monthId?: string) {
+  return useQuery({
+    queryKey: monthId ? queryKeys.roadmapMonthWorkload(monthId) : ['roadmapMonthWorkload', 'skip'],
+    queryFn: async () => {
+      if (!monthId) return null
+      const { data, error } = await supabase.from('roadmap_month_workloads').select('*').eq('month_id', monthId).maybeSingle()
+      if (error) throw error
+      return data as RoadmapMonthWorkload | null
+    },
+    enabled: !!monthId,
+  })
+}
+
+export function useRoadmapMonthResources(monthId?: string) {
+  return useQuery({
+    queryKey: monthId ? queryKeys.roadmapMonthResources(monthId) : ['roadmapMonthResources', 'skip'],
+    queryFn: async () => {
+      if (!monthId) return []
+      const { data, error } = await supabase.from('roadmap_month_resources').select('*').eq('month_id', monthId).order('order_index')
+      if (error) throw error
+      return data as RoadmapMonthResource[]
+    },
+    enabled: !!monthId,
   })
 }
 

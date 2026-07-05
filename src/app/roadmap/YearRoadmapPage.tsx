@@ -1,11 +1,38 @@
-import { useRoadmapPhases, useRoadmapMonths } from '@/lib/supabase/queries'
+import { useState } from 'react'
+import { ChevronLeft, Calendar as CalendarIcon } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
+import { 
+  useRoadmapPhases, 
+  useRoadmapMonths, 
+  useMilestones,
+  useRoadmapMonthWorkload,
+  useRoadmapMonthResources,
+  useChapters,
+  useProgress
+} from '@/lib/supabase/queries'
 import { LoadingState, ErrorState, EmptyState } from '@/components/shared/StateBlocks'
+import { YearTimeline } from '@/features/roadmap/components/YearTimeline'
+import { Milestones } from '@/features/roadmap/components/Milestones'
+import { RoadmapPhaseSnapshot } from '@/features/roadmap/components/RoadmapPhaseSnapshot'
+import { WorkloadMeter } from '@/features/roadmap/components/WorkloadMeter'
+import { ResourceMatrix } from '@/features/roadmap/components/ResourceMatrix'
+import { WeeklyBreakdown } from '@/features/roadmap/components/WeeklyBreakdown'
 
 export default function YearRoadmapPage() {
+  const { user } = useAuth()
+  const [selectedMonthId, setSelectedMonthId] = useState<string | null>(null)
+
   const { data: phases, isLoading: isLoadingPhases, error: phasesError, refetch: refetchPhases } = useRoadmapPhases()
   const { data: months, isLoading: isLoadingMonths, error: monthsError, refetch: refetchMonths } = useRoadmapMonths()
+  const { data: milestones, isLoading: isLoadingMilestones } = useMilestones()
+  
+  // Month-specific data
+  const { data: workload } = useRoadmapMonthWorkload(selectedMonthId || undefined)
+  const { data: resources } = useRoadmapMonthResources(selectedMonthId || undefined)
+  const { data: chapters } = useChapters()
+  const { data: progress } = useProgress(user?.id)
 
-  const isLoading = isLoadingPhases || isLoadingMonths
+  const isLoading = isLoadingPhases || isLoadingMonths || isLoadingMilestones
   const error = phasesError || monthsError
   const hasNoData = !phases?.length && !months?.length
 
@@ -27,61 +54,81 @@ export default function YearRoadmapPage() {
     return <EmptyState title="No Roadmap Configured" description="The curriculum phases and months have not been setup yet." />
   }
 
+  const selectedMonth = months?.find(m => m.id === selectedMonthId)
+  const selectedPhase = phases?.find(p => p.id === selectedMonth?.phase_id)
+
+  if (selectedMonthId && selectedMonth) {
+    // === MONTH VIEW ===
+    return (
+      <div className="mx-auto max-w-5xl space-y-8 animate-in fade-in-50 duration-500 pb-16">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setSelectedMonthId(null)}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{selectedMonth.name}</h1>
+            <p className="mt-1 text-muted-foreground">{selectedMonth.focus_area || 'Standard operations'}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 flex flex-col gap-6">
+            <WeeklyBreakdown chapters={chapters || []} progress={progress || []} monthName={selectedMonth.name} />
+            <ResourceMatrix resources={resources || []} />
+          </div>
+          <div className="flex flex-col gap-6">
+            <WorkloadMeter workload={workload || null} />
+            <RoadmapPhaseSnapshot currentPhase={selectedPhase || null} phases={phases || []} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // === YEAR VIEW ===
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8 animate-in fade-in-50 duration-500 pb-16">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Yearly Roadmap</h1>
-        <p className="text-muted-foreground mt-2">Macro-level planning of your curriculum across phases.</p>
+        <p className="text-muted-foreground mt-2">Macro-level planning of your curriculum across 8 phases.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {phases?.map((phase) => {
-          const phaseMonths = months?.filter(m => m.phase_id === phase.id) || []
-          
-          return (
-            <div key={phase.id} className="flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
-              <div className="border-b border-border bg-muted/30 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-lg">{phase.name}</h3>
-                  <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                    Phase {phase.order_index}
-                  </span>
-                </div>
-                {phase.description && (
-                  <p className="mt-1 text-sm text-muted-foreground">{phase.description}</p>
-                )}
-                <div className="mt-3 text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  {new Date(phase.start_date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })} 
-                  {' - '}
-                  {new Date(phase.end_date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
-                </div>
-              </div>
-              
-              <div className="flex-1 p-6">
-                <h4 className="text-sm font-medium text-foreground mb-4 uppercase tracking-wider">Months in Phase</h4>
-                {phaseMonths.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">No months assigned.</p>
-                ) : (
-                  <ul className="space-y-3">
-                    {phaseMonths.map((month) => (
-                      <li key={month.id} className="flex items-start gap-3">
-                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-muted/50 text-[10px] font-medium text-muted-foreground">
-                          {month.order_index}
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <p className="text-sm font-medium leading-none">{month.name}</p>
-                          {month.focus_area && (
-                            <p className="text-xs text-muted-foreground line-clamp-2">{month.focus_area}</p>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          )
-        })}
+      <YearTimeline phases={phases || []} />
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="md:col-span-2 space-y-6">
+          <h2 className="text-xl font-bold text-foreground">Month Guides</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {months?.map((month) => {
+              const phase = phases?.find(p => p.id === month.phase_id)
+              return (
+                <button
+                  key={month.id}
+                  onClick={() => setSelectedMonthId(month.id)}
+                  className="group flex flex-col items-start rounded-xl border border-border bg-card p-5 text-left shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
+                >
+                  <div className="flex w-full items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4 text-primary" />
+                      <span className="font-semibold">{month.name}</span>
+                    </div>
+                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity">
+                      Phase {phase?.order_index}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-1">{month.focus_area || 'Standard operations'}</p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <Milestones milestones={milestones || []} />
+        </div>
       </div>
     </div>
   )
