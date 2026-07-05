@@ -148,7 +148,7 @@ export default function ChapterDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-8">
+    <div className="mx-auto max-w-6xl space-y-4 pb-8">
       <ChapterHeader 
         chapter={chapter}
         subject={subject}
@@ -158,9 +158,9 @@ export default function ChapterDetailPage() {
         completionPercent={completionPercent}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         {/* Left Column - Workflow, Resources, Revisions */}
-        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+        <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-24">
           <ChapterWorkflow 
             currentStatus={currentStatus}
             onStatusChange={handleStatusChange}
@@ -177,8 +177,8 @@ export default function ChapterDetailPage() {
         </div>
 
         {/* Right Column - Notes, Formula, Mistakes, Comments */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="lg:col-span-8 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ChapterNotes 
               note={note || null}
               onSave={handleSaveNote}

@@ -3,6 +3,8 @@ import { AlertTriangle, Plus, CheckCircle, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { formatIST } from '@/lib/time'
 import type { Mistake } from '@/lib/supabase/types'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { cn } from '@/lib/utils'
 
 interface ChapterMistakesProps {
   mistakes: Mistake[]
@@ -11,7 +13,7 @@ interface ChapterMistakesProps {
 }
 
 export function ChapterMistakes({ mistakes, onAddMistake, onToggleResolved }: ChapterMistakesProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useLocalStorage('os12-mistakes-expanded', true)
   const [isAdding, setIsAdding] = useState(false)
   const [content, setContent] = useState('')
   const [tag, setTag] = useState('conceptual')
@@ -34,24 +36,27 @@ export function ChapterMistakes({ mistakes, onAddMistake, onToggleResolved }: Ch
 
   return (
     <Card className="overflow-hidden border-border/50 bg-card/50 transition-all duration-300">
-      <div className="w-full flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 transition-colors group cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-red-500" />
-          <span className="font-bold text-sm uppercase tracking-wider text-foreground">Mistake Log</span>
+      <button 
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-muted/20 hover:bg-muted/40 transition-colors group"
+      >
+        <div className="flex items-center gap-2.5">
+          <AlertTriangle className="h-4 w-4 text-red-500" />
+          <span className="font-semibold text-sm text-foreground">Mistake Log</span>
         </div>
         <div className="flex items-center gap-3">
           {unresolvedCount > 0 && (
-            <span className="text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 px-2 py-0.5 rounded border border-red-500/20">
               {unresolvedCount} Pending
             </span>
           )}
-          <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+          <ChevronRight className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", isExpanded && "rotate-90")} />
         </div>
-      </div>
+      </button>
 
-      <div className={`grid transition-all duration-300 ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+      <div className={cn("grid transition-all duration-300", isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
         <div className="overflow-hidden">
-          <CardContent className="p-4 border-t border-border/50 space-y-4">
+          <CardContent className="p-3 border-t border-border/50 space-y-3">
             <div className="flex justify-end">
               <button
                 onClick={() => setIsAdding(!isAdding)}
@@ -62,16 +67,12 @@ export function ChapterMistakes({ mistakes, onAddMistake, onToggleResolved }: Ch
             </div>
 
             {isAdding && (
-              <form onSubmit={handleSubmit} className="p-4 bg-background rounded-xl border border-border/50 space-y-3 animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-red-500" />
-                  <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">New Log</h4>
-                </div>
-                <div className="flex flex-col gap-3">
+              <form onSubmit={handleSubmit} className="p-3 bg-background rounded-xl border border-border/50 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <select 
                     value={tag} 
                     onChange={e => setTag(e.target.value)}
-                    className="text-sm rounded-lg border-border/50 bg-muted/30 p-2 focus:ring-1 focus:ring-primary outline-none w-full sm:w-auto font-medium"
+                    className="text-[13px] rounded-lg border-border/50 bg-muted/30 p-2 focus:ring-1 focus:ring-primary outline-none w-full sm:w-[160px] font-medium"
                   >
                     <option value="conceptual">Conceptual Error</option>
                     <option value="calculation">Calculation Mistake</option>
@@ -82,23 +83,23 @@ export function ChapterMistakes({ mistakes, onAddMistake, onToggleResolved }: Ch
                   <textarea
                     value={content}
                     onChange={e => setContent(e.target.value)}
-                    placeholder="What went wrong? Why did it happen? How will you prevent it?"
-                    className="w-full text-sm rounded-lg border-border/50 bg-muted/30 p-3 min-h-[100px] resize-y focus:ring-1 focus:ring-primary outline-none"
+                    placeholder="What went wrong? Why did it happen?"
+                    className="w-full flex-1 text-[13px] rounded-lg border-border/50 bg-muted/30 p-2 min-h-[60px] resize-y focus:ring-1 focus:ring-primary outline-none"
                     required
                   />
                 </div>
-                <div className="flex justify-end gap-2 pt-2 border-t border-border/30">
+                <div className="flex justify-end gap-2 pt-1 border-border/30">
                   <button 
                     type="button" 
                     onClick={() => setIsAdding(false)}
-                    className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted rounded-lg transition-colors"
+                    className="px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted rounded-lg transition-colors"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit" 
                     disabled={isSubmitting || !content.trim()}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 disabled:opacity-50 transition-colors shadow-sm"
+                    className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-semibold hover:bg-red-600 disabled:opacity-50 transition-colors shadow-sm"
                   >
                     {isSubmitting ? 'Saving...' : 'Save Log'}
                   </button>
@@ -106,40 +107,36 @@ export function ChapterMistakes({ mistakes, onAddMistake, onToggleResolved }: Ch
               </form>
             )}
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {mistakes.length === 0 ? (
-                <div className="text-sm font-medium text-muted-foreground text-center py-6 border-2 border-dashed border-border/50 rounded-xl bg-muted/10">
+                <div className="md:col-span-2 text-xs font-medium text-muted-foreground text-center py-6 border-2 border-dashed border-border/50 rounded-xl bg-muted/10">
                   No mistakes logged yet. Perfect!
                 </div>
               ) : (
                 mistakes.map(mistake => (
-                  <div key={mistake.id} className={`p-4 rounded-xl border transition-colors ${mistake.is_resolved ? 'bg-muted/30 border-border/30' : 'bg-background border-red-500/20 shadow-sm'}`}>
-                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                      <div className="space-y-2.5">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {mistake.tags.map(t => (
-                            <span key={t} className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${mistake.is_resolved ? 'bg-muted text-muted-foreground' : 'bg-red-500/10 text-red-500'}`}>
-                              {t}
-                            </span>
-                          ))}
-                          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                            {formatIST(new Date(mistake.created_at), 'MMM d, h:mm a')}
+                  <div key={mistake.id} className={cn("p-3 rounded-xl border transition-colors flex flex-col gap-2", mistake.is_resolved ? 'bg-muted/30 border-border/30' : 'bg-background border-red-500/20 shadow-sm hover:border-red-500/40')}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                        {mistake.tags.map(t => (
+                          <span key={t} className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider truncate", mistake.is_resolved ? 'bg-muted text-muted-foreground' : 'bg-red-500/10 text-red-500')}>
+                            {t}
                           </span>
-                        </div>
-                        <p className={`text-sm leading-relaxed whitespace-pre-wrap ${mistake.is_resolved ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                          {mistake.content}
-                        </p>
+                        ))}
                       </div>
+                      <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider shrink-0 mt-0.5">
+                        {formatIST(new Date(mistake.created_at), 'MMM d')}
+                      </span>
+                    </div>
+                    <p className={cn("text-[13px] leading-relaxed whitespace-pre-wrap break-words flex-1", mistake.is_resolved ? 'text-muted-foreground line-through' : 'text-foreground/90')}>
+                      {mistake.content}
+                    </p>
+                    <div className="flex justify-end pt-1 mt-auto border-t border-border/30">
                       <button
                         onClick={() => onToggleResolved(mistake.id, !mistake.is_resolved)}
-                        className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] uppercase font-bold tracking-wider transition-colors ${
-                          mistake.is_resolved 
-                            ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20' 
-                            : 'bg-muted text-muted-foreground hover:bg-foreground hover:text-background'
-                        }`}
+                        className={cn("shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] uppercase font-bold tracking-wider transition-colors", mistake.is_resolved ? 'bg-green-500/10 text-green-600 hover:bg-green-500/20' : 'bg-muted text-muted-foreground hover:bg-foreground hover:text-background')}
                       >
-                        <CheckCircle className="h-3.5 w-3.5" />
-                        {mistake.is_resolved ? 'Resolved' : 'Mark Resolved'}
+                        <CheckCircle className="h-3 w-3" />
+                        {mistake.is_resolved ? 'Resolved' : 'Resolve'}
                       </button>
                     </div>
                   </div>

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Zap, ChevronRight, Check } from 'lucide-react'
+import { Zap, ChevronRight, Check, Bold, Italic, Type, Sigma } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import type { FormulaSheet } from '@/lib/supabase/types'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { cn } from '@/lib/utils'
 
 interface ChapterFormulaProps {
   formulaSheet: FormulaSheet | null
@@ -9,7 +11,7 @@ interface ChapterFormulaProps {
 }
 
 export function ChapterFormula({ formulaSheet, onSave }: ChapterFormulaProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useLocalStorage('os12-formula-expanded', true)
   const [content, setContent] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
@@ -28,7 +30,7 @@ export function ChapterFormula({ formulaSheet, onSave }: ChapterFormulaProps) {
       handleSave()
     }, 2000)
     return () => clearTimeout(timer)
-  }, [content, isDirty]) // handleSave omitted to prevent loop
+  }, [content, isDirty])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -45,14 +47,17 @@ export function ChapterFormula({ formulaSheet, onSave }: ChapterFormulaProps) {
 
   return (
     <Card className="overflow-hidden border-border/50 bg-card/50 transition-all duration-300 h-full flex flex-col">
-      <div className="w-full flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 transition-colors group cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-        <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-purple-500" />
-          <span className="font-bold text-sm uppercase tracking-wider text-foreground">Formula Sheet</span>
+      <button 
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-muted/20 hover:bg-muted/40 transition-colors group"
+      >
+        <div className="flex items-center gap-2.5">
+          <Zap className="h-4 w-4 text-purple-500" />
+          <span className="font-semibold text-sm text-foreground">Formula Sheet</span>
         </div>
         <div className="flex items-center gap-3">
           {lastSaved && !isDirty && (
-            <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium bg-background px-2 py-0.5 rounded-full border border-border/50">
+            <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-semibold bg-background px-2 py-0.5 rounded border border-border/50">
               <Check className="h-3 w-3 text-green-500" /> Saved
             </span>
           )}
@@ -66,13 +71,19 @@ export function ChapterFormula({ formulaSheet, onSave }: ChapterFormulaProps) {
               Unsaved
             </span>
           )}
-          <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+          <ChevronRight className={cn("h-4 w-4 text-muted-foreground transition-transform duration-300", isExpanded && "rotate-90")} />
         </div>
-      </div>
+      </button>
       
-      <div className={`grid transition-all duration-300 flex-1 ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+      <div className={cn("grid transition-all duration-300 flex-1", isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
         <div className="overflow-hidden h-full flex flex-col">
           <CardContent className="p-0 border-t border-border/50 flex-1 flex flex-col min-h-[300px]">
+            <div className="flex items-center gap-1 p-2 bg-muted/10 border-b border-border/50">
+              <button className="p-1.5 hover:bg-muted rounded text-muted-foreground transition-colors" title="Bold (Markdown)"><Bold className="h-3.5 w-3.5" /></button>
+              <button className="p-1.5 hover:bg-muted rounded text-muted-foreground transition-colors" title="Italic (Markdown)"><Italic className="h-3.5 w-3.5" /></button>
+              <button className="p-1.5 hover:bg-muted rounded text-muted-foreground transition-colors" title="Equation (LaTeX)"><Sigma className="h-3.5 w-3.5" /></button>
+              <button className="p-1.5 hover:bg-muted rounded text-muted-foreground transition-colors" title="Heading (Markdown)"><Type className="h-3.5 w-3.5" /></button>
+            </div>
             <textarea
               value={content}
               onChange={e => {
@@ -80,12 +91,12 @@ export function ChapterFormula({ formulaSheet, onSave }: ChapterFormulaProps) {
                 setIsDirty(true)
               }}
               placeholder="Store your critical formulas and short-tricks here..."
-              className="w-full flex-1 min-h-[300px] text-sm bg-transparent p-6 focus:ring-0 focus:outline-none resize-none placeholder:text-muted-foreground/50 font-mono leading-relaxed"
+              className="w-full flex-1 min-h-[250px] text-[13px] bg-transparent p-4 focus:ring-0 focus:outline-none resize-y placeholder:text-muted-foreground/50 font-mono leading-relaxed"
               spellCheck="false"
             />
-            <div className="border-t border-border/50 px-6 py-2 flex items-center justify-between bg-muted/10 text-xs text-muted-foreground">
+            <div className="border-t border-border/50 px-4 py-2 flex items-center justify-between bg-muted/10 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
               <span>{wordCount} words</span>
-              <span>LaTeX / Markdown Supported</span>
+              <span>LaTeX / Markdown</span>
             </div>
           </CardContent>
         </div>
