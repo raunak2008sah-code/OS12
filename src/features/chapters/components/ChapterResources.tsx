@@ -65,7 +65,7 @@ export function ChapterResources({ resources, progress, onToggle }: ChapterResou
                 } else if (status === 'in_progress') {
                   badgeStyle = 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400 shadow-sm'
                   Icon = PenTool
-                  statusText = '65%' // Mock progress as per instruction example
+                  statusText = 'In Progress'
                 }
 
                 const isCardExpanded = expandedResourceId === res.id
@@ -80,20 +80,19 @@ export function ChapterResources({ resources, progress, onToggle }: ChapterResou
                     )}
                   >
                     <div 
-                      className="flex items-center justify-between p-3 min-h-[44px]"
+                      className="flex flex-col gap-1 p-3"
                       onClick={() => setExpandedResourceId(isCardExpanded ? null : res.id)}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                        <Icon className="h-4 w-4 shrink-0" />
-                        <span className="font-semibold text-sm truncate group-hover:text-foreground transition-colors">{res.name}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs font-bold tracking-tight opacity-80">
-                          {statusText}
-                        </span>
+                      <div className="flex items-start gap-2.5">
+                        <Icon className="h-4 w-4 shrink-0 mt-0.5" />
+                        <div className="flex flex-col gap-1 flex-1">
+                          <span className="font-medium text-sm break-words group-hover:text-foreground transition-colors">{res.name}</span>
+                          <span className="text-xs text-muted-foreground font-medium opacity-80">
+                            {statusText}
+                          </span>
+                        </div>
                         <div 
-                          className="p-1 hover:bg-foreground/10 rounded-md transition-colors"
+                          className="p-1 hover:bg-foreground/10 rounded-md transition-colors shrink-0 self-start"
                           onClick={(e) => {
                             e.stopPropagation()
                             onToggle(res.id, nextStatus)
