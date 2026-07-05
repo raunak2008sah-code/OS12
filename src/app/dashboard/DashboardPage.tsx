@@ -1,13 +1,9 @@
-
-import { Calendar, Sparkles } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { YearDashboardCard } from '@/features/dashboard/components/YearDashboardCard'
 import { BacklogBanner } from '@/features/dashboard/components/BacklogBanner'
 import { TodaysFocus } from '@/features/dashboard/components/TodaysFocus'
-import { FriendSnapshot } from '@/features/dashboard/components/FriendSnapshot'
-
-import { CalendarWidget } from '@/features/dashboard/components/CalendarWidget'
-import { CountdownWidget } from '@/features/dashboard/components/CountdownWidget'
+import { Upcoming } from '@/features/dashboard/components/Upcoming'
+import { HealthIndicator } from '@/features/dashboard/components/HealthIndicator'
 import { isSundayIST } from '@/lib/time'
 import { useTime } from '@/hooks/useTime'
 
@@ -45,59 +41,27 @@ function SundayRitualPrompt() {
 
 export default function DashboardPage() {
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Sparkles className="h-7 w-7 text-primary" />
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            Your operating system at a glance — ten seconds to know exactly where you stand.
-          </p>
-        </div>
+    <div className="flex-1 w-full max-w-4xl mx-auto space-y-12 p-4 md:p-8 pt-12 md:pt-16 pb-24">
+      {/* Top Meta Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-xl font-medium tracking-tight text-foreground/80">Dashboard</h1>
+        <HealthIndicator />
       </div>
 
-      {/* Backlog Banner — shows above everything when active (Section 15.1) */}
       <BacklogBanner />
-
-      {/* Sunday Ritual Prompt — only on Sundays (Section 13.3) */}
       <SundayRitualPrompt />
 
-      <div className="grid gap-6 md:grid-cols-12 items-start">
-        <div className="md:col-span-8 space-y-6">
-          <YearDashboardCard />
-          
-          <div className="grid gap-6 md:grid-cols-2">
-            <FriendSnapshot />
-          </div>
+      <div className="grid gap-16 md:grid-cols-12 items-start pt-4">
+        {/* Left Column: What should I study? */}
+        <div className="md:col-span-8">
+          <TodaysFocus />
         </div>
         
-        <div className="md:col-span-4 space-y-6 sticky top-24">
-          <CalendarWidget />
-          <CountdownWidget />
-          {/* Upcoming Revision Placeholder */}
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Upcoming Revision</p>
-                <p className="font-medium mt-1">Physics: Mechanics</p>
-              </div>
-              <div className="text-xs bg-orange-500/10 text-orange-500 font-bold px-2 py-1 rounded-md">Today</div>
-            </CardContent>
-          </Card>
-          {/* Next Milestone Placeholder */}
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Next Milestone</p>
-                <p className="font-medium mt-1">Complete Term 1 Syllabus</p>
-              </div>
-              <div className="text-xs bg-primary/10 text-primary font-bold px-2 py-1 rounded-md">Aug 30</div>
-            </CardContent>
-          </Card>
-          <TodaysFocus />
+        {/* Right Column: What is due next? */}
+        <div className="md:col-span-4">
+          <Upcoming />
         </div>
       </div>
     </div>
   )
-}
+}

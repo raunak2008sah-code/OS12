@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, ArrowRight, CheckCircle2, Circle } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ArrowRight, CheckCircle2, Circle } from 'lucide-react'
 import { useChapters, useAllChapterProgress, useSubjects } from '@/lib/supabase/queries'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -86,62 +85,42 @@ export function TodaysFocus() {
   }, [chapters, progress, subjects])
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-primary" />
-          Today&apos;s Focus
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {focusChapter ? (
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {focusChapter.subject?.name ?? 'Unknown Subject'}
-              </p>
-              <Link
-                to={`/chapters/${focusChapter.chapter.id}`}
-                className="text-lg font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5 mt-1"
-              >
-                {focusChapter.chapter.name}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Workflow Progress</p>
-              <div className="space-y-1.5">
-                {WORKFLOW_STEPS.slice(0, focusChapter.chapter.subject_id && subjects.find(s => s.id === focusChapter.chapter.subject_id)?.name !== 'Physics' ? -2 : undefined).map((step) => {
-                  const currentIdx = WORKFLOW_STEPS.indexOf(focusChapter.status as typeof WORKFLOW_STEPS[number])
-                  const stepIdx = WORKFLOW_STEPS.indexOf(step)
-                  const isDone = stepIdx <= currentIdx && currentIdx >= 0
-                  const isCurrent = stepIdx === currentIdx + 1
-
-                  return (
-                    <div key={step} className={`flex items-center gap-2 text-xs ${isCurrent ? 'text-primary font-semibold' : isDone ? 'text-muted-foreground line-through' : 'text-muted-foreground/60'}`}>
-                      {isDone ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                      ) : (
-                        <Circle className={`h-3.5 w-3.5 shrink-0 ${isCurrent ? 'text-primary' : ''}`} />
-                      )}
-                      {step}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-6 text-center">
-            <CheckCircle2 className="h-10 w-10 text-green-500 mb-3" />
-            <p className="font-medium text-foreground">All caught up!</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              No chapters are currently in progress.
+    <div className="py-8">
+      {focusChapter ? (
+        <div className="space-y-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+              {focusChapter.subject?.name ?? 'Unknown Subject'}
             </p>
+            <Link
+              to={`/chapters/${focusChapter.chapter.id}`}
+              className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground hover:text-primary transition-colors inline-block"
+            >
+              {focusChapter.chapter.name}
+            </Link>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary w-fit">
+              <Circle className="h-4 w-4 fill-primary" />
+              <span className="text-sm font-semibold">{focusChapter.status}</span>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground hidden sm:block" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 text-muted-foreground w-fit">
+              <Circle className="h-4 w-4" />
+              <span className="text-sm font-medium">{focusChapter.nextStep}</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="py-12">
+          <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
+          <h2 className="text-3xl font-bold tracking-tight text-foreground mb-2">All caught up.</h2>
+          <p className="text-muted-foreground text-lg">
+            No chapters are currently in progress. Enjoy the calm.
+          </p>
+        </div>
+      )}
+    </div>
   )
 }
