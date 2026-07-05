@@ -4,6 +4,7 @@ import type {
   Subject, RoadmapPhase, RoadmapMonth, Chapter, Note, Comment, Profile, 
   RoadmapMonthWorkload, RoadmapMonthResource, Mistake, ChapterProgress, 
   MonthlyReview, Backlog, ResourceProgress, WeeklyReview, FormulaSheet,
+  RoadmapWeek, Milestone
 } from './types'
 
 export const queryKeys = {
@@ -12,6 +13,7 @@ export const queryKeys = {
   roadmapPhases: ['roadmapPhases'] as const,
   roadmapMonths: ['roadmapMonths'] as const,
   roadmapMilestones: ['roadmapMilestones'] as const,
+  roadmapWeeks: (monthId: string) => ['roadmapWeeks', monthId] as const,
   roadmapMonthWorkload: (monthId: string) => ['roadmapMonthWorkload', monthId] as const,
   roadmapMonthResources: (monthId: string) => ['roadmapMonthResources', monthId] as const,
   chapters: (subjectId?: string) => ['chapters', subjectId] as const,
@@ -98,6 +100,30 @@ export function useRoadmapMonthResources(monthId?: string) {
       return data as RoadmapMonthResource[]
     },
     enabled: !!monthId,
+  })
+}
+
+export function useRoadmapWeeks(monthId?: string) {
+  return useQuery({
+    queryKey: monthId ? queryKeys.roadmapWeeks(monthId) : ['roadmapWeeks', 'skip'],
+    queryFn: async () => {
+      if (!monthId) return []
+      const { data, error } = await supabase.from('roadmap_weeks').select('*').eq('month_id', monthId).order('week_number')
+      if (error) throw error
+      return data as RoadmapWeek[]
+    },
+    enabled: !!monthId,
+  })
+}
+
+export function useMilestones() {
+  return useQuery({
+    queryKey: queryKeys.roadmapMilestones,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('milestones').select('*').order('created_at')
+      if (error) throw error
+      return data as Milestone[]
+    },
   })
 }
 

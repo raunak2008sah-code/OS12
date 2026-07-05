@@ -1,54 +1,74 @@
-import { Layers } from 'lucide-react'
+import { LayoutGrid } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { RoadmapMonthResource } from '@/lib/supabase/types'
 
 interface ResourceMatrixProps {
   resources: RoadmapMonthResource[]
 }
 
-const ALL_RESOURCES = [
-  'Science & Fun',
-  'NCERT',
-  'WINR',
-  'Board PYQs',
-  'JEE PYQs',
-  'HC Verma',
-  'Sample Papers',
-  'Revision',
-  'Mock Tests'
-]
-
 export function ResourceMatrix({ resources }: ResourceMatrixProps) {
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'Active': return 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20'
-      case 'Heavy Focus': return 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20'
-      case 'Revision': return 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20'
-      case 'Completed': return 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20'
-      case 'Inactive':
-      default: return 'bg-muted/50 text-muted-foreground border-transparent opacity-60'
-    }
-  }
+  if (!resources || resources.length === 0) return null
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
-      <div className="flex items-center gap-2 border-b border-border pb-4 mb-4">
-        <Layers className="h-5 w-5 text-primary" />
-        <h2 className="font-semibold tracking-tight text-foreground">Resource Activation</h2>
-      </div>
+    <Card>
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <LayoutGrid className="h-5 w-5 text-primary" />
+          Resource Activation
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-3">
+          {resources.map((resource) => {
+            let variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" = "outline"
+            let dotColor = "bg-muted-foreground"
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        {ALL_RESOURCES.map(resName => {
-          const dbResource = resources.find(r => r.resource_name === resName)
-          const status = dbResource?.status || 'Inactive'
-          
-          return (
-            <div key={resName} className={`flex flex-col p-3 rounded-lg border ${getStatusColor(status)}`}>
-              <span className="text-xs font-semibold uppercase tracking-wider opacity-80 mb-1">{status}</span>
-              <span className="font-medium">{resName}</span>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+            switch (resource.status) {
+              case 'Active':
+                variant = 'default'
+                dotColor = 'bg-blue-500'
+                break
+              case 'Heavy Focus':
+                variant = 'destructive'
+                dotColor = 'bg-red-500'
+                break
+              case 'Revision':
+                variant = 'warning'
+                dotColor = 'bg-orange-500'
+                break
+              case 'Completed':
+                variant = 'success'
+                dotColor = 'bg-green-500'
+                break
+              case 'Inactive':
+              default:
+                variant = 'secondary'
+                dotColor = 'bg-muted-foreground/30'
+                break
+            }
+
+            return (
+              <div key={resource.id} className="flex items-center justify-between text-sm border-b border-border/50 pb-2 last:border-0 last:pb-0">
+                <span className={`font-medium ${resource.status === 'Inactive' ? 'text-muted-foreground' : 'text-foreground'}`}>
+                  {resource.resource_name}
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className={`h-2 w-2 rounded-full ${dotColor}`} />
+                  <span className={`inline-flex items-center justify-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-24 text-center ${
+                    variant === 'default' ? 'border-transparent bg-primary text-primary-foreground' :
+                    variant === 'destructive' ? 'border-transparent bg-destructive text-destructive-foreground' :
+                    variant === 'warning' ? 'border-transparent bg-orange-500 text-white' :
+                    variant === 'success' ? 'border-transparent bg-green-500 text-white' :
+                    'text-foreground'
+                  }`}>
+                    {resource.status}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
