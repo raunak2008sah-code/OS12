@@ -72,7 +72,7 @@ export interface RoadmapMonthWorkload {
 export interface RoadmapMonthResource {
   id: string
   month_id: string
-  resource_name: string
+  name: string
   status: 'Inactive' | 'Active' | 'Heavy Focus' | 'Revision' | 'Completed'
   order_index: number
   created_at: string

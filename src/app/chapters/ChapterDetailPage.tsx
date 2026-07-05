@@ -53,6 +53,7 @@ export default function ChapterDetailPage() {
   const { chapterId } = useParams<{ chapterId: string }>()
   const { user } = useAuth()
   const userId = user?.id
+  const queryClient = useQueryClient()
 
   // Data fetching
   const { data: chapter, isLoading: loadingChapter } = useChapter(chapterId || '')
@@ -139,7 +140,6 @@ export default function ChapterDetailPage() {
     await addComment({ userId, chapterId, content })
   }
 
-  const queryClient = useQueryClient()
 
   const handleDeleteComment = async (commentId: string) => {
     if (!chapterId) return

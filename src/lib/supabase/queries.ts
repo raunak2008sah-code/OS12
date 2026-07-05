@@ -99,7 +99,10 @@ export function useRoadmapMonthResources(monthId?: string) {
       if (!monthId) return []
       const { data, error } = await supabase.from('roadmap_month_resources').select('*').eq('month_id', monthId).order('order_index')
       if (error) throw error
-      return data as RoadmapMonthResource[]
+      return (data || []).map((row: any) => ({
+        ...row,
+        name: row.resource_name
+      })) as RoadmapMonthResource[]
     },
     enabled: !!monthId,
   })

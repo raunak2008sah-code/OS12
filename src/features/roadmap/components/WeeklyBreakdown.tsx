@@ -79,7 +79,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
             {resources.length > 0 ? resources.map(resource => (
               <div key={resource.id} className="flex items-center justify-between text-xs border-b border-border/50 pb-1.5 last:border-0 last:pb-0 gap-2">
                 <span className={cn("font-medium truncate", resource.status === 'Inactive' ? 'text-muted-foreground' : 'text-foreground')}>
-                  {resource.resource_name}
+                  {resource.name}
                 </span>
                 <span className={cn("inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-semibold w-20 shrink-0 text-center", 
                   resource.status === 'Active' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
