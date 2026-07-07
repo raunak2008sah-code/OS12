@@ -216,37 +216,23 @@ export function getCurrentChapter(
  */
 export function getLatestCompletedWorkflow(
   progress: ChapterProgress[],
-  chapters: Chapter[],
-  subjects: Subject[]
+  chapters: Chapter[]
 ): { chapterName: string; status: string; completedAt: string } | null {
+  // Filter to rows that represent real activity (not the default 'Lecture Pending')
   const active = progress.filter(p => p.status && p.completed_at && p.status !== 'Lecture Pending')
   if (active.length === 0) return null
   
+  // Sort by most recent completed_at
   const sorted = active.sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime())
   const latest = sorted[0]
   
   const chapter = chapters.find(c => c.id === latest.chapter_id)
-  const subject = subjects.find(s => s.id === chapter?.subject_id)
   
-  // Resolve subject-aware workflow
-  const config = getSubjectConfig(subject?.slug)
-  const stages = getWorkflowForChapter(config, chapter?.name || '')
-  
-  const idx = stages.indexOf(latest.status)
-  
-  // The 'status' in DB represents the ACTIVE stage. 
-  // Therefore, the last COMPLETED stage is the one before it (idx - 1).
-  let completedStage = latest.status
-  if (latest.status !== 'Done' && idx > 0) {
-    completedStage = stages[idx - 1]
-  } else if (idx === 0) {
-    // If the active stage is the very first stage, no stage has been completed yet.
-    return null
-  }
-  
+  // The status field (e.g. "NCERT Complete", "WINR Complete", "Done") already
+  // represents the checkpoint that was reached. Display it directly.
   return {
     chapterName: chapter?.name || 'Unknown Chapter',
-    status: completedStage,
+    status: latest.status,
     completedAt: latest.completed_at!
   }
 }
