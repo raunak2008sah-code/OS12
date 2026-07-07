@@ -239,6 +239,13 @@ export function useToggleChapterProgress() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.chapterProgress(variables.userId) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.chapterProgress(variables.userId, variables.chapterId) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.allChapterProgress(variables.userId) })
+      // Invalidate friend caches
+      void queryClient.invalidateQueries({ queryKey: ['friendProfile'] })
+      void queryClient.invalidateQueries({ queryKey: ['allChapterProgress'] })
+      void queryClient.invalidateQueries({ queryKey: ['allRevisions'] })
+      void queryClient.invalidateQueries({ queryKey: ['allNotes'] })
+      void queryClient.invalidateQueries({ queryKey: ['allResourceProgress'] })
+      void queryClient.invalidateQueries({ queryKey: ['dailyCheckins'] })
     },
   })
 }
@@ -341,6 +348,9 @@ export function useFriendProfile(currentUserId?: string) {
       return data as Profile | null
     },
     enabled: !!currentUserId,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
   })
 }
 
@@ -358,6 +368,9 @@ export function useDailyCheckins(userId?: string) {
       return data as DailyCheckin[]
     },
     enabled: !!userId,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
   })
 }
 
@@ -415,6 +428,9 @@ export function useCreateDailyCheckin() {
       const year = parseInt(variables.date.split('-')[0], 10)
       const month = parseInt(variables.date.split('-')[1], 10)
       void queryClient.invalidateQueries({ queryKey: queryKeys.monthlyCheckins(variables.userId, year, month) })
+      // Invalidate friend caches that depend on check‑ins
+      void queryClient.invalidateQueries({ queryKey: ['friendProfile'] })
+      void queryClient.invalidateQueries({ queryKey: ['dailyCheckins'] })
     },
   })
 }
@@ -432,6 +448,9 @@ export function useAllResourceProgress(userId?: string) {
       return data as (ResourceProgress & { resources: { name: string } | null })[]
     },
     enabled: !!userId,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
   })
 }
 
@@ -469,6 +488,9 @@ export function useAllNotes(userId?: string) {
       return data as Note[]
     },
     enabled: !!userId,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
   })
 }
 
@@ -485,6 +507,9 @@ export function useAllRevisions(userId?: string) {
       return data as Revision[]
     },
     enabled: !!userId,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
   })
 }
 
@@ -533,8 +558,14 @@ export function useToggleRevision() {
       }
     },
     onSettled: (_data, _error, variables) => {
-      void queryClient.invalidateQueries({ queryKey: ['revisions', variables.userId, variables.chapterId] })
+      void queryClient.invalidateQueries({ queryKey: ['revisions', variables.userId] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.allRevisions(variables.userId) })
+      // Invalidate friend caches
+      void queryClient.invalidateQueries({ queryKey: ['friendProfile'] })
+      void queryClient.invalidateQueries({ queryKey: ['allRevisions'] })
+      void queryClient.invalidateQueries({ queryKey: ['allNotes'] })
+      void queryClient.invalidateQueries({ queryKey: ['allResourceProgress'] })
+      void queryClient.invalidateQueries({ queryKey: ['dailyCheckins'] })
     },
   })
 }
@@ -586,6 +617,12 @@ export function useToggleResourceProgress() {
     onSettled: (_data, _error, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.resourceProgress(variables.userId, variables.chapterId) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.allResourceProgress(variables.userId) })
+      // Invalidate friend caches
+      void queryClient.invalidateQueries({ queryKey: ['friendProfile'] })
+      void queryClient.invalidateQueries({ queryKey: ['allRevisions'] })
+      void queryClient.invalidateQueries({ queryKey: ['allNotes'] })
+      void queryClient.invalidateQueries({ queryKey: ['allResourceProgress'] })
+      void queryClient.invalidateQueries({ queryKey: ['dailyCheckins'] })
     },
   })
 }
