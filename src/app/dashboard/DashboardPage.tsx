@@ -85,12 +85,12 @@ export default function DashboardPage() {
         <div className="md:col-span-8 space-y-4">
           <TodaysFocus />
           <YearDashboardCard />
+          <FriendActivityWidget />
         </div>
         
         <div className="md:col-span-4 space-y-4 lg:sticky lg:top-24">
           <CalendarWidget />
           <CountdownWidget />
-          <FriendActivityWidget />
           
           <SidebarWidgets />
         </div>
