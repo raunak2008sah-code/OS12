@@ -66,7 +66,7 @@ export function FriendActivityWidget() {
   const friendCurrentInfo = getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, resources, revisions, subjects)
   const currentChapterName = friendCurrentInfo?.chapter?.name || 'None'
   
-  const latestActivity = getLatestCompletedWorkflow(progress, chapters)
+  const latestActivity = getLatestCompletedWorkflow(progress, chapters, subjects)
   const completedTodayCount = getCompletedTodayCount(progress)
 
   // Latest note snippet
