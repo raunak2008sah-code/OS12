@@ -80,9 +80,9 @@ export default function ProgressHubPage() {
   }, [chapters, chapterProgress, mistakes, resourceProgress, revisions, notes, formulas, subjects])
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="mx-auto max-w-[1400px] space-y-4">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
+      <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-3 bg-background/80 backdrop-blur-xl border-b border-border/30">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -105,9 +105,9 @@ export default function ProgressHubPage() {
         <MetricCard title="Mistakes" value={`${stats.resolvedMistakes}/${stats.totalMistakes}`} sub="Resolved / Total" icon={Flame} color="text-purple-500" accent="bg-purple-500" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left Column: Subject Breakdown + Milestones */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Subject Progress Breakdown */}
           <Card>
             <CardHeader className="pb-3">
@@ -116,7 +116,7 @@ export default function ProgressHubPage() {
                 Subject Breakdown
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-3">
               {stats.subjectStats.map(s => (
                 <ProgressBar key={s.name} label={s.name} value={s.completed} total={s.total} />
               ))}
@@ -128,7 +128,7 @@ export default function ProgressHubPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold">Milestone Achievements</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-3">
               <ProgressBar label="Resources Completed" value={stats.completedResources} total={Math.max(stats.completedResources + 10, 50)} color="bg-blue-500" />
               <ProgressBar label="Revisions Done" value={stats.completedRevisions} total={Math.max(stats.completedRevisions + 10, 30)} color="bg-green-500" />
               <ProgressBar label="Notes Finalized" value={stats.totalNotes} total={stats.totalChapters} color="bg-yellow-500" />
@@ -176,7 +176,7 @@ export default function ProgressHubPage() {
         </div>
 
         {/* Right Column: Insights */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function ProgressHubPage() {
               <InsightRow label="Weekly Target" value={stats.weeklyTargetStatus} status={stats.weeklyTargetStatus === 'On Track' ? 'success' : 'warning'} />
               <InsightRow label="Weakest Subject" value={stats.mostDifficult} status="warning" />
               
-              <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/10">
+              <div className="mt-4 p-3 bg-primary/5 rounded-xl border border-primary/10">
                 <h4 className="font-bold text-primary text-sm mb-1.5">Next Best Action</h4>
                 <p className="text-sm text-foreground leading-relaxed">
                   Start the next pending lecture in your weakest subject.
@@ -236,7 +236,7 @@ function MetricCard({ title, value, sub, icon: Icon, color, accent }: any) {
 function ProgressBar({ label, value, total, color = 'bg-primary' }: any) {
   const percent = total > 0 ? Math.round((value / total) * 100) : 0
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div className="flex justify-between text-sm">
         <span className="font-medium text-foreground">{label}</span>
         <span className="text-muted-foreground font-mono text-xs">{value}/{total} <span className="text-foreground font-bold">({percent}%)</span></span>
@@ -251,7 +251,7 @@ function ProgressBar({ label, value, total, color = 'bg-primary' }: any) {
 function InsightRow({ label, value, status }: any) {
   const color = status === 'danger' ? 'text-red-500 bg-red-500/10' : status === 'warning' ? 'text-yellow-500 bg-yellow-500/10' : 'text-green-500 bg-green-500/10'
   return (
-    <div className="flex justify-between items-center py-2.5 border-b border-border/30 last:border-0">
+    <div className="flex justify-between items-center py-2 border-b border-border/30 last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${color}`}>{value}</span>
     </div>
@@ -260,7 +260,7 @@ function InsightRow({ label, value, status }: any) {
 
 function SummaryRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-border/30 last:border-0">
+    <div className="flex justify-between items-center py-1.5 border-b border-border/30 last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm font-bold text-foreground">{value}</span>
     </div>

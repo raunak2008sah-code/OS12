@@ -115,10 +115,10 @@ export function FriendActivityWidget() {
       </div>
 
       {/* Content - Two Column Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 flex-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 flex-1">
         
         {/* Left Column: Progress & Current Status */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground mb-1">Overall Progress</p>
@@ -147,7 +147,7 @@ export function FriendActivityWidget() {
         </div>
 
         {/* Right Column: Latest Updates */}
-        <div className="space-y-3 flex flex-col justify-center border-l border-border/50 pl-6">
+        <div className="space-y-2 flex flex-col justify-center border-l border-border/50 pl-4">
           <div className="group">
             <div className="flex items-center gap-1.5 mb-0.5">
               <PenTool className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />

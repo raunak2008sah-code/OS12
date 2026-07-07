@@ -16,7 +16,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
   const activeWeek = weeks && weeks.length > 0 ? (weeks.find(w => w.id === activeWeekId) || weeks[0]) : null
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       
       {/* Week Tabs */}
       <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-2">
@@ -39,7 +39,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
         })}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
         
         {/* Column 1: Weekly Tasks */}
         <Card className="border-border/50 bg-card/50 flex flex-col">
@@ -47,7 +47,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
             <CheckSquare className="w-3.5 h-3.5 text-primary" />
             <span className="font-semibold text-xs uppercase tracking-wide">Weekly Tasks</span>
           </div>
-          <CardContent className="p-4 space-y-4 flex-1">
+          <CardContent className="p-4 space-y-3 flex-1">
             {activeWeek ? (
               <>
                 <div className="bg-background rounded-lg p-2.5 border border-border/50">
@@ -104,7 +104,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
             <span className="font-semibold text-xs uppercase tracking-wide">Deliverables</span>
           </div>
           <CardContent className="p-4 flex-1">
-            <div className="relative border-l-2 border-primary/20 ml-2 pl-4 space-y-4">
+            <div className="relative border-l-2 border-primary/20 ml-2 pl-4 space-y-3">
               {milestones.length > 0 ? milestones.map(milestone => (
                 <div key={milestone.id} className="relative">
                   <div className="absolute -left-[23px] top-1 h-2.5 w-2.5 rounded-full bg-primary ring-4 ring-background" />

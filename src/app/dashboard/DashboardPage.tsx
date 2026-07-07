@@ -64,7 +64,7 @@ function SundayRitualPrompt() {
 
 export default function DashboardPage() {
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-6 lg:p-8 pt-4 max-w-[1600px] mx-auto">
+    <div className="flex-1 space-y-4 p-3 md:p-4 lg:p-5 pt-3 max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <Sparkles className="h-6 w-6 text-primary" />
@@ -78,15 +78,15 @@ export default function DashboardPage() {
 
       <SundayRitualPrompt />
 
-      <div className="grid gap-6 md:grid-cols-12 items-start mt-2">
-        <div className="md:col-span-8 space-y-4">
+      <div className="grid gap-4 md:grid-cols-12 items-start mt-2">
+        <div className="md:col-span-8 space-y-3">
           <TodaysFocus />
           <YearDashboardCard />
           <DailyCheckinWidget />
           <FriendActivityWidget />
         </div>
         
-        <div className="md:col-span-4 space-y-4 lg:sticky lg:top-24">
+        <div className="md:col-span-4 space-y-3 lg:sticky lg:top-24">
           <CalendarWidget />
           <CountdownWidget />
         </div>

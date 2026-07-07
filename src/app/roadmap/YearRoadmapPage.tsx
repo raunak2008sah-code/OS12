@@ -109,7 +109,7 @@ export default function YearRoadmapPage() {
         </header>
 
         {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar bg-muted/10 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 md:p-4 lg:p-5 custom-scrollbar bg-muted/10 space-y-4">
           
           {/* Section 1: Horizontal Month Timeline */}
           <section className="bg-card/50 border border-border/50 rounded-xl p-2 md:p-3">

@@ -14,7 +14,7 @@ export function RoadmapPhaseSnapshot({ currentPhase, phases }: RoadmapPhaseSnaps
   const nextPhase = currentIndex < phases.length - 1 ? phases[currentIndex + 1] : null
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
+    <div className="flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="flex items-center gap-2 border-b border-border pb-4">
         <Compass className="h-5 w-5 text-primary" />
         <h2 className="font-semibold tracking-tight text-foreground">Phase Objectives</h2>

@@ -71,7 +71,7 @@ export default function SettingsPage() {
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8">
+    <div className="mx-auto max-w-[1400px] space-y-4">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
         <div className="flex items-center justify-between">
@@ -85,7 +85,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 pb-12">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 pb-6">
         {/* Navigation Sidebar (Desktop) */}
         <div className="hidden md:block md:col-span-3 space-y-1 sticky top-24 h-fit">
           <SettingsNavButton icon={User} label="Profile" active />
@@ -96,7 +96,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Settings Content */}
-        <div className="md:col-span-9 space-y-10">
+        <div className="md:col-span-9 space-y-6">
           
           {/* Profile Section */}
           <section className="space-y-4">
@@ -105,7 +105,7 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground">Manage your personal profile and data.</p>
             </div>
             <Card>
-              <CardContent className="p-6 sm:p-8">
+              <CardContent className="p-4 sm:p-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div className="flex items-center gap-5">
                     <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl font-black text-primary shadow-inner border border-primary/20">
@@ -131,7 +131,7 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground">Customize how OS12 looks and feels.</p>
             </div>
             <Card>
-              <CardContent className="p-6 sm:p-8 space-y-8">
+              <CardContent className="p-4 sm:p-5 space-y-4">
                 <div className="space-y-4">
                   <label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Theme Preference</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -160,7 +160,7 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground">Configure timezone and calendar preferences.</p>
             </div>
             <Card>
-              <CardContent className="p-6 sm:p-8 space-y-6">
+              <CardContent className="p-4 sm:p-5 space-y-4">
                 <div className="space-y-3">
                   <label className="text-sm font-semibold text-foreground">Timezone</label>
                   <select disabled className="w-full sm:max-w-md rounded-xl border border-border/50 bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all cursor-not-allowed opacity-70">
@@ -221,7 +221,7 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground">Destructive actions and data exports.</p>
             </div>
             <Card className="border-red-500/20 bg-red-500/5">
-              <CardContent className="p-6 sm:p-8 space-y-6">
+              <CardContent className="p-4 sm:p-5 space-y-4">
                 <Button onClick={handleExport} variant="outline" className="w-full border-red-500/20 hover:bg-red-500/10 text-foreground">
                   <Download className="h-4 w-4 mr-2" /> Export JSON Backup
                 </Button>

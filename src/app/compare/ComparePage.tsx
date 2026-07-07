@@ -78,7 +78,7 @@ export default function ComparePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="mx-auto max-w-[1400px] space-y-4">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
         <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ export default function ComparePage() {
       </header>
 
       {/* Head-to-Head Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <UserCard name="You" stats={stats.me} isMe />
         <UserCard name={friend.display_name || 'Friend'} stats={stats.friend} />
       </div>
@@ -143,7 +143,7 @@ function UserCard({ name, stats, isMe }: any) {
     <Card className={`relative overflow-hidden group hover:scale-[1.01] transition-transform duration-300 ${isMe ? 'border-primary/40 shadow-lg shadow-primary/5' : ''}`}>
       {isMe && <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />}
       {isMe && <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">You</div>}
-      <CardContent className="p-6 space-y-5">
+      <CardContent className="p-4 space-y-3">
         <div className="text-center space-y-2">
           <div className={`inline-flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-black ${isMe ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
             {name.charAt(0).toUpperCase()}

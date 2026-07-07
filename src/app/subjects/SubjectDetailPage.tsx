@@ -99,7 +99,7 @@ export default function SubjectDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-[1400px] space-y-6">
+      <div className="mx-auto max-w-[1400px] space-y-4">
         {/* Skeleton header */}
         <div className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
           <div className="h-4 w-32 bg-muted/50 rounded-lg animate-pulse" />
@@ -117,7 +117,7 @@ export default function SubjectDetailPage() {
   if (!subject) return <div className="text-center py-12 text-muted-foreground">Subject not found</div>
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 pb-12">
+    <div className="mx-auto max-w-[1400px] space-y-4 pb-8">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
         {/* Breadcrumbs */}
@@ -166,7 +166,7 @@ export default function SubjectDetailPage() {
       </div>
 
       {/* Chapters Grid */}
-      <div className="space-y-8 mt-4">
+      <div className="space-y-4 mt-4">
         {filteredChapters.length === 0 ? (
           <div className="flex h-48 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/50 bg-muted/10 text-muted-foreground gap-3">
             <p className="font-medium">No chapters match your filters.</p>
@@ -210,7 +210,7 @@ function ChapterGroups({ chapters, progress, ...props }: any) {
   })
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {active.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-lg font-bold">Active Chapters</h2>

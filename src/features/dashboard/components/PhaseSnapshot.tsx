@@ -25,7 +25,7 @@ export function PhaseSnapshot({ phases, months }: PhaseSnapshotProps) {
 
   if (!currentPhase || !currentMonth) {
     return (
-      <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm">
         <h3 className="font-semibold text-foreground">Timeline</h3>
         <p className="mt-2 text-sm text-muted-foreground">Outside of schedule bounds.</p>
       </div>
@@ -38,7 +38,7 @@ export function PhaseSnapshot({ phases, months }: PhaseSnapshotProps) {
   const progressPercent = Math.round((completedMonths / totalMonths) * 100)
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center gap-2 border-b border-border pb-4">
         <Compass className="h-5 w-5 text-primary" />
         <h2 className="font-semibold tracking-tight text-foreground">Current Phase</h2>

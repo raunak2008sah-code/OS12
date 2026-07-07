@@ -19,9 +19,9 @@ export default function SubjectListPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-[1400px] space-y-6">
+      <div className="mx-auto max-w-[1400px] space-y-4">
         <div className="h-10 w-48 bg-muted/50 rounded-xl animate-pulse" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1,2,3].map(i => (
             <div key={i} className="h-56 bg-card/50 border border-border/30 rounded-2xl animate-pulse" />
           ))}
@@ -31,7 +31,7 @@ export default function SubjectListPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="mx-auto max-w-[1400px] space-y-4">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -61,7 +61,7 @@ export default function SubjectListPage() {
           <p className="text-sm text-muted-foreground/60 mt-1">Add subjects from the database to get started.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {subjects.map(subject => {
             const subjectChapters = allChapters.filter(c => c.subject_id === subject.id)
             return (

@@ -144,7 +144,7 @@ export default function ManualPage() {
   const [activeSection, setActiveSection] = useState('belief')
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 pb-12">
+    <div className="mx-auto max-w-[1400px] space-y-4 pb-8">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
         <div className="flex items-center gap-3">
@@ -156,7 +156,7 @@ export default function ManualPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
         {/* Section Nav (Desktop) */}
         <div className="hidden md:block md:col-span-3 space-y-1 sticky top-24 h-fit">
           {SECTIONS.map(s => {
@@ -182,7 +182,7 @@ export default function ManualPage() {
         </div>
 
         {/* Content */}
-        <div className="md:col-span-9 space-y-8">
+        <div className="md:col-span-9 space-y-4">
           {SECTIONS.map(s => {
             const Icon = s.icon
             return (
@@ -193,7 +193,7 @@ export default function ManualPage() {
                     {s.title}
                   </h2>
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="p-4">
                   {s.content}
                 </CardContent>
               </Card>
@@ -201,7 +201,7 @@ export default function ManualPage() {
           })}
 
           {/* Footer */}
-          <div className="text-center py-8">
+          <div className="text-center py-4">
             <Sparkles className="h-8 w-8 text-primary mx-auto mb-3 opacity-50" />
             <p className="text-sm text-muted-foreground font-medium">OS12 — Built for Raunak & Sahmo</p>
             <p className="text-xs text-muted-foreground/50 mt-1">Version 1.3 • Premium Edition</p>

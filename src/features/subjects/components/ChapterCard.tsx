@@ -80,7 +80,7 @@ export function ChapterCard({
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-5 pl-8 pr-4">
+      <CardContent className="space-y-4 pl-8 pr-4">
         {/* Status & Indicators */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4">
           <div className="space-y-1">
@@ -127,7 +127,7 @@ export function ChapterCard({
         </div>
 
         {/* Revisions */}
-        <div className="space-y-2 border-t border-border/50 pt-4">
+        <div className="space-y-1.5 border-t border-border/50 pt-3">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Spaced Repetition</span>
           </div>

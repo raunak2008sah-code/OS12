@@ -34,9 +34,9 @@ export function TodaysFocus() {
         <Target className="h-5 w-5 text-primary" />
         <h2 className="font-semibold text-foreground tracking-tight">Today&apos;s Focus</h2>
       </div>
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-5">
         {focusChapter ? (
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {focusChapter.subject?.name ?? 'Unknown Subject'}

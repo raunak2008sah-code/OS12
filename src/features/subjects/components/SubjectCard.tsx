@@ -52,7 +52,7 @@ export function SubjectCard({ subject, chapters, progress }: SubjectCardProps) {
         {/* Top gradient accent */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/60 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-3 space-y-2">
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export function SubjectCard({ subject, chapters, progress }: SubjectCardProps) {
           </div>
 
           {/* Progress */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex justify-between items-center text-xs">
               <span className="text-muted-foreground font-medium">Progress</span>
               <span className="font-bold text-foreground">{completionPercent}%</span>

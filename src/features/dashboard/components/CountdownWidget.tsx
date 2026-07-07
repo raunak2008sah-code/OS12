@@ -11,7 +11,7 @@ export function CountdownWidget() {
   const targets = defaultTargets
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm p-6 h-full">
+    <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm p-4 h-full">
       <div className="flex items-center gap-2 mb-6">
         <Timer className="h-5 w-5 text-primary" />
         <h2 className="font-semibold text-foreground tracking-tight">Countdowns</h2>

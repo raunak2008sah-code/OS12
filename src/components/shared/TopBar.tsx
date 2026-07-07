@@ -50,7 +50,7 @@ export default function TopBar() {
 
   return (
     <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-border/50 bg-background/80 px-4 md:px-6 backdrop-blur-xl shadow-[0_1px_12px_rgba(0,0,0,0.02)]">
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <span className="text-xl font-bold tracking-tight text-foreground md:hidden">OS12</span>
         
         <button onClick={handleSearchClick} className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/40 hover:bg-muted/80 border border-transparent hover:border-border rounded-lg transition-all w-64 shadow-sm group">
