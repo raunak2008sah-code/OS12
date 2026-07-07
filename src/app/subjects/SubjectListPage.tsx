@@ -2,7 +2,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { SubjectCard } from '@/features/subjects/components/SubjectCard'
 import { useSubjects, useChapters, useAllChapterProgress } from '@/lib/supabase/queries'
 import { BookOpen, BarChart3 } from 'lucide-react'
-import { subjectProgressDynamic } from '@/lib/progress'
+import { calculateOverallProgress } from '@/lib/progress'
 
 export default function SubjectListPage() {
   const { user } = useAuth()
@@ -14,7 +14,7 @@ export default function SubjectListPage() {
 
   // Stats
   const totalChapters = allChapters.length
-  const overallPercent = subjectProgressDynamic(allChapters, progress, subjects)
+  const overallPercent = calculateOverallProgress(allChapters, progress, subjects)
 
   if (isLoading) {
     return (

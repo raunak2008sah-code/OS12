@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ChevronRight, Book, Clock, Target } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { subjectProgressDynamic, isChapterDone } from '@/lib/progress'
+import { calculateSubjectProgress, isChapterDone } from '@/lib/progress'
 import { FilterBar } from '@/features/subjects/components/FilterBar'
 import { ChapterCard } from '@/features/subjects/components/ChapterCard'
 import { 
@@ -76,7 +76,7 @@ export default function SubjectDetailPage() {
       completionStats: {
         total: chapters.length,
         completed: completedCount,
-        percent: subject ? subjectProgressDynamic(chapters, progress, [subject]) : 0,
+        percent: subject ? calculateSubjectProgress(subject.id, chapters, progress, [subject]) : 0,
         estimatedHours: totalEstimated
       }
     }

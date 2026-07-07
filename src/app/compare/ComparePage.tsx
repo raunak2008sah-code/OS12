@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Users, Swords, Trophy, Activity, AlertTriangle, BookOpen, TrendingUp } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { subjectProgressDynamic, isChapterDone } from '@/lib/progress'
+import { calculateOverallProgress, calculateSubjectProgress, isChapterDone } from '@/lib/progress'
 import { 
   useChapters, 
   useAllChapterProgress, 
@@ -32,22 +32,21 @@ export default function ComparePage() {
 
   const stats = useMemo(() => {
     const myCompletedChapters = myProgress.filter(p => isChapterDone(p.status)).length
-    const myPercent = subjectProgressDynamic(chapters, myProgress, subjects)
+    const myPercent = calculateOverallProgress(chapters, myProgress, subjects)
     const myResourcesCount = myResources.filter(r => r.status === 'completed').length
     const myMistakesCount = myMistakes.length
 
     const friendCompletedChapters = friendProgress.filter(p => isChapterDone(p.status)).length
-    const friendPercent = subjectProgressDynamic(chapters, friendProgress, subjects)
+    const friendPercent = calculateOverallProgress(chapters, friendProgress, subjects)
     const friendResourcesCount = friendResources.filter(r => r.status === 'completed').length
     const friendMistakesCount = friendMistakes.length
 
     // Per-subject radar
     const subjectComparison = subjects.map(s => {
-      const subChapters = chapters.filter(c => c.subject_id === s.id)
       return {
         name: s.name,
-        myPercent: subjectProgressDynamic(subChapters, myProgress, [s]),
-        friendPercent: subjectProgressDynamic(subChapters, friendProgress, [s]),
+        myPercent: calculateSubjectProgress(s.id, chapters, myProgress, subjects),
+        friendPercent: calculateSubjectProgress(s.id, chapters, friendProgress, subjects),
       }
     })
 

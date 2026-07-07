@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { subjectProgressDynamic } from '@/lib/progress'
+import { calculateOverallProgress } from '@/lib/progress'
 import {
   useChapters,
   useAllChapterProgress,
@@ -11,12 +11,12 @@ import { useAuth } from '@/hooks/useAuth'
 import type { Chapter, ChapterProgress } from '@/lib/supabase/types'
 
 function computeBoardsProgress(chapters: Chapter[], progress: ChapterProgress[], subjects: any[]): number {
-  return subjectProgressDynamic(chapters, progress, subjects)
+  return calculateOverallProgress(chapters, progress, subjects)
 }
 
 function computeJeeProgress(chapters: Chapter[], progress: ChapterProgress[], subjects: any[]): number {
   const jeeChapters = chapters.filter(c => c.jee_weight !== 'none')
-  return subjectProgressDynamic(jeeChapters, progress, subjects)
+  return calculateOverallProgress(jeeChapters, progress, subjects)
 }
 
 export function YearDashboardCard() {

@@ -1,9 +1,9 @@
 import { type RoadmapMonthWorkload, type RoadmapMonthResource } from '@/lib/supabase/types'
 import { Card, CardContent } from '@/components/ui/card'
-import { subjectProgress } from '@/lib/progress'
+import { calculateOverallProgress } from '@/lib/progress'
 import { BookOpen, CheckCircle, Flame } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { useAllChapterProgress, useChapters } from '@/lib/supabase/queries'
+import { useAllChapterProgress, useChapters, useSubjects } from '@/lib/supabase/queries'
 
 interface MonthDashboardProps {
   workload: RoadmapMonthWorkload | null
@@ -15,13 +15,14 @@ export function MonthDashboard({ workload, resources: _resources, monthPhaseId }
   const { user } = useAuth()
   const { data: chapters = [] } = useChapters()
   const { data: progress = [] } = useAllChapterProgress(user?.id)
+  const { data: subjects = [] } = useSubjects()
 
 
   // Calculate real stats
   const phaseChapters = monthPhaseId 
     ? chapters.filter(c => c.phase === monthPhaseId) 
     : chapters
-  const completionRate = subjectProgress(phaseChapters.map(c => c.id), progress)
+  const completionRate = calculateOverallProgress(phaseChapters, progress, subjects)
 
   const totalLoad = workload 
     ? workload.lecture_load + workload.practice_load + workload.revision_load + workload.testing_load 

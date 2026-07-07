@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Activity, Target, Clock, TrendingUp, CalendarDays, BarChart3, Flame } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { subjectProgressDynamic, isChapterDone } from '@/lib/progress'
+import { calculateOverallProgress, calculateSubjectProgress, isChapterDone } from '@/lib/progress'
 import { 
   useChapters, 
   useAllChapterProgress, 
@@ -30,7 +30,7 @@ export default function ProgressHubPage() {
   const stats = useMemo(() => {
     const totalChapters = chapters.length
     const completedChapters = chapterProgress.filter(p => isChapterDone(p.status)).length
-    const overallPercent = subjectProgressDynamic(chapters, chapterProgress, subjects)
+    const overallPercent = calculateOverallProgress(chapters, chapterProgress, subjects)
 
     const totalEstHours = chapters.reduce((sum, ch) => sum + (ch.estimated_hours || 0), 0)
     const completedHours = chapters
@@ -49,7 +49,7 @@ export default function ProgressHubPage() {
       const subCompleted = subChapters.filter(ch => 
         chapterProgress.some(p => p.chapter_id === ch.id && isChapterDone(p.status))
       ).length
-      const pct = subjectProgressDynamic(subChapters, chapterProgress, [s])
+      const pct = calculateSubjectProgress(s.id, chapters, chapterProgress, subjects)
       return { name: s.name, completed: subCompleted, total: subChapters.length, percent: pct }
     })
 
@@ -118,7 +118,7 @@ export default function ProgressHubPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {stats.subjectStats.map(s => (
-                <ProgressBar key={s.name} label={s.name} value={s.completed} total={s.total} />
+                <ProgressBar key={s.name} label={s.name} value={s.percent} total={100} isPercent={true} originalCompleted={s.completed} originalTotal={s.total} />
               ))}
             </CardContent>
           </Card>
@@ -233,16 +233,21 @@ function MetricCard({ title, value, sub, icon: Icon, color, accent }: any) {
   )
 }
 
-function ProgressBar({ label, value, total, color = 'bg-primary' }: any) {
+function ProgressBar({ label, value, total, color = 'bg-primary', isPercent = false, originalCompleted = 0, originalTotal = 0 }: any) {
   const percent = total > 0 ? Math.round((value / total) * 100) : 0
+  
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between text-sm">
         <span className="font-medium text-foreground">{label}</span>
-        <span className="text-muted-foreground font-mono text-xs">{value}/{total} <span className="text-foreground font-bold">({percent}%)</span></span>
+        {isPercent ? (
+          <span className="text-muted-foreground font-mono text-xs">{originalCompleted}/{originalTotal} <span className="text-foreground font-bold">({value}%)</span></span>
+        ) : (
+          <span className="text-muted-foreground font-mono text-xs">{value}/{total} <span className="text-foreground font-bold">({percent}%)</span></span>
+        )}
       </div>
       <div className="h-2 w-full bg-muted/50 rounded-full overflow-hidden">
-        <div className={`h-full ${color} transition-all duration-700 rounded-full`} style={{ width: `${percent}%` }} />
+        <div className={`h-full ${color} transition-all duration-700 rounded-full`} style={{ width: `${isPercent ? value : percent}%` }} />
       </div>
     </div>
   )

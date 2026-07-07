@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Flame, ChevronRight, Activity, BookOpen, PenTool, AlertCircle } from 'lucide-react'
+import { Flame, ChevronRight, BookOpen, PenTool, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { 
   useFriendProfile,
@@ -10,11 +10,14 @@ import {
   useFormulaSheets,
   useAllComments,
   useChapters,
-  useSubjects
+  useSubjects,
+  useAllResourceProgress
 } from '@/lib/supabase/queries'
 import { 
-  subjectProgressDynamic, 
+  calculateOverallProgress, 
   getCurrentChapter, 
+  getLatestCompletedWorkflow,
+  getCompletedTodayCount,
   calculateStudyStreak, 
   formatRelativeTime 
 } from '@/lib/progress'
@@ -29,13 +32,14 @@ export function FriendActivityWidget() {
   const { data: notes = [] } = useAllNotes(friend?.id)
   const { data: formulas = [] } = useFormulaSheets(friend?.id)
   const { data: comments = [] } = useAllComments(friend?.id)
+  const { data: resources = [] } = useAllResourceProgress(friend?.id)
   const { data: chapters = [] } = useChapters()
   const { data: subjects = [] } = useSubjects()
 
   if (!friend) return null
 
-  // Calculate overall progress % using dynamic formula
-  const friendPercent = subjectProgressDynamic(chapters, progress, subjects)
+  // Calculate overall progress % using unified canonical formula
+  const friendPercent = calculateOverallProgress(chapters, progress, subjects)
 
   // Collect all timestamps for Last Seen and Streak
   const allTimestamps: string[] = []
@@ -47,6 +51,8 @@ export function FriendActivityWidget() {
     if (m.created_at) allTimestamps.push(m.created_at)
   })
   comments.forEach(c => { if (c.created_at) allTimestamps.push(c.created_at) })
+  resources.forEach(r => { if (r.completed_at) allTimestamps.push(r.completed_at) })
+  revisions.forEach(r => { if (r.completed_at) allTimestamps.push(r.completed_at) })
 
   // Last Seen
   const sortedTimestamps = [...allTimestamps].sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
@@ -56,10 +62,12 @@ export function FriendActivityWidget() {
   // Streak
   const streak = calculateStudyStreak(allTimestamps)
 
-  // Friend Current Chapter & Last Workflow Step
-  const friendCurrentInfo = getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, [])
+  // Friend Current Chapter & Latest Activity
+  const friendCurrentInfo = getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, resources, revisions, subjects)
   const currentChapterName = friendCurrentInfo?.chapter?.name || 'None'
-  const lastWorkflowStep = friendCurrentInfo?.status || 'None'
+  
+  const latestActivity = getLatestCompletedWorkflow(progress, chapters)
+  const completedTodayCount = getCompletedTodayCount(progress)
 
   // Latest note snippet
   const latestNote = [...notes].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0]
@@ -138,13 +146,32 @@ export function FriendActivityWidget() {
             </div>
           </div>
 
-          <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
-            <p className="text-[10px] uppercase font-bold tracking-wider text-primary/70 mb-1">Current Chapter</p>
-            <p className="font-semibold text-foreground truncate">{currentChapterName}</p>
-            <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
-              <Activity className="w-3.5 h-3.5" />
-              <span className="font-medium truncate">{lastWorkflowStep}</span>
+          <div className="bg-primary/5 rounded-lg p-3 border border-primary/10 space-y-3">
+            <div>
+              <p className="text-[10px] uppercase font-bold tracking-wider text-primary/70 mb-1">Current Chapter</p>
+              <p className="font-semibold text-foreground truncate">{currentChapterName}</p>
             </div>
+            
+            {latestActivity && (
+              <div>
+                <p className="text-[10px] uppercase font-bold tracking-wider text-primary/70 mb-1">Latest Activity</p>
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 font-medium text-foreground">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                    <span className="truncate max-w-[120px]">{latestActivity.status}</span>
+                  </div>
+                  <span className="text-muted-foreground">{formatRelativeTime(latestActivity.completedAt)}</span>
+                </div>
+              </div>
+            )}
+
+            {completedTodayCount > 0 && (
+              <div className="pt-2 border-t border-primary/10">
+                <p className="text-xs text-muted-foreground">
+                  Completed Today: <span className="font-semibold text-foreground">{completedTodayCount}</span> workflow stages
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

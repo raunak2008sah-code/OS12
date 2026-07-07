@@ -1,4 +1,4 @@
-import type { Chapter, ChapterProgress, Note, FormulaSheet, Mistake, Comment, Subject } from '@/lib/supabase/types'
+import type { Chapter, ChapterProgress, Note, FormulaSheet, Mistake, Comment, Subject, ResourceProgress, Revision } from '@/lib/supabase/types'
 import { getSubjectConfig, getWorkflowForChapter } from '@/lib/subjectProfiles'
 
 /**
@@ -32,58 +32,10 @@ export function getStageIndex(status: string | undefined | null): number {
 }
 
 /**
- * Returns the completed steps for a chapter based on its status.
- * - 'Lecture Pending' or undefined = 0 steps completed
- * - 'NCERT Complete' = 1 step completed
- * - 'WINR Complete' = 2 steps completed
- * ...
- * - 'Mock Test 2 Complete' = 8 steps completed
- * - 'Done' = 10 steps completed
- */
-export function getCompletedSteps(status: string | undefined | null): number {
-  if (!status) return 0
-  if (status === 'Done') return 10
-  const idx = WORKFLOW_STAGES.indexOf(status as any)
-  return idx === -1 ? 0 : idx
-}
-
-/**
  * Returns whether a chapter is fully completed (reached 'Done').
  */
 export function isChapterDone(status: string | undefined | null): boolean {
   return status === 'Done'
-}
-
-/**
- * Compute the workflow completion percentage for a SINGLE chapter.
- * 'Lecture Pending' = 0%
- * 'NCERT Complete' = 10%
- * ...
- * 'Mock Test 2 Complete' = 80%
- * 'Done' = 100%
- */
-export function chapterWorkflowPercent(status: string | undefined | null): number {
-  return getCompletedSteps(status) * 10
-}
-
-/**
- * Compute weighted subject progress across all chapters.
- *
- * Formula:
- *   overallProgress = completedWorkflowSteps / totalWorkflowSteps * 100
- */
-export function subjectProgress(
-  chapterIds: string[],
-  progress: { chapter_id: string; status: string }[]
-): number {
-  if (chapterIds.length === 0) return 0
-  const totalWorkflowSteps = chapterIds.length * 10
-  let completedWorkflowSteps = 0
-  for (const chapterId of chapterIds) {
-    const p = progress.find(pr => pr.chapter_id === chapterId)
-    completedWorkflowSteps += getCompletedSteps(p?.status)
-  }
-  return Math.round((completedWorkflowSteps / totalWorkflowSteps) * 100)
 }
 
 // ---------------------------------------------------------------------------
@@ -111,8 +63,36 @@ export function chapterWorkflowPercentDynamic(status: string | undefined | null,
 /**
  * Compute subject progress where each chapter may have a different
  * number of workflow stages (e.g. Chemistry categories).
+ * This is the canonical subject progress calculation.
  */
-export function subjectProgressDynamic(
+export function calculateSubjectProgress(
+  subjectId: string,
+  chapters: Chapter[],
+  progress: { chapter_id: string; status: string }[],
+  subjects: Subject[]
+): number {
+  const subjectChapters = chapters.filter(c => c.subject_id === subjectId)
+  if (subjectChapters.length === 0) return 0
+
+  let totalSteps = 0
+  let completedSteps = 0
+  const subject = subjects.find(s => s.id === subjectId)
+  const config = getSubjectConfig(subject?.slug)
+
+  for (const ch of subjectChapters) {
+    const stages = getWorkflowForChapter(config, ch.name)
+    totalSteps += stages.length
+    const p = progress.find(pr => pr.chapter_id === ch.id)
+    completedSteps += getCompletedStepsForWorkflow(p?.status, stages)
+  }
+  return totalSteps === 0 ? 0 : Math.round((completedSteps / totalSteps) * 100)
+}
+
+/**
+ * Compute overall progress across ALL subjects.
+ * Formula: total completed workflow steps / total workflow steps * 100
+ */
+export function calculateOverallProgress(
   chapters: Chapter[],
   progress: { chapter_id: string; status: string }[],
   subjects: Subject[]
@@ -120,6 +100,7 @@ export function subjectProgressDynamic(
   if (chapters.length === 0) return 0
   let totalSteps = 0
   let completedSteps = 0
+  
   for (const ch of chapters) {
     const subject = subjects.find(s => s.id === ch.subject_id)
     const config = getSubjectConfig(subject?.slug)
@@ -134,12 +115,14 @@ export function subjectProgressDynamic(
 /**
  * Select the most recently interacted incomplete chapter.
  * Priority:
- * 1. Last workflow stage updated (completed_at)
- * 2. Last note edited (updated_at)
- * 3. Last formula updated (updated_at)
- * 4. Last mistake added (created_at)
- * 5. Last comment (created_at)
- * 6. First incomplete chapter
+ * 1. Workflow stage updated (completed_at)
+ * 2. Resource update (completed_at)
+ * 3. Note edit (updated_at)
+ * 4. Formula updated (updated_at)
+ * 5. Mistake added (created_at)
+ * 6. Comment added (created_at)
+ * 7. Revision completed (completed_at)
+ * 8. Fallback to first incomplete chapter by order_index
  */
 export function getCurrentChapter(
   chapters: Chapter[],
@@ -148,6 +131,8 @@ export function getCurrentChapter(
   formulas: FormulaSheet[],
   mistakes: Mistake[],
   comments: Comment[],
+  resources: ResourceProgress[],
+  revisions: Revision[],
   subjects: Subject[]
 ): { chapter: Chapter; subject: Subject | undefined; status: string; nextStep: string } | null {
   if (chapters.length === 0) return null
@@ -168,24 +153,30 @@ export function getCurrentChapter(
     const chFormula = formulas.find(f => f.chapter_id === ch.id)
     const chMistakes = mistakes.filter(m => m.chapter_id === ch.id)
     const chComments = comments.filter(cm => cm.chapter_id === ch.id)
+    const chResources = resources.filter(r => r.chapter_id === ch.id)
+    const chRevisions = revisions.filter(r => r.chapter_id === ch.id)
 
     // Interaction timestamps (ms since epoch)
     const pTime = chProgress?.completed_at ? new Date(chProgress.completed_at).getTime() : 0
+    const resTime = chResources.length > 0 ? Math.max(...chResources.map(r => r.completed_at ? new Date(r.completed_at).getTime() : 0)) : 0
     const nTime = (chNote?.content && chNote.content.trim().length > 0 && chNote.updated_at) ? new Date(chNote.updated_at).getTime() : 0
     const fTime = chFormula?.updated_at ? new Date(chFormula.updated_at).getTime() : 0
     const mTime = chMistakes.length > 0 ? Math.max(...chMistakes.map(m => new Date(m.created_at).getTime())) : 0
     const cTime = chComments.length > 0 ? Math.max(...chComments.map(c => new Date(c.created_at).getTime())) : 0
+    const revTime = chRevisions.length > 0 ? Math.max(...chRevisions.map(r => r.completed_at ? new Date(r.completed_at).getTime() : 0)) : 0
 
-    // Find the absolute maximum interaction time across the 5 categories
+    // Find the absolute maximum interaction time across the categories
     const times = [
       { type: 1, time: pTime },
-      { type: 2, time: nTime },
-      { type: 3, time: fTime },
-      { type: 4, time: mTime },
-      { type: 5, time: cTime }
+      { type: 2, time: resTime },
+      { type: 3, time: nTime },
+      { type: 4, time: fTime },
+      { type: 5, time: mTime },
+      { type: 6, time: cTime },
+      { type: 7, time: revTime }
     ]
 
-    const maxInteraction = times.reduce((max, curr) => curr.time > max.time ? curr : max, { type: 6, time: 0 })
+    const maxInteraction = times.reduce((max, curr) => curr.time > max.time ? curr : max, { type: 8, time: 0 })
 
     return {
       chapter: ch,
@@ -220,6 +211,42 @@ export function getCurrentChapter(
     status,
     nextStep
   }
+}
+
+/**
+ * Returns the latest completed workflow stage details by timestamp.
+ */
+export function getLatestCompletedWorkflow(
+  progress: ChapterProgress[],
+  chapters: Chapter[]
+): { chapterName: string; status: string; completedAt: string } | null {
+  const completed = progress.filter(p => p.status && p.completed_at && p.status !== 'Lecture Pending')
+  if (completed.length === 0) return null
+  
+  const sorted = completed.sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime())
+  const latest = sorted[0]
+  const chapter = chapters.find(c => c.id === latest.chapter_id)
+  
+  return {
+    chapterName: chapter?.name || 'Unknown Chapter',
+    status: latest.status,
+    completedAt: latest.completed_at!
+  }
+}
+
+/**
+ * Returns the number of workflow stages completed today.
+ */
+export function getCompletedTodayCount(progress: ChapterProgress[]): number {
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  
+  return progress.filter(p => {
+    if (!p.completed_at || !p.status || p.status === 'Lecture Pending') return false
+    const d = new Date(p.completed_at)
+    const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    return dStr === todayStr
+  }).length
 }
 
 /**
