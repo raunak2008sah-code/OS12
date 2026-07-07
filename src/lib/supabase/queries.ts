@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from './client'
 import type { 
-  Subject, RoadmapPhase, RoadmapMonth, Chapter, Note, Comment, Profile, 
-  RoadmapMonthWorkload, RoadmapMonthResource, Mistake, ChapterProgress, 
-  MonthlyReview, DailyCheckin, ResourceProgress, WeeklyReview, FormulaSheet,
+  Subject, RoadmapPhase, RoadmapMonth, Chapter, Note, Profile, 
+  RoadmapMonthWorkload, RoadmapMonthResource, ChapterProgress, 
+  MonthlyReview, DailyCheckin, ResourceProgress, WeeklyReview,
   RoadmapWeek, Milestone, Revision
 } from './types'
 
@@ -23,14 +23,13 @@ export const queryKeys = {
   allResourceProgress: (userId?: string) => ['allResourceProgress', userId] as const,
   monthlyReview: (userId?: string, month?: string) => ['monthlyReview', userId, month] as const,
   notes: (chapterId: string, userId?: string) => ['notes', chapterId, userId] as const,
-  mistakes: (chapterId?: string, userId?: string) => ['mistakes', chapterId, userId] as const,
-  comments: (chapterId: string) => ['comments', chapterId] as const,
+
   friendProfile: (currentUserId?: string) => ['friendProfile', currentUserId] as const,
   allChapterProgress: (userId?: string) => ['allChapterProgress', userId] as const,
   dailyCheckins: (userId?: string) => ['dailyCheckins', userId] as const,
   monthlyCheckins: (userId: string | undefined, year: number, month: number) => ['monthlyCheckins', userId, year, month] as const,
   latestWeeklyReview: (userId?: string) => ['latestWeeklyReview', userId] as const,
-  formulaSheets: (userId?: string) => ['formulaSheets', userId] as const,
+
   allNotes: (userId?: string) => ['allNotes', userId] as const,
   allRevisions: (userId?: string) => ['allRevisions', userId] as const,
 }
@@ -280,63 +279,7 @@ export function useSaveNote() {
   })
 }
 
-export function useComments(chapterId: string) {
-  return useQuery({
-    queryKey: queryKeys.comments(chapterId),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('comments')
-        .select('*, profiles(id, display_name, avatar_url)')
-        .eq('chapter_id', chapterId)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Comment[]
-    },
-    enabled: !!chapterId,
-  })
-}
 
-export function useAddComment() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async ({ chapterId, userId, content }: { chapterId: string; userId: string; content: string }) => {
-      const { error } = await supabase.from('comments').insert({ chapter_id: chapterId, user_id: userId, content } as any)
-      if (error) throw error
-    },
-    onSuccess: (_, { chapterId }) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.comments(chapterId) })
-    },
-  })
-}
-
-export function useDeleteComment() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async ({ commentId, userId }: { commentId: string; userId: string }) => {
-      const { error } = await supabase.from('comments').delete().match({ id: commentId, user_id: userId })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['comments'] })
-    },
-  })
-}
-
-export function useAllComments(userId?: string) {
-  return useQuery({
-    queryKey: ['allComments', userId],
-    queryFn: async () => {
-      if (!userId) return []
-      const { data, error } = await supabase
-        .from('comments')
-        .select('*')
-        .eq('user_id', userId)
-      if (error) throw error
-      return data as Comment[]
-    },
-    enabled: !!userId,
-  })
-}
 
 export function useMonthlyReview(userId?: string, month?: string) {
   return useQuery({
@@ -381,22 +324,7 @@ export function useSaveMonthlyReview() {
   })
 }
 
-export function useMistakes(chapterId?: string, userId?: string) {
-  return useQuery({
-    queryKey: queryKeys.mistakes(chapterId, userId),
-    queryFn: async () => {
-      if (!userId) return []
-      let query = supabase.from('mistakes').select('*').eq('user_id', userId)
-      if (chapterId) {
-        query = query.eq('chapter_id', chapterId)
-      }
-      const { data, error } = await query.order('created_at', { ascending: false })
-      if (error) throw error
-      return data as Mistake[]
-    },
-    enabled: !!userId,
-  })
-}
+
 
 export function useFriendProfile(currentUserId?: string) {
   return useQuery({
@@ -526,21 +454,7 @@ export function useLatestWeeklyReview(userId?: string) {
   })
 }
 
-export function useFormulaSheets(userId?: string) {
-  return useQuery({
-    queryKey: queryKeys.formulaSheets(userId),
-    queryFn: async () => {
-      if (!userId) return []
-      const { data, error } = await supabase
-        .from('formula_sheet')
-        .select('*')
-        .eq('user_id', userId)
-      if (error) throw error
-      return data as FormulaSheet[]
-    },
-    enabled: !!userId,
-  })
-}
+
 
 export function useAllNotes(userId?: string) {
   return useQuery({
@@ -683,72 +597,6 @@ export function useResources() {
       const { data, error } = await supabase.from('resources').select('*').order('order_index')
       if (error) throw error
       return data as { id: string, name: string, description: string | null, order_index: number }[]
-    },
-  })
-}
-
-export function useFormulaSheet(userId?: string, chapterId?: string) {
-  return useQuery({
-    queryKey: ['formulaSheet', userId, chapterId],
-    queryFn: async () => {
-      if (!userId || !chapterId) return null
-      const { data, error } = await supabase
-        .from('formula_sheet')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('chapter_id', chapterId)
-        .maybeSingle()
-      if (error) throw error
-      return data as FormulaSheet | null
-    },
-    enabled: !!userId && !!chapterId,
-  })
-}
-
-export function useSaveFormulaSheet() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async ({ userId, chapterId, content }: { userId: string; chapterId: string; content: string }) => {
-      const { data, error } = await supabase.from('formula_sheet').upsert({
-        user_id: userId,
-        chapter_id: chapterId,
-        content,
-        updated_at: new Date().toISOString()
-      } as any, { onConflict: 'user_id,chapter_id' }).select().single()
-      if (error) throw error
-      return data as FormulaSheet
-    },
-    onSuccess: (data, { userId, chapterId }) => {
-      queryClient.setQueryData(['formulaSheet', userId, chapterId], data)
-      void queryClient.invalidateQueries({ queryKey: queryKeys.formulaSheets(userId) })
-    },
-  })
-}
-
-export function useAddMistake() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (mistake: { user_id: string; chapter_id: string; content: string; tags: string[] }) => {
-      const { error } = await supabase.from('mistakes').insert(mistake as any)
-      if (error) throw error
-    },
-    onSuccess: (_, { user_id, chapter_id }) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.mistakes(chapter_id, user_id) })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.mistakes(undefined, user_id) })
-    },
-  })
-}
-
-export function useToggleMistakeResolved() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async ({ mistakeId, isResolved }: { mistakeId: string; isResolved: boolean; userId: string; chapterId: string }) => {
-      // @ts-ignore
-      const { error } = await supabase.from('mistakes').update({ is_resolved: isResolved }).eq('id', mistakeId)
-      if (error) throw error
-    },
-    onSuccess: (_, { userId, chapterId }) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.mistakes(chapterId, userId) })
     },
   })
 }

@@ -1,4 +1,4 @@
-import type { Chapter, ChapterProgress, Note, FormulaSheet, Mistake, Comment, Subject, ResourceProgress, Revision } from '@/lib/supabase/types'
+import type { Chapter, ChapterProgress, Note, Subject, ResourceProgress, Revision } from '@/lib/supabase/types'
 import { getSubjectConfig, getWorkflowForChapter } from '@/lib/subjectProfiles'
 
 /**
@@ -128,9 +128,6 @@ export function getCurrentChapter(
   chapters: Chapter[],
   progress: ChapterProgress[],
   notes: Note[],
-  formulas: FormulaSheet[],
-  mistakes: Mistake[],
-  comments: Comment[],
   resources: ResourceProgress[],
   revisions: Revision[],
   subjects: Subject[]
@@ -150,9 +147,6 @@ export function getCurrentChapter(
   const chaptersWithInteractions = incompleteChapters.map(ch => {
     const chProgress = progress.find(p => p.chapter_id === ch.id)
     const chNote = notes.find(n => n.chapter_id === ch.id)
-    const chFormula = formulas.find(f => f.chapter_id === ch.id)
-    const chMistakes = mistakes.filter(m => m.chapter_id === ch.id)
-    const chComments = comments.filter(cm => cm.chapter_id === ch.id)
     const chResources = resources.filter(r => r.chapter_id === ch.id)
     const chRevisions = revisions.filter(r => r.chapter_id === ch.id)
 
@@ -160,9 +154,6 @@ export function getCurrentChapter(
     const pTime = chProgress?.completed_at ? new Date(chProgress.completed_at).getTime() : 0
     const resTime = chResources.length > 0 ? Math.max(...chResources.map(r => r.completed_at ? new Date(r.completed_at).getTime() : 0)) : 0
     const nTime = (chNote?.content && chNote.content.trim().length > 0 && chNote.updated_at) ? new Date(chNote.updated_at).getTime() : 0
-    const fTime = chFormula?.updated_at ? new Date(chFormula.updated_at).getTime() : 0
-    const mTime = chMistakes.length > 0 ? Math.max(...chMistakes.map(m => new Date(m.created_at).getTime())) : 0
-    const cTime = chComments.length > 0 ? Math.max(...chComments.map(c => new Date(c.created_at).getTime())) : 0
     const revTime = chRevisions.length > 0 ? Math.max(...chRevisions.map(r => r.completed_at ? new Date(r.completed_at).getTime() : 0)) : 0
 
     // Find the absolute maximum interaction time across the categories
@@ -170,13 +161,10 @@ export function getCurrentChapter(
       { type: 1, time: pTime },
       { type: 2, time: resTime },
       { type: 3, time: nTime },
-      { type: 4, time: fTime },
-      { type: 5, time: mTime },
-      { type: 6, time: cTime },
-      { type: 7, time: revTime }
+      { type: 4, time: revTime }
     ]
 
-    const maxInteraction = times.reduce((max, curr) => curr.time > max.time ? curr : max, { type: 8, time: 0 })
+    const maxInteraction = times.reduce((max, curr) => curr.time > max.time ? curr : max, { type: 0, time: 0 })
 
     return {
       chapter: ch,

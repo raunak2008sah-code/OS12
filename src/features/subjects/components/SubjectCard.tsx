@@ -4,11 +4,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import type { Subject, Chapter, ChapterProgress } from '@/lib/supabase/types'
 import { calculateSubjectProgress, isChapterDone, getCurrentChapter } from '@/lib/progress'
 import { useAuth } from '@/hooks/useAuth'
-import { 
+import {
   useAllNotes, 
-  useFormulaSheets, 
-  useMistakes, 
-  useAllComments,
   useAllResourceProgress,
   useAllRevisions 
 } from '@/lib/supabase/queries'
@@ -22,9 +19,6 @@ interface SubjectCardProps {
 export function SubjectCard({ subject, chapters, progress }: SubjectCardProps) {
   const { user } = useAuth()
   const { data: notes = [] } = useAllNotes(user?.id)
-  const { data: formulas = [] } = useFormulaSheets(user?.id)
-  const { data: mistakes = [] } = useMistakes(undefined, user?.id)
-  const { data: comments = [] } = useAllComments(user?.id)
   const { data: resources = [] } = useAllResourceProgress(user?.id)
   const { data: revisions = [] } = useAllRevisions(user?.id)
 
@@ -43,7 +37,7 @@ export function SubjectCard({ subject, chapters, progress }: SubjectCardProps) {
   const remainingHours = estimatedHours - completedHours
   
   // Find the "current" chapter (most recently interacted incomplete chapter)
-  const currentChapterInfo = getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, resources, revisions, [subject])
+  const currentChapterInfo = getCurrentChapter(chapters, progress, notes, resources, revisions, [subject])
   const currentChapter = currentChapterInfo?.chapter || null
 
   // Weakness indicator

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Users, Swords, Trophy, Activity, AlertTriangle, BookOpen, TrendingUp } from 'lucide-react'
+import { Users, Swords, Trophy, Activity, BookOpen, TrendingUp } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { calculateOverallProgress, calculateSubjectProgress, isChapterDone } from '@/lib/progress'
@@ -7,7 +7,6 @@ import {
   useChapters, 
   useAllChapterProgress, 
   useAllResourceProgress, 
-  useMistakes,
   useFriendProfile,
   useSubjects
 } from '@/lib/supabase/queries'
@@ -22,24 +21,20 @@ export default function ComparePage() {
   // My Data
   const { data: myProgress = [] } = useAllChapterProgress(userId)
   const { data: myResources = [] } = useAllResourceProgress(userId)
-  const { data: myMistakes = [] } = useMistakes(undefined, userId)
 
   // Friend Data
   const { data: friend } = useFriendProfile(userId)
   const { data: friendProgress = [] } = useAllChapterProgress(friend?.id)
   const { data: friendResources = [] } = useAllResourceProgress(friend?.id)
-  const { data: friendMistakes = [] } = useMistakes(undefined, friend?.id)
 
   const stats = useMemo(() => {
     const myCompletedChapters = myProgress.filter(p => isChapterDone(p.status)).length
     const myPercent = calculateOverallProgress(chapters, myProgress, subjects)
     const myResourcesCount = myResources.filter(r => r.status === 'completed').length
-    const myMistakesCount = myMistakes.length
 
     const friendCompletedChapters = friendProgress.filter(p => isChapterDone(p.status)).length
     const friendPercent = calculateOverallProgress(chapters, friendProgress, subjects)
     const friendResourcesCount = friendResources.filter(r => r.status === 'completed').length
-    const friendMistakesCount = friendMistakes.length
 
     // Per-subject radar
     const subjectComparison = subjects.map(s => {
@@ -51,11 +46,11 @@ export default function ComparePage() {
     })
 
     return {
-      me: { percent: myPercent, chapters: myCompletedChapters, resources: myResourcesCount, mistakes: myMistakesCount },
-      friend: { percent: friendPercent, chapters: friendCompletedChapters, resources: friendResourcesCount, mistakes: friendMistakesCount },
+      me: { percent: myPercent, chapters: myCompletedChapters, resources: myResourcesCount },
+      friend: { percent: friendPercent, chapters: friendCompletedChapters, resources: friendResourcesCount },
       subjectComparison
     }
-  }, [chapters, myProgress, myResources, myMistakes, friendProgress, friendResources, friendMistakes, subjects])
+  }, [chapters, myProgress, myResources, friendProgress, friendResources, subjects])
 
   if (!friend) {
     return (
@@ -105,7 +100,6 @@ export default function ComparePage() {
           <ComparisonRow label="Overall Progress" me={stats.me.percent} friend={stats.friend.percent} unit="%" icon={Activity} />
           <ComparisonRow label="Chapters Completed" me={stats.me.chapters} friend={stats.friend.chapters} icon={Trophy} />
           <ComparisonRow label="Resources Finished" me={stats.me.resources} friend={stats.friend.resources} icon={BookOpen} />
-          <ComparisonRow label="Mistakes Logged" me={stats.me.mistakes} friend={stats.friend.mistakes} icon={AlertTriangle} />
         </CardContent>
       </Card>
 

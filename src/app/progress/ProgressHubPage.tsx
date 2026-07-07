@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Activity, Target, Clock, TrendingUp, CalendarDays, BarChart3, Flame } from 'lucide-react'
+import { Activity, Target, Clock, TrendingUp, CalendarDays, BarChart3 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { calculateOverallProgress, calculateSubjectProgress, isChapterDone } from '@/lib/progress'
@@ -9,8 +9,6 @@ import {
   useAllResourceProgress, 
   useAllNotes, 
   useAllRevisions, 
-  useMistakes,
-  useFormulaSheets,
   useSubjects
 } from '@/lib/supabase/queries'
 
@@ -24,8 +22,6 @@ export default function ProgressHubPage() {
   const { data: resourceProgress = [] } = useAllResourceProgress(userId)
   const { data: notes = [] } = useAllNotes(userId)
   const { data: revisions = [] } = useAllRevisions(userId)
-  const { data: mistakes = [] } = useMistakes(undefined, userId)
-  const { data: formulas = [] } = useFormulaSheets(userId)
 
   const stats = useMemo(() => {
     const totalChapters = chapters.length
@@ -37,9 +33,6 @@ export default function ProgressHubPage() {
       .filter(ch => chapterProgress.some(p => p.chapter_id === ch.id && isChapterDone(p.status)))
       .reduce((sum, ch) => sum + (ch.estimated_hours || 0), 0)
     
-    const resolvedMistakes = mistakes.filter(m => m.is_resolved).length
-    const totalMistakes = mistakes.length
-
     const completedResources = resourceProgress.filter(r => r.status === 'completed').length
     const completedRevisions = revisions.filter(r => r.status === 'completed').length
 
@@ -67,17 +60,14 @@ export default function ProgressHubPage() {
       totalChapters,
       totalEstHours,
       completedHours,
-      resolvedMistakes,
-      totalMistakes,
       completedResources,
       completedRevisions,
       totalNotes: notes.length,
-      totalFormulas: formulas.length,
       subjectStats,
       mostDifficult,
       weeklyTargetStatus
     }
-  }, [chapters, chapterProgress, mistakes, resourceProgress, revisions, notes, formulas, subjects])
+  }, [chapters, chapterProgress, resourceProgress, revisions, notes, subjects])
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-4">
@@ -102,7 +92,6 @@ export default function ProgressHubPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard title="Overall" value={`${stats.overallPercent}%`} sub={`${stats.completedChapters}/${stats.totalChapters} chapters`} icon={Target} color="text-green-500" accent="bg-green-500" />
         <MetricCard title="Study Hours" value={`${stats.completedHours}h`} sub={`of ${stats.totalEstHours}h estimated`} icon={Clock} color="text-blue-500" accent="bg-blue-500" />
-        <MetricCard title="Mistakes" value={`${stats.resolvedMistakes}/${stats.totalMistakes}`} sub="Resolved / Total" icon={Flame} color="text-purple-500" accent="bg-purple-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -132,7 +121,6 @@ export default function ProgressHubPage() {
               <ProgressBar label="Resources Completed" value={stats.completedResources} total={Math.max(stats.completedResources + 10, 50)} color="bg-blue-500" />
               <ProgressBar label="Revisions Done" value={stats.completedRevisions} total={Math.max(stats.completedRevisions + 10, 30)} color="bg-green-500" />
               <ProgressBar label="Notes Finalized" value={stats.totalNotes} total={stats.totalChapters} color="bg-yellow-500" />
-              <ProgressBar label="Formula Sheets" value={stats.totalFormulas} total={stats.totalChapters} color="bg-purple-500" />
             </CardContent>
           </Card>
 
@@ -147,11 +135,9 @@ export default function ProgressHubPage() {
             <CardContent>
               <div className="flex gap-3 justify-between items-end h-32 pt-4">
                 {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day, i) => {
-                  // Real data: count chapter progress entries completed on each weekday
                   const dayActivity = chapterProgress.filter(p => {
                     if (!p.completed_at) return false
                     const d = new Date(p.completed_at)
-                    // JS getDay: 0=Sun, 1=Mon... map i: 0=Mon → getDay()=1
                     return d.getDay() === ((i + 1) % 7)
                   }).length
                   const maxActivity = Math.max(1, ...['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((_, j) =>
@@ -205,7 +191,6 @@ export default function ProgressHubPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <SummaryRow label="Total Notes" value={stats.totalNotes} />
-              <SummaryRow label="Total Formulas" value={stats.totalFormulas} />
               <SummaryRow label="Resources Done" value={stats.completedResources} />
               <SummaryRow label="Revisions Done" value={stats.completedRevisions} />
             </CardContent>

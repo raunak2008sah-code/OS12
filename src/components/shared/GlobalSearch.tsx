@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Book, Target, FileText, AlertTriangle, BookOpen, Settings, Map, ExternalLink } from 'lucide-react'
+import { Search, Book, Target, FileText, Settings, Map, ExternalLink } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { 
   useSubjects, 
   useChapters, 
-  useAllNotes, 
-  useMistakes, 
-  useFormulaSheets 
+  useAllNotes
 } from '@/lib/supabase/queries'
 
 export function GlobalSearch() {
@@ -22,8 +20,6 @@ export function GlobalSearch() {
   const { data: subjects = [] } = useSubjects()
   const { data: chapters = [] } = useChapters()
   const { data: notes = [] } = useAllNotes(userId)
-  const { data: mistakes = [] } = useMistakes(undefined, userId)
-  const { data: formulas = [] } = useFormulaSheets(userId)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -77,17 +73,7 @@ export function GlobalSearch() {
       results.push({ id: n.id, type: 'Note', title: n.content?.substring(0, 50) + '...', subtitle: chap?.name, path: `/chapters/${n.chapter_id}`, icon: FileText, color: 'text-green-500' })
     })
 
-    // 5. Mistakes
-    mistakes.filter(m => m.content?.toLowerCase().includes(lowerQuery) || m.tags.some(t => t.toLowerCase().includes(lowerQuery))).forEach(m => {
-      const chap = chapters.find(c => c.id === m.chapter_id)
-      results.push({ id: m.id, type: 'Mistake', title: m.content?.substring(0, 50) + '...', subtitle: chap?.name, path: `/chapters/${m.chapter_id}`, icon: AlertTriangle, color: 'text-red-500' })
-    })
 
-    // 6. Formulas
-    formulas.filter(f => f.content?.toLowerCase().includes(lowerQuery)).forEach(f => {
-      const chap = chapters.find(c => c.id === f.chapter_id)
-      results.push({ id: f.id, type: 'Formula', title: f.content?.substring(0, 50) + '...', subtitle: chap?.name, path: `/chapters/${f.chapter_id}`, icon: BookOpen, color: 'text-purple-500' })
-    })
   }
 
   const handleSelect = (path: string) => {
@@ -112,7 +98,8 @@ export function GlobalSearch() {
     }
     window.addEventListener('keydown', handleNavigation)
     return () => window.removeEventListener('keydown', handleNavigation)
-  }, [isOpen, results, selectedIndex, handleSelect])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, results, selectedIndex])
 
   if (!isOpen) return null
 

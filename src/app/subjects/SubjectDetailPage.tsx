@@ -10,8 +10,6 @@ import {
   useChapters, 
   useAllChapterProgress, 
   useAllResourceProgress, 
-  useMistakes, 
-  useFormulaSheets, 
   useAllNotes, 
   useAllRevisions,
   useRoadmapPhases,
@@ -27,8 +25,6 @@ export default function SubjectDetailPage() {
   
   const { data: progress = [], isLoading: loadingProgress } = useAllChapterProgress(user?.id)
   const { data: resources = [], isLoading: loadingResources } = useAllResourceProgress(user?.id)
-  const { data: mistakes = [], isLoading: loadingMistakes } = useMistakes(undefined, user?.id)
-  const { data: formulaSheets = [], isLoading: loadingFormula } = useFormulaSheets(user?.id)
   const { data: notes = [], isLoading: loadingNotes } = useAllNotes(user?.id)
   const { data: revisions = [], isLoading: loadingRevisions } = useAllRevisions(user?.id)
   
@@ -40,7 +36,7 @@ export default function SubjectDetailPage() {
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedDifficulty, setSelectedDifficulty] = useState('all')
 
-  const isLoading = loadingSubject || loadingChapters || loadingProgress || loadingResources || loadingMistakes || loadingFormula || loadingNotes || loadingRevisions
+  const isLoading = loadingSubject || loadingChapters || loadingProgress || loadingResources || loadingNotes || loadingRevisions
 
   const { filteredChapters, completionStats } = useMemo(() => {
     let filtered = chapters
@@ -185,8 +181,6 @@ export default function SubjectDetailPage() {
             progress={progress} 
             resources={resources} 
             notes={notes} 
-            mistakes={mistakes} 
-            formulaSheets={formulaSheets} 
             revisions={revisions} 
             phases={phases} 
             months={months}

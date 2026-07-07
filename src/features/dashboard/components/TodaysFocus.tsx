@@ -7,9 +7,6 @@ import {
   useAllChapterProgress, 
   useSubjects,
   useAllNotes,
-  useFormulaSheets,
-  useMistakes,
-  useAllComments,
   useAllResourceProgress,
   useAllRevisions
 } from '@/lib/supabase/queries'
@@ -22,15 +19,12 @@ export function TodaysFocus() {
   const { data: progress = [] } = useAllChapterProgress(user?.id)
   const { data: subjects = [] } = useSubjects()
   const { data: notes = [] } = useAllNotes(user?.id)
-  const { data: formulas = [] } = useFormulaSheets(user?.id)
-  const { data: mistakes = [] } = useMistakes(undefined, user?.id)
-  const { data: comments = [] } = useAllComments(user?.id)
   const { data: resources = [] } = useAllResourceProgress(user?.id)
   const { data: revisions = [] } = useAllRevisions(user?.id)
 
   const focusChapter = useMemo(() => {
-    return getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, resources, revisions, subjects)
-  }, [chapters, progress, notes, formulas, mistakes, comments, resources, revisions, subjects])
+    return getCurrentChapter(chapters, progress, notes, resources, revisions, subjects)
+  }, [chapters, progress, notes, resources, revisions, subjects])
 
   return (
     <Card className="border-border/60 shadow-sm overflow-hidden">

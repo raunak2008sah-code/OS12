@@ -1,14 +1,11 @@
 import { Link } from 'react-router-dom'
-import { Flame, ChevronRight, BookOpen, PenTool, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Flame, ChevronRight, BookOpen, PenTool, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { 
   useFriendProfile,
   useAllChapterProgress,
-  useMistakes,
   useAllRevisions,
   useAllNotes,
-  useFormulaSheets,
-  useAllComments,
   useChapters,
   useSubjects,
   useAllResourceProgress
@@ -27,11 +24,8 @@ export function FriendActivityWidget() {
   const { data: friend } = useFriendProfile(user?.id)
   
   const { data: progress = [] } = useAllChapterProgress(friend?.id)
-  const { data: mistakes = [] } = useMistakes(undefined, friend?.id)
   const { data: revisions = [] } = useAllRevisions(friend?.id)
   const { data: notes = [] } = useAllNotes(friend?.id)
-  const { data: formulas = [] } = useFormulaSheets(friend?.id)
-  const { data: comments = [] } = useAllComments(friend?.id)
   const { data: resources = [] } = useAllResourceProgress(friend?.id)
   const { data: chapters = [] } = useChapters()
   const { data: subjects = [] } = useSubjects()
@@ -45,12 +39,7 @@ export function FriendActivityWidget() {
   const allTimestamps: string[] = []
   progress.forEach(p => { if (p.completed_at) allTimestamps.push(p.completed_at) })
   notes.forEach(n => { if (n.updated_at) allTimestamps.push(n.updated_at) })
-  formulas.forEach(f => { if (f.updated_at) allTimestamps.push(f.updated_at) })
-  mistakes.forEach(m => {
-    if (m.updated_at) allTimestamps.push(m.updated_at)
-    if (m.created_at) allTimestamps.push(m.created_at)
-  })
-  comments.forEach(c => { if (c.created_at) allTimestamps.push(c.created_at) })
+
   resources.forEach(r => { if (r.completed_at) allTimestamps.push(r.completed_at) })
   revisions.forEach(r => { if (r.completed_at) allTimestamps.push(r.completed_at) })
 
@@ -63,7 +52,7 @@ export function FriendActivityWidget() {
   const streak = calculateStudyStreak(allTimestamps)
 
   // Friend Current Chapter & Latest Activity
-  const friendCurrentInfo = getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, resources, revisions, subjects)
+  const friendCurrentInfo = getCurrentChapter(chapters, progress, notes, resources, revisions, subjects)
   const currentChapterName = friendCurrentInfo?.chapter?.name || 'None'
   
   const latestActivity = getLatestCompletedWorkflow(progress, chapters, subjects)
@@ -73,12 +62,6 @@ export function FriendActivityWidget() {
   const latestNote = [...notes].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0]
   const latestNoteText = latestNote 
     ? `${chapters.find(c => c.id === latestNote.chapter_id)?.name || 'Ch'}: ${latestNote.content ? latestNote.content.substring(0, 30) : 'Empty'}...`
-    : 'None'
-
-  // Latest mistake
-  const latestMistake = [...mistakes].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
-  const latestMistakeText = latestMistake
-    ? `${chapters.find(c => c.id === latestMistake.chapter_id)?.name || 'Ch'}: ${latestMistake.content.substring(0, 30)}...`
     : 'None'
 
   // Latest revision
@@ -183,14 +166,6 @@ export function FriendActivityWidget() {
               <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground group-hover:text-primary transition-colors">Latest Note</p>
             </div>
             <p className="text-sm font-medium text-foreground truncate" title={latestNoteText}>{latestNoteText}</p>
-          </div>
-
-          <div className="group">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <AlertCircle className="w-3.5 h-3.5 text-muted-foreground group-hover:text-destructive transition-colors" />
-              <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground group-hover:text-destructive transition-colors">Latest Mistake</p>
-            </div>
-            <p className="text-sm font-medium text-foreground truncate" title={latestMistakeText}>{latestMistakeText}</p>
           </div>
 
           <div className="group">
