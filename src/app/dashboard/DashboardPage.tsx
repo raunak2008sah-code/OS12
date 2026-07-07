@@ -8,6 +8,7 @@ import { BacklogBanner } from '@/features/dashboard/components/BacklogBanner'
 import { TodaysFocus } from '@/features/dashboard/components/TodaysFocus'
 import { CalendarWidget } from '@/features/dashboard/components/CalendarWidget'
 import { CountdownWidget } from '@/features/dashboard/components/CountdownWidget'
+import { FriendActivityWidget } from '@/features/dashboard/components/FriendActivityWidget'
 import { isSundayIST } from '@/lib/time'
 import { useTime } from '@/hooks/useTime'
 import { cn } from '@/lib/utils'
@@ -89,6 +90,7 @@ export default function DashboardPage() {
         <div className="md:col-span-4 space-y-4 lg:sticky lg:top-24">
           <CalendarWidget />
           <CountdownWidget />
+          <FriendActivityWidget />
           
           <SidebarWidgets />
         </div>

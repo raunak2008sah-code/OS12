@@ -2,6 +2,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { SubjectCard } from '@/features/subjects/components/SubjectCard'
 import { useSubjects, useChapters, useAllChapterProgress, useBacklog } from '@/lib/supabase/queries'
 import { BookOpen, BarChart3 } from 'lucide-react'
+import { subjectProgress } from '@/lib/progress'
 
 export default function SubjectListPage() {
   const { user } = useAuth()
@@ -14,11 +15,8 @@ export default function SubjectListPage() {
 
   // Stats
   const totalChapters = allChapters.length
-  const completedChapters = allChapters.filter(ch => {
-    const p = progress.find(pr => pr.chapter_id === ch.id)
-    return p?.status === 'Completed' || p?.status === 'Done'
-  }).length
-  const overallPercent = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0
+  const allChapterIds = allChapters.map(ch => ch.id)
+  const overallPercent = subjectProgress(allChapterIds, progress)
 
   if (isLoading) {
     return (
@@ -44,7 +42,7 @@ export default function SubjectListPage() {
               Subjects
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {subjects.length} subjects • {completedChapters}/{totalChapters} chapters completed
+              {subjects.length} subjects • {totalChapters} chapters • {overallPercent}% progress
             </p>
           </div>
           <div className="flex items-center gap-3">

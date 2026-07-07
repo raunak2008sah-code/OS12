@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
-import { 
-  FileText, AlertTriangle, BookOpen, PenTool, CheckCircle2, Circle, AlertCircle
-} from 'lucide-react'
+import { BookOpen, AlertCircle, AlertTriangle, FileText, CheckCircle2, PenTool, Circle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { isChapterDone, chapterWorkflowPercent } from '@/lib/progress'
 import type { 
   Chapter, ChapterProgress, ResourceProgress, Note, 
   Mistake, FormulaSheet, Revision, Backlog, RoadmapPhase, RoadmapMonth 
@@ -29,7 +28,8 @@ export function ChapterCard({
 
   const activeBacklog = backlog.find(b => b.chapter_id === chapter.id)
 
-  const isCompleted = progress?.status === 'Completed' || progress?.status === 'Done'
+  const isCompleted = isChapterDone(progress?.status)
+  const completionPercent = chapterWorkflowPercent(progress?.status)
   const hasNotes = notes.some(n => n.chapter_id === chapter.id && n.content && n.content.trim().length > 0)
   const activeMistakes = mistakes.filter(m => m.chapter_id === chapter.id && !m.is_resolved)
   const hasFormula = formulaSheets.some(f => f.chapter_id === chapter.id)
@@ -73,11 +73,16 @@ export function ChapterCard({
             </span>
           </div>
         </div>
-        <div className="text-right pl-2">
-          <div className="text-sm font-semibold text-foreground">
-            {chapter.estimated_hours}h
+        <div className="flex items-center gap-1.5 ml-auto">
+          <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground mr-2">
+            {completionPercent}%
           </div>
-          <div className="text-xs text-muted-foreground">Est. Time</div>
+          <div className="text-right">
+            <div className="text-sm font-semibold text-foreground">
+              {chapter.estimated_hours}h
+            </div>
+            <div className="text-xs text-muted-foreground">Est. Time</div>
+          </div>
         </div>
       </CardHeader>
       

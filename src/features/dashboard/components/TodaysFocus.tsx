@@ -2,72 +2,31 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, CheckCircle2, Circle, Target } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { useChapters, useAllChapterProgress, useSubjects } from '@/lib/supabase/queries'
+import { 
+  useChapters, 
+  useAllChapterProgress, 
+  useSubjects,
+  useAllNotes,
+  useFormulaSheets,
+  useMistakes,
+  useAllComments
+} from '@/lib/supabase/queries'
 import { useAuth } from '@/hooks/useAuth'
-
-const WORKFLOW_STEPS = [
-  'Lecture Pending',
-  'Lecture Completed',
-  'Notes Completed',
-  'NCERT Completed',
-  'WINR Completed',
-  'Board PYQs Done',
-  'JEE PYQs Done',
-  'H.C. Verma Done',
-  'Mixed Test Done',
-  'Fully Completed',
-] as const
-
-function getNextStep(status: string): string {
-  const idx = WORKFLOW_STEPS.indexOf(status as typeof WORKFLOW_STEPS[number])
-  if (idx === -1 || idx >= WORKFLOW_STEPS.length - 1) return 'Fully Completed'
-  return WORKFLOW_STEPS[idx + 1]
-}
+import { getCurrentChapter } from '@/lib/progress'
 
 export function TodaysFocus() {
   const { user } = useAuth()
   const { data: chapters = [] } = useChapters()
   const { data: progress = [] } = useAllChapterProgress(user?.id)
   const { data: subjects = [] } = useSubjects()
+  const { data: notes = [] } = useAllNotes(user?.id)
+  const { data: formulas = [] } = useFormulaSheets(user?.id)
+  const { data: mistakes = [] } = useMistakes(undefined, user?.id)
+  const { data: comments = [] } = useAllComments(user?.id)
 
   const focusChapter = useMemo(() => {
-    if (!chapters.length) return null
-
-    const completedIds = new Set(
-      progress.filter(p => p.status === 'Fully Completed' || p.status === 'Completed').map(p => p.chapter_id)
-    )
-
-    const inProgressEntries = progress.filter(
-      p => p.status !== 'Fully Completed' && p.status !== 'Completed' && p.status !== 'Lecture Pending'
-    )
-
-    if (inProgressEntries.length > 0) {
-      const entry = inProgressEntries[0]
-      const chapter = chapters.find(c => c.id === entry.chapter_id)
-      if (chapter) {
-        const subject = subjects.find(s => s.id === chapter.subject_id)
-        return {
-          chapter,
-          subject,
-          status: entry.status,
-          nextStep: getNextStep(entry.status),
-        }
-      }
-    }
-
-    const untouched = chapters.find(c => !completedIds.has(c.id) && !progress.some(p => p.chapter_id === c.id))
-    if (untouched) {
-      const subject = subjects.find(s => s.id === untouched.subject_id)
-      return {
-        chapter: untouched,
-        subject,
-        status: 'Lecture Pending',
-        nextStep: 'Lecture Completed',
-      }
-    }
-
-    return null
-  }, [chapters, progress, subjects])
+    return getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, subjects)
+  }, [chapters, progress, notes, formulas, mistakes, comments, subjects])
 
   return (
     <Card className="border-border/60 shadow-sm overflow-hidden">

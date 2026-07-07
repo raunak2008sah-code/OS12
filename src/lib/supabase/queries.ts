@@ -187,7 +187,12 @@ export function useToggleChapterProgress() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ userId, chapterId, status }: { userId: string; chapterId: string; status: string }) => {
-      const { error } = await supabase.from('chapter_progress').upsert({ user_id: userId, chapter_id: chapterId, status } as any, { onConflict: 'user_id,chapter_id' })
+      const { error } = await supabase.from('chapter_progress').upsert({ 
+        user_id: userId, 
+        chapter_id: chapterId, 
+        status,
+        completed_at: new Date().toISOString()
+      } as any, { onConflict: 'user_id,chapter_id' })
       if (error) throw error
     },
     onMutate: async ({ userId, chapterId, status }) => {
@@ -199,23 +204,25 @@ export function useToggleChapterProgress() {
       const previousProgress = queryClient.getQueryData(queryKeys.chapterProgress(userId, chapterId))
       const previousAllProgress = queryClient.getQueryData(queryKeys.allChapterProgress(userId))
 
+      const now = new Date().toISOString()
+
       // Optimistically update the single-chapter cache
       queryClient.setQueryData(queryKeys.chapterProgress(userId, chapterId), (old: any) => ({
         ...old,
         user_id: userId,
         chapter_id: chapterId,
-        status
+        status,
+        completed_at: now
       }))
 
-      // Optimistically update the allChapterProgress cache (used by SubjectListPage, ProgressHub, Compare, Dashboard)
+      // Optimistically update the allChapterProgress cache
       queryClient.setQueryData(queryKeys.allChapterProgress(userId), (old: any) => {
         if (!Array.isArray(old)) return old
         const exists = old.some((p: any) => p.chapter_id === chapterId)
         if (exists) {
-          return old.map((p: any) => p.chapter_id === chapterId ? { ...p, status } : p)
+          return old.map((p: any) => p.chapter_id === chapterId ? { ...p, status, completed_at: now } : p)
         }
-        // If this chapter has no progress row yet, add one
-        return [...old, { user_id: userId, chapter_id: chapterId, status }]
+        return [...old, { user_id: userId, chapter_id: chapterId, status, completed_at: now }]
       })
 
       return { previousProgress, previousAllProgress, userId, chapterId }
@@ -311,6 +318,22 @@ export function useDeleteComment() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['comments'] })
     },
+  })
+}
+
+export function useAllComments(userId?: string) {
+  return useQuery({
+    queryKey: ['allComments', userId],
+    queryFn: async () => {
+      if (!userId) return []
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('user_id', userId)
+      if (error) throw error
+      return data as Comment[]
+    },
+    enabled: !!userId,
   })
 }
 

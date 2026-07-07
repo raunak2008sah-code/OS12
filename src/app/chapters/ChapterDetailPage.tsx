@@ -25,6 +25,7 @@ import {
   useAddComment
   // onDeleteComment is not implemented in queries.ts, we'll omit or add it if needed
 } from '@/lib/supabase/queries'
+import { chapterWorkflowPercent } from '@/lib/progress'
 
 import { ChapterHeader } from '@/features/chapters/components/ChapterHeader'
 import { ChapterWorkflow } from '@/features/chapters/components/ChapterWorkflow'
@@ -36,18 +37,7 @@ import { ChapterFormula } from '@/features/chapters/components/ChapterFormula'
 import { ChapterComments } from '@/features/chapters/components/ChapterComments'
 import { supabase } from '@/lib/supabase/client'
 
-const WORKFLOW_STAGES = [
-  'Lecture Pending',
-  'NCERT Complete',
-  'WINR Complete',
-  'HC Verma / Module Complete',
-  'PYQ Complete',
-  'Revision 1 Done',
-  'Notes Finalized',
-  'Mock Test 1 Complete',
-  'Mock Test 2 Complete',
-  'Done'
-]
+
 
 export default function ChapterDetailPage() {
   const { chapterId } = useParams<{ chapterId: string }>()
@@ -95,9 +85,7 @@ export default function ChapterDetailPage() {
   const activePhase = phases?.find(p => p.id === chapter.phase)
   const activeBacklog = backlog.find(b => b.chapter_id === chapter.id)
 
-  const currentIndex = WORKFLOW_STAGES.indexOf(currentStatus)
-  const safeIndex = currentIndex === -1 ? 0 : currentIndex
-  const completionPercent = Math.round(((safeIndex + (currentStatus === 'Done' ? 1 : 0)) / WORKFLOW_STAGES.length) * 100)
+  const completionPercent = chapterWorkflowPercent(currentStatus)
 
   // Handlers
   const handleStatusChange = async (status: string) => {

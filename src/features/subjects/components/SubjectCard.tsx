@@ -2,6 +2,9 @@ import { Link } from 'react-router-dom'
 import { BookOpen, AlertCircle, Clock, ChevronRight, TrendingUp } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Subject, Chapter, ChapterProgress, Backlog } from '@/lib/supabase/types'
+import { subjectProgress, isChapterDone, getCurrentChapter } from '@/lib/progress'
+import { useAuth } from '@/hooks/useAuth'
+import { useAllNotes, useFormulaSheets, useMistakes, useAllComments } from '@/lib/supabase/queries'
 
 interface SubjectCardProps {
   subject: Subject
@@ -11,19 +14,21 @@ interface SubjectCardProps {
 }
 
 export function SubjectCard({ subject, chapters, progress, backlog }: SubjectCardProps) {
+  const { user } = useAuth()
+  const { data: notes = [] } = useAllNotes(user?.id)
+  const { data: formulas = [] } = useFormulaSheets(user?.id)
+  const { data: mistakes = [] } = useMistakes(undefined, user?.id)
+  const { data: comments = [] } = useAllComments(user?.id)
+
   const totalChapters = chapters.length
-  const completedChapters = chapters.filter(ch => {
-    const p = progress.find(pr => pr.chapter_id === ch.id)
-    return p?.status === 'Completed' || p?.status === 'Done'
-  }).length
-  
-  const completionPercent = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0
+  const chapterIds = chapters.map(ch => ch.id)
+  const completionPercent = subjectProgress(chapterIds, progress)
   
   const estimatedHours = chapters.reduce((acc, curr) => acc + (curr.estimated_hours || 0), 0)
   const completedHours = chapters
     .filter(ch => {
       const p = progress.find(pr => pr.chapter_id === ch.id)
-      return p?.status === 'Completed' || p?.status === 'Done'
+      return isChapterDone(p?.status)
     })
     .reduce((acc, curr) => acc + (curr.estimated_hours || 0), 0)
   const remainingHours = estimatedHours - completedHours
@@ -32,17 +37,15 @@ export function SubjectCard({ subject, chapters, progress, backlog }: SubjectCar
     chapters.some(c => c.id === b.chapter_id)
   )
 
-  // Find the "current" chapter (first non-completed)
-  const currentChapter = chapters.find(ch => {
-    const p = progress.find(pr => pr.chapter_id === ch.id)
-    return !p || (p.status !== 'Completed' && p.status !== 'Done')
-  })
+  // Find the "current" chapter (most recently interacted incomplete chapter)
+  const currentChapterInfo = getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, [subject])
+  const currentChapter = currentChapterInfo?.chapter || null
 
   // Weakness indicator
   const hardChapters = chapters.filter(c => c.difficulty === 'hard')
   const hardIncomplete = hardChapters.filter(ch => {
     const p = progress.find(pr => pr.chapter_id === ch.id)
-    return !p || (p.status !== 'Completed' && p.status !== 'Done')
+    return !p || !isChapterDone(p.status)
   })
   const weaknessLevel = hardIncomplete.length > 2 ? 'High' : hardIncomplete.length > 0 ? 'Medium' : 'Low'
 

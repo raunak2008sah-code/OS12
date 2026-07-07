@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Users, Swords, Trophy, Activity, AlertTriangle, BookOpen, TrendingUp } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { subjectProgress, isChapterDone } from '@/lib/progress'
 import { 
   useChapters, 
   useAllChapterProgress, 
@@ -30,27 +31,23 @@ export default function ComparePage() {
   const { data: friendMistakes = [] } = useMistakes(undefined, friend?.id)
 
   const stats = useMemo(() => {
-    const totalChapters = chapters.length
-
-    const myCompletedChapters = myProgress.filter(p => p.status === 'Completed' || p.status === 'Done').length
-    const myPercent = totalChapters > 0 ? Math.round((myCompletedChapters / totalChapters) * 100) : 0
+    const myCompletedChapters = myProgress.filter(p => isChapterDone(p.status)).length
+    const myPercent = subjectProgress(chapters.map(c => c.id), myProgress)
     const myResourcesCount = myResources.filter(r => r.status === 'completed').length
     const myMistakesCount = myMistakes.length
 
-    const friendCompletedChapters = friendProgress.filter(p => p.status === 'Completed' || p.status === 'Done').length
-    const friendPercent = totalChapters > 0 ? Math.round((friendCompletedChapters / totalChapters) * 100) : 0
+    const friendCompletedChapters = friendProgress.filter(p => isChapterDone(p.status)).length
+    const friendPercent = subjectProgress(chapters.map(c => c.id), friendProgress)
     const friendResourcesCount = friendResources.filter(r => r.status === 'completed').length
     const friendMistakesCount = friendMistakes.length
 
     // Per-subject radar
     const subjectComparison = subjects.map(s => {
       const subChapters = chapters.filter(c => c.subject_id === s.id)
-      const myDone = subChapters.filter(ch => myProgress.some(p => p.chapter_id === ch.id && (p.status === 'Completed' || p.status === 'Done'))).length
-      const friendDone = subChapters.filter(ch => friendProgress.some(p => p.chapter_id === ch.id && (p.status === 'Completed' || p.status === 'Done'))).length
       return {
         name: s.name,
-        myPercent: subChapters.length > 0 ? Math.round((myDone / subChapters.length) * 100) : 0,
-        friendPercent: subChapters.length > 0 ? Math.round((friendDone / subChapters.length) * 100) : 0,
+        myPercent: subjectProgress(subChapters.map(c => c.id), myProgress),
+        friendPercent: subjectProgress(subChapters.map(c => c.id), friendProgress),
       }
     })
 

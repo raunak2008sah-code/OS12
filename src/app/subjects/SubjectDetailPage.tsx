@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ChevronRight, Book, Clock, AlertCircle, Target } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { subjectProgress, isChapterDone } from '@/lib/progress'
 import { FilterBar } from '@/features/subjects/components/FilterBar'
 import { ChapterCard } from '@/features/subjects/components/ChapterCard'
 import { 
@@ -53,7 +54,7 @@ export default function SubjectDetailPage() {
     chapters.forEach(ch => {
       totalEstimated += ch.estimated_hours || 0
       const p = progress.find(pr => pr.chapter_id === ch.id)
-      if (p?.status === 'Completed' || p?.status === 'Done') completedCount++
+      if (isChapterDone(p?.status)) completedCount++
       if (backlog.some(b => b.chapter_id === ch.id)) activeBacklogCount++
     })
 
@@ -79,7 +80,7 @@ export default function SubjectDetailPage() {
       completionStats: {
         total: chapters.length,
         completed: completedCount,
-        percent: chapters.length > 0 ? Math.round((completedCount / chapters.length) * 100) : 0,
+        percent: subjectProgress(chapters.map(c => c.id), progress),
         estimatedHours: totalEstimated,
         backlogs: activeBacklogCount
       }
@@ -208,11 +209,11 @@ function ChapterGroups({ chapters, progress, ...props }: any) {
 
   const active = chapters.filter((c: any) => {
     const p = progress.find((pr: any) => pr.chapter_id === c.id)
-    return !p || (p.status !== 'Completed' && p.status !== 'Done')
+    return !p || !isChapterDone(p.status)
   })
   const completed = chapters.filter((c: any) => {
     const p = progress.find((pr: any) => pr.chapter_id === c.id)
-    return p?.status === 'Completed' || p?.status === 'Done'
+    return isChapterDone(p?.status)
   })
 
   return (

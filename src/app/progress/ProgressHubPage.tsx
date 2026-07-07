@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Activity, Target, Clock, AlertCircle, TrendingUp, CalendarDays, BarChart3, Flame } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { subjectProgress, isChapterDone } from '@/lib/progress'
 import { 
   useChapters, 
   useAllChapterProgress, 
@@ -30,12 +31,12 @@ export default function ProgressHubPage() {
 
   const stats = useMemo(() => {
     const totalChapters = chapters.length
-    const completedChapters = chapterProgress.filter(p => p.status === 'Completed' || p.status === 'Done').length
-    const overallPercent = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0
+    const completedChapters = chapterProgress.filter(p => isChapterDone(p.status)).length
+    const overallPercent = subjectProgress(chapters.map(c => c.id), chapterProgress)
 
     const totalEstHours = chapters.reduce((sum, ch) => sum + (ch.estimated_hours || 0), 0)
     const completedHours = chapters
-      .filter(ch => chapterProgress.some(p => p.chapter_id === ch.id && (p.status === 'Completed' || p.status === 'Done')))
+      .filter(ch => chapterProgress.some(p => p.chapter_id === ch.id && isChapterDone(p.status)))
       .reduce((sum, ch) => sum + (ch.estimated_hours || 0), 0)
     
     const activeBacklogs = backlog.length
@@ -49,9 +50,9 @@ export default function ProgressHubPage() {
     const subjectStats = subjects.map(s => {
       const subChapters = chapters.filter(c => c.subject_id === s.id)
       const subCompleted = subChapters.filter(ch => 
-        chapterProgress.some(p => p.chapter_id === ch.id && (p.status === 'Completed' || p.status === 'Done'))
+        chapterProgress.some(p => p.chapter_id === ch.id && isChapterDone(p.status))
       ).length
-      const pct = subChapters.length > 0 ? Math.round((subCompleted / subChapters.length) * 100) : 0
+      const pct = subjectProgress(subChapters.map(c => c.id), chapterProgress)
       return { name: s.name, completed: subCompleted, total: subChapters.length, percent: pct }
     })
 

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { subjectProgress } from '@/lib/progress'
 import {
   useChapters,
   useAllChapterProgress,
@@ -20,18 +21,12 @@ function getBacklogStatus(count: number): { label: string; color: string; bg: st
 }
 
 function computeBoardsProgress(chapters: Chapter[], progress: ChapterProgress[]): number {
-  if (!chapters.length) return 0
-  const completedIds = new Set(progress.filter(p => p.status === 'Completed').map(p => p.chapter_id))
-  const completed = chapters.filter(c => completedIds.has(c.id)).length
-  return Math.round((completed / chapters.length) * 100)
+  return subjectProgress(chapters.map(c => c.id), progress)
 }
 
 function computeJeeProgress(chapters: Chapter[], progress: ChapterProgress[]): number {
   const jeeChapters = chapters.filter(c => c.jee_weight !== 'none')
-  if (!jeeChapters.length) return 0
-  const completedIds = new Set(progress.filter(p => p.status === 'Completed').map(p => p.chapter_id))
-  const completed = jeeChapters.filter(c => completedIds.has(c.id)).length
-  return Math.round((completed / jeeChapters.length) * 100)
+  return subjectProgress(jeeChapters.map(c => c.id), progress)
 }
 
 

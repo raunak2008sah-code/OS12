@@ -2,28 +2,16 @@ import { Check, ChevronRight, Activity } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { cn } from '@/lib/utils'
-
-const WORKFLOW_STAGES = [
-  'Lecture Pending',
-  'NCERT Complete',
-  'WINR Complete',
-  'HC Verma / Module Complete',
-  'PYQ Complete',
-  'Revision 1 Done',
-  'Notes Finalized',
-  'Mock Test 1 Complete',
-  'Mock Test 2 Complete',
-  'Done'
-]
+import { WORKFLOW_STAGES } from '@/lib/progress'
 
 interface ChapterWorkflowProps {
   currentStatus: string
-  onStatusChange: (status: string) => void
+  onStatusChange: (status: any) => void
 }
 
 export function ChapterWorkflow({ currentStatus, onStatusChange }: ChapterWorkflowProps) {
   const [isExpanded, setIsExpanded] = useLocalStorage('os12-workflow-expanded', true)
-  const currentIndex = WORKFLOW_STAGES.indexOf(currentStatus)
+  const currentIndex = WORKFLOW_STAGES.indexOf(currentStatus as any)
   const safeIndex = currentIndex === -1 ? 0 : currentIndex
 
   const completionPercent = Math.round(((safeIndex + (currentStatus === 'Done' ? 1 : 0)) / WORKFLOW_STAGES.length) * 100)

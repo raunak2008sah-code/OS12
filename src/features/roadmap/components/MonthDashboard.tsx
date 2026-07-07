@@ -1,5 +1,6 @@
 import { type RoadmapMonthWorkload, type RoadmapMonthResource } from '@/lib/supabase/types'
 import { Card, CardContent } from '@/components/ui/card'
+import { subjectProgress } from '@/lib/progress'
 import { BookOpen, CheckCircle, AlertCircle, Flame } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAllChapterProgress, useChapters, useBacklog } from '@/lib/supabase/queries'
@@ -20,12 +21,7 @@ export function MonthDashboard({ workload, resources: _resources, monthPhaseId }
   const phaseChapters = monthPhaseId 
     ? chapters.filter(c => c.phase === monthPhaseId) 
     : chapters
-  const phaseCompleted = phaseChapters.filter(ch => 
-    progress.some(p => p.chapter_id === ch.id && (p.status === 'Completed' || p.status === 'Done'))
-  ).length
-  const completionRate = phaseChapters.length > 0 
-    ? Math.round((phaseCompleted / phaseChapters.length) * 100) 
-    : 0
+  const completionRate = subjectProgress(phaseChapters.map(c => c.id), progress)
 
   const backlogCount = backlog.length
 
@@ -63,12 +59,11 @@ export function MonthDashboard({ workload, resources: _resources, monthPhaseId }
               <CheckCircle className="w-4 h-4 text-green-500" />
               <span className="text-sm font-medium">Completion</span>
             </div>
-            <div className="flex items-end gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-3xl font-bold">{completionRate}%</span>
-              <span className="text-sm text-muted-foreground mb-1">{phaseCompleted}/{phaseChapters.length} chapters</span>
-            </div>
-            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-green-500 rounded-full" style={{ width: `${completionRate}%` }} />
+              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 rounded-full" style={{ width: `${completionRate}%` }} />
+              </div>
             </div>
           </CardContent>
         </Card>
