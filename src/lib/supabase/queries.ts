@@ -482,7 +482,11 @@ export function useCreateDailyCheckin() {
     },
     onSettled: (_data, _error, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.dailyCheckins(variables.userId) })
-      // We also invalidate profile/dashboard related queries if necessary, but this relies on dailyCheckins cache
+      
+      // Also invalidate the corresponding monthly check-in cache for the calendar
+      const year = parseInt(variables.date.split('-')[0], 10)
+      const month = parseInt(variables.date.split('-')[1], 10)
+      void queryClient.invalidateQueries({ queryKey: queryKeys.monthlyCheckins(variables.userId, year, month) })
     },
   })
 }
