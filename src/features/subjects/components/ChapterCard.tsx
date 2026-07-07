@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
-import { BookOpen, AlertTriangle, FileText, CheckCircle2, PenTool, Circle } from 'lucide-react'
+import { FileText, CheckCircle2, PenTool, Circle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { isChapterDone, chapterWorkflowPercentDynamic } from '@/lib/progress'
 import { getSubjectConfig, getWorkflowForChapter } from '@/lib/subjectProfiles'
 import type { 
   Chapter, ChapterProgress, ResourceProgress, Note, 
-  Mistake, FormulaSheet, Revision, RoadmapPhase, RoadmapMonth 
+  Revision, RoadmapPhase, RoadmapMonth 
 } from '@/lib/supabase/types'
 
 interface ChapterCardProps {
@@ -13,8 +13,6 @@ interface ChapterCardProps {
   progress?: ChapterProgress
   resources: (ResourceProgress & { resources: { name: string } | null })[]
   notes: Note[]
-  mistakes: Mistake[]
-  formulaSheets: FormulaSheet[]
   revisions: Revision[]
   phases: RoadmapPhase[]
   months: RoadmapMonth[]
@@ -22,7 +20,7 @@ interface ChapterCardProps {
 }
 
 export function ChapterCard({
-  chapter, progress, resources, notes, mistakes, formulaSheets, revisions, phases, months, subjectSlug
+  chapter, progress, resources, notes, revisions, phases, months, subjectSlug
 }: ChapterCardProps) {
   const currentPhase = phases.find(p => p.id === chapter.phase)
   const currentMonth = months.find(m => m.id === chapter.month)
@@ -33,8 +31,6 @@ export function ChapterCard({
   const stages = getWorkflowForChapter(config, chapter.name)
   const completionPercent = chapterWorkflowPercentDynamic(progress?.status, stages)
   const hasNotes = notes.some(n => n.chapter_id === chapter.id && n.content && n.content.trim().length > 0)
-  const activeMistakes = mistakes.filter(m => m.chapter_id === chapter.id && !m.is_resolved)
-  const hasFormula = formulaSheets.some(f => f.chapter_id === chapter.id)
 
   const revisionDays = [1, 3, 7, 21, 45]
   
@@ -97,12 +93,6 @@ export function ChapterCard({
           <div className="flex gap-3">
             <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md ${hasNotes ? 'bg-blue-500/10 text-blue-500' : 'bg-muted text-muted-foreground opacity-50'}`}>
               <FileText className="h-3.5 w-3.5" /> Notes
-            </div>
-            <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md ${activeMistakes.length > 0 ? 'bg-red-500/10 text-red-500' : 'bg-muted text-muted-foreground opacity-50'}`}>
-              <AlertTriangle className="h-3.5 w-3.5" /> {activeMistakes.length > 0 ? `${activeMistakes.length} Mistakes` : 'Mistakes'}
-            </div>
-            <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md ${hasFormula ? 'bg-purple-500/10 text-purple-500' : 'bg-muted text-muted-foreground opacity-50'}`}>
-              <BookOpen className="h-3.5 w-3.5" /> Formula
             </div>
           </div>
         </div>
