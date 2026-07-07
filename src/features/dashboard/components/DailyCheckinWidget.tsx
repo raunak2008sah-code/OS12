@@ -3,8 +3,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Check, Flame, Clock } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useDailyCheckins, useCreateDailyCheckin } from '@/lib/supabase/queries'
-import { formatIST, addDaysIST } from '@/lib/time'
-import { formatRelativeTime } from '@/lib/progress'
+import { formatIST } from '@/lib/time'
+import { calculateStudyStreak, formatRelativeTime } from '@/lib/progress'
 
 export function DailyCheckinWidget() {
   const { user } = useAuth()
@@ -12,9 +12,8 @@ export function DailyCheckinWidget() {
   const createCheckin = useCreateDailyCheckin()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Determine Today and Yesterday in IST
+  // Determine Today in IST
   const todayStr = formatIST(new Date(), 'yyyy-MM-dd')
-  const yesterdayStr = formatIST(addDaysIST(new Date(), -1), 'yyyy-MM-dd')
 
   const todayCheckin = checkins.find(c => c.date === todayStr)
   const isCheckedToday = !!todayCheckin
@@ -24,24 +23,8 @@ export function DailyCheckinWidget() {
     ? formatRelativeTime(lastCheckin.checked_at)
     : 'Never'
 
-  // Calculate Streak
-  let streak = 0
-  const checkinDates = new Set(checkins.map(c => c.date))
-  
-  if (checkinDates.has(todayStr) || checkinDates.has(yesterdayStr)) {
-    // Start counting backwards
-    let currentDate = checkinDates.has(todayStr) ? new Date() : addDaysIST(new Date(), -1)
-    
-    while (true) {
-      const dateStr = formatIST(currentDate, 'yyyy-MM-dd')
-      if (checkinDates.has(dateStr)) {
-        streak++
-        currentDate = addDaysIST(currentDate, -1)
-      } else {
-        break
-      }
-    }
-  }
+  // Calculate Streak using canonical helper
+  const streak = calculateStudyStreak(checkins)
 
   const handleCheckin = async () => {
     if (!user || isCheckedToday || isSubmitting) return

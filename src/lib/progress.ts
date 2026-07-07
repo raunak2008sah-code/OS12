@@ -1,5 +1,5 @@
 import type { Chapter, ChapterProgress, Note, Subject, ResourceProgress, Revision } from '@/lib/supabase/types'
-import { getSubjectConfig, getWorkflowForChapter } from '@/lib/subjectProfiles'
+import { getSubjectConfig, getWorkflowForChapter, SUBJECT_PROFILES } from '@/lib/subjectProfiles'
 
 /**
  * Canonical workflow stages for OS12.
@@ -218,21 +218,34 @@ export function getLatestCompletedWorkflow(
   progress: ChapterProgress[],
   chapters: Chapter[]
 ): { chapterName: string; status: string; completedAt: string } | null {
-  // Filter to rows that represent real activity (not the default 'Lecture Pending')
   const active = progress.filter(p => p.status && p.completed_at && p.status !== 'Lecture Pending')
   if (active.length === 0) return null
   
-  // Sort by most recent completed_at
   const sorted = active.sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime())
   const latest = sorted[0]
   
   const chapter = chapters.find(c => c.id === latest.chapter_id)
   
-  // The status field (e.g. "NCERT Complete", "WINR Complete", "Done") already
-  // represents the checkpoint that was reached. Display it directly.
+  let stages: string[] = []
+  if (chapter) {
+     const profile = SUBJECT_PROFILES.find((s: any) => s.slug === (chapter as any).subject?.slug) || getSubjectConfig(undefined)
+     stages = getWorkflowForChapter(profile, chapter.name)
+  }
+
+  if (stages.length === 0) return null
+
+  const idx = stages.indexOf(latest.status)
+  
+  let completedStage = latest.status
+  if (latest.status !== 'Done' && idx > 0) {
+    completedStage = stages[idx - 1]
+  } else if (idx === 0) {
+    return null
+  }
+  
   return {
     chapterName: chapter?.name || 'Unknown Chapter',
-    status: latest.status,
+    status: completedStage,
     completedAt: latest.completed_at!
   }
 }
@@ -252,60 +265,58 @@ export function getCompletedTodayCount(progress: ChapterProgress[]): number {
   }).length
 }
 
+import { formatIST, addDaysIST } from '@/lib/time'
+
 /**
- * Real Study Streak calculator.
- * Group all timestamps by YYYY-MM-DD and check consecutive days.
+ * Calculate study streak from actual calendar dates in IST (Asia/Kolkata).
+ * It expects an array of DailyCheckin objects (or any object with a 'date' field).
  */
-export function calculateStudyStreak(timestamps: string[]): number {
-  if (timestamps.length === 0) return 0
+export function calculateStudyStreak(checkins: { date: string }[]): number {
+  if (!checkins || checkins.length === 0) return 0
   
-  const activeDates = new Set<string>()
-  for (const ts of timestamps) {
-    if (!ts) continue
-    const d = new Date(ts)
-    const yyyy = d.getFullYear()
-    const mm = String(d.getMonth() + 1).padStart(2, '0')
-    const dd = String(d.getDate()).padStart(2, '0')
-    activeDates.add(`${yyyy}-${mm}-${dd}`)
-  }
+  // Extract all dates and sort descending
+  const dates = checkins
+    .map(c => c.date)
+    .filter(Boolean)
+    .sort((a, b) => b.localeCompare(a)) // e.g. "2026-07-07", "2026-07-06"
+    
+  if (dates.length === 0) return 0
   
-  const sortedDates = Array.from(activeDates).sort((a, b) => b.localeCompare(a))
-  if (sortedDates.length === 0) return 0
+  // Get today and yesterday in IST
+  const now = new Date()
+  const todayIST = formatIST(now, 'yyyy-MM-dd')
   
-  const today = new Date()
-  const yyyy = today.getFullYear()
-  const mm = String(today.getMonth() + 1).padStart(2, '0')
-  const dd = String(today.getDate()).padStart(2, '0')
-  const todayStr = `${yyyy}-${mm}-${dd}`
+  const yesterday = addDaysIST(now, -1)
+  const yesterdayIST = formatIST(yesterday, 'yyyy-MM-dd')
   
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
-  const y_yyyy = yesterday.getFullYear()
-  const y_mm = String(yesterday.getMonth() + 1).padStart(2, '0')
-  const y_dd = String(yesterday.getDate()).padStart(2, '0')
-  const yesterdayStr = `${y_yyyy}-${y_mm}-${y_dd}`
-  
-  const latestActiveDate = sortedDates[0]
-  if (latestActiveDate !== todayStr && latestActiveDate !== yesterdayStr) {
-    return 0
-  }
+  // Distinct dates descending
+  const uniqueDates = Array.from(new Set(dates))
   
   let streak = 0
-  let checkDate = new Date(latestActiveDate)
+  let expectedDate = new Date(todayIST)
   
-  while (true) {
-    const c_yyyy = checkDate.getFullYear()
-    const c_mm = String(checkDate.getMonth() + 1).padStart(2, '0')
-    const c_dd = String(checkDate.getDate()).padStart(2, '0')
-    const checkStr = `${c_yyyy}-${c_mm}-${c_dd}`
+  // If today is not checked in, we expect the streak to start from yesterday
+  if (!uniqueDates.includes(todayIST)) {
+    expectedDate = new Date(yesterdayIST)
+  }
+
+  for (const dateStr of uniqueDates) {
+    const expectedStr = expectedDate.toLocaleString('en-CA', { timeZone: 'UTC' }).substring(0, 10) // Since we constructed Date from YYYY-MM-DD
     
-    if (activeDates.has(checkStr)) {
+    // In JS, new Date('YYYY-MM-DD') creates a date at midnight UTC.
+    // So toLocaleString('en-CA', { timeZone: 'UTC' }) will safely return 'YYYY-MM-DD'.
+    
+    if (dateStr === expectedStr) {
       streak++
-      checkDate.setDate(checkDate.getDate() - 1)
+      expectedDate.setDate(expectedDate.getDate() - 1)
     } else {
-      break
+      break // Streak broken
     }
   }
+  
+  // If the user didn't check in today AND didn't check in yesterday, 
+  // expectedDate would have started at yesterday, but uniqueDates[0] would be earlier, 
+  // so streak loop breaks immediately at 0. This correctly handles midnight reset!
   
   return streak
 }

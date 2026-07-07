@@ -8,7 +8,8 @@ import {
   useAllNotes,
   useChapters,
   useSubjects,
-  useAllResourceProgress
+  useAllResourceProgress,
+  useDailyCheckins
 } from '@/lib/supabase/queries'
 import { 
   calculateOverallProgress, 
@@ -29,27 +30,26 @@ export function FriendActivityWidget() {
   const { data: resources = [] } = useAllResourceProgress(friend?.id)
   const { data: chapters = [] } = useChapters()
   const { data: subjects = [] } = useSubjects()
+  const { data: checkins = [] } = useDailyCheckins(friend?.id)
 
   if (!friend) return null
 
   // Calculate overall progress % using unified canonical formula
   const friendPercent = calculateOverallProgress(chapters, progress, subjects)
 
-  // Collect all timestamps for Last Seen and Streak
+  // Last Seen
   const allTimestamps: string[] = []
   progress.forEach(p => { if (p.completed_at) allTimestamps.push(p.completed_at) })
   notes.forEach(n => { if (n.updated_at) allTimestamps.push(n.updated_at) })
-
   resources.forEach(r => { if (r.completed_at) allTimestamps.push(r.completed_at) })
   revisions.forEach(r => { if (r.completed_at) allTimestamps.push(r.completed_at) })
-
-  // Last Seen
+  
   const sortedTimestamps = [...allTimestamps].sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
   const lastSeenStr = sortedTimestamps[0] ? formatRelativeTime(sortedTimestamps[0]) : 'Never'
   const isOnline = sortedTimestamps[0] && (new Date().getTime() - new Date(sortedTimestamps[0]).getTime() < 3600000)
 
   // Streak
-  const streak = calculateStudyStreak(allTimestamps)
+  const streak = calculateStudyStreak(checkins)
 
   // Friend Current Chapter & Latest Activity
   const friendCurrentInfo = getCurrentChapter(chapters, progress, notes, resources, revisions, subjects)
