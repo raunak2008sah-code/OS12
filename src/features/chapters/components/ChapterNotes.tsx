@@ -92,9 +92,9 @@ export function ChapterNotes({ note, onSave }: ChapterNotesProps) {
   }
 
   return (
-    <Card className={`overflow-hidden border-border bg-card shadow-sm flex flex-col transition-all duration-300 ease-in-out ${isExpanded ? 'h-[70vh]' : 'max-h-[220px]'}`}>
+    <Card className={`overflow-hidden border-border bg-card shadow-sm flex flex-col transition-all duration-300 ease-in-out ${isExpanded ? 'h-[70vh]' : 'max-h-[150px]'}`}>
       <div 
-        className="w-full flex items-center justify-between px-6 py-4 bg-muted/10 border-b border-border/50 cursor-pointer hover:bg-muted/20 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-2.5 bg-muted/10 border-b border-border/50 cursor-pointer hover:bg-muted/20 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-2.5">
@@ -124,11 +124,11 @@ export function ChapterNotes({ note, onSave }: ChapterNotesProps) {
         
         {!isExpanded ? (
           <div 
-            className="flex-1 flex flex-col p-4 cursor-pointer hover:bg-muted/5 transition-colors"
+            className="flex-1 flex flex-col px-4 py-2 cursor-pointer hover:bg-muted/5 transition-colors"
             onClick={() => setIsExpanded(true)}
           >
             {content.trim() ? (
-              <div className="text-sm text-muted-foreground font-mono leading-relaxed line-clamp-3">
+              <div className="text-sm text-muted-foreground font-mono leading-relaxed line-clamp-2">
                 {content}
               </div>
             ) : (
@@ -136,7 +136,7 @@ export function ChapterNotes({ note, onSave }: ChapterNotesProps) {
                 No notes yet. Click Expand Editor to start writing.
               </div>
             )}
-            <div className="mt-3 flex justify-center">
+            <div className="mt-2 flex justify-center">
               <button className="text-[10px] font-bold uppercase tracking-wider text-primary hover:underline flex items-center gap-1.5">
                 <Maximize2 className="h-3 w-3" />
                 Expand Editor

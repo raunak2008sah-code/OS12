@@ -105,9 +105,9 @@ export default function ChapterDetailPage() {
         completionPercent={completionPercent}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start h-full pb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pb-8">
         {/* Left Column - Workflow, Resources, Revisions */}
-        <div className="lg:col-span-3 space-y-4 lg:sticky lg:top-24">
+        <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-24">
           <ChapterWorkflow 
             currentStatus={currentStatus}
             onStatusChange={handleStatusChange}
@@ -125,7 +125,7 @@ export default function ChapterDetailPage() {
         </div>
 
         {/* Right Column - Notes Workspace */}
-        <div className="lg:col-span-9 h-full min-h-[700px]">
+        <div className="lg:col-span-8">
           <ChapterNotes 
             note={note || null}
             onSave={handleSaveNote}
