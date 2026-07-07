@@ -39,7 +39,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         
         {/* Column 1: Weekly Tasks */}
         <Card className="border-border/50 bg-card/50 flex flex-col">
@@ -47,7 +47,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
             <CheckSquare className="w-3.5 h-3.5 text-primary" />
             <span className="font-semibold text-xs uppercase tracking-wide">Weekly Tasks</span>
           </div>
-          <CardContent className="p-3 space-y-3 flex-1 overflow-y-auto custom-scrollbar max-h-[300px]">
+          <CardContent className="p-4 space-y-4 flex-1">
             {activeWeek ? (
               <>
                 <div className="bg-background rounded-lg p-2.5 border border-border/50">
@@ -75,23 +75,25 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
             <LayoutGrid className="w-3.5 h-3.5 text-primary" />
             <span className="font-semibold text-xs uppercase tracking-wide">Resource Matrix</span>
           </div>
-          <CardContent className="p-3 space-y-2 flex-1 overflow-y-auto custom-scrollbar max-h-[300px]">
-            {resources.length > 0 ? resources.map(resource => (
-              <div key={resource.id} className="flex items-center justify-between text-xs border-b border-border/50 pb-1.5 last:border-0 last:pb-0 gap-2">
-                <span className={cn("font-medium truncate", resource.status === 'Inactive' ? 'text-muted-foreground' : 'text-foreground')}>
-                  {resource.name}
-                </span>
-                <span className={cn("inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-semibold w-20 shrink-0 text-center", 
-                  resource.status === 'Active' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                  resource.status === 'Heavy Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                  resource.status === 'Revision' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
-                  resource.status === 'Completed' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                  'bg-muted text-muted-foreground border-border/50'
-                )}>
-                  {resource.status}
-                </span>
-              </div>
-            )) : <p className="text-xs text-muted-foreground">No resources mapped.</p>}
+          <CardContent className="p-4 flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {resources.length > 0 ? resources.map(resource => (
+                <div key={resource.id} className="bg-background border border-border/50 rounded-lg p-3 flex flex-col gap-2 shadow-sm">
+                  <span className={cn("font-semibold text-sm truncate", resource.status === 'Inactive' ? 'text-muted-foreground' : 'text-foreground')}>
+                    {resource.name}
+                  </span>
+                  <span className={cn("inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-bold w-fit", 
+                    resource.status === 'Active' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                    resource.status === 'Heavy Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                    resource.status === 'Revision' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
+                    resource.status === 'Completed' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                    'bg-muted text-muted-foreground border-border/50'
+                  )}>
+                    {resource.status}
+                  </span>
+                </div>
+              )) : <p className="text-xs text-muted-foreground col-span-full">No resources mapped.</p>}
+            </div>
           </CardContent>
         </Card>
 
@@ -101,7 +103,7 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
             <Flag className="w-3.5 h-3.5 text-primary" />
             <span className="font-semibold text-xs uppercase tracking-wide">Deliverables</span>
           </div>
-          <CardContent className="p-3 flex-1 overflow-y-auto custom-scrollbar max-h-[300px]">
+          <CardContent className="p-4 flex-1">
             <div className="relative border-l-2 border-primary/20 ml-2 pl-4 space-y-4">
               {milestones.length > 0 ? milestones.map(milestone => (
                 <div key={milestone.id} className="relative">

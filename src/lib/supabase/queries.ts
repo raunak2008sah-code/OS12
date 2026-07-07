@@ -28,6 +28,7 @@ export const queryKeys = {
   friendProfile: (currentUserId?: string) => ['friendProfile', currentUserId] as const,
   allChapterProgress: (userId?: string) => ['allChapterProgress', userId] as const,
   dailyCheckins: (userId?: string) => ['dailyCheckins', userId] as const,
+  monthlyCheckins: (userId: string | undefined, year: number, month: number) => ['monthlyCheckins', userId, year, month] as const,
   latestWeeklyReview: (userId?: string) => ['latestWeeklyReview', userId] as const,
   formulaSheets: (userId?: string) => ['formulaSheets', userId] as const,
   allNotes: (userId?: string) => ['allNotes', userId] as const,
@@ -425,6 +426,30 @@ export function useDailyCheckins(userId?: string) {
         .select('*')
         .eq('user_id', userId)
         .order('date', { ascending: false })
+      if (error) throw error
+      return data as DailyCheckin[]
+    },
+    enabled: !!userId,
+  })
+}
+
+export function useMonthlyCheckins(userId: string | undefined, year: number, month: number) {
+  return useQuery({
+    queryKey: queryKeys.monthlyCheckins(userId, year, month),
+    queryFn: async () => {
+      if (!userId) return []
+      
+      const startStr = `${year}-${String(month).padStart(2, '0')}-01`
+      const endStr = `${year}-${String(month).padStart(2, '0')}-31`
+      
+      const { data, error } = await supabase
+        .from('daily_checkins')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('date', startStr)
+        .lte('date', endStr)
+        .order('date', { ascending: false })
+        
       if (error) throw error
       return data as DailyCheckin[]
     },

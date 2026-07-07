@@ -1,11 +1,21 @@
 import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
-import { getNowIST, isSameDayIST } from '@/lib/time'
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, addMonths, subMonths } from 'date-fns'
+import { getNowIST, isSameDayIST, formatIST } from '@/lib/time'
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, addMonths, subMonths, isBefore } from 'date-fns'
+import { useAuth } from '@/hooks/useAuth'
+import { useMonthlyCheckins } from '@/lib/supabase/queries'
+import { cn } from '@/lib/utils'
 
 export function CalendarWidget() {
+  const { user } = useAuth()
   const [currentDate, setCurrentDate] = useState(() => getNowIST())
   const now = getNowIST()
+
+  const year = currentDate.getFullYear()
+  const month = currentDate.getMonth() + 1
+
+  const { data: checkins = [] } = useMonthlyCheckins(user?.id, year, month)
+  const checkinSet = useMemo(() => new Set(checkins.map(c => c.date)), [checkins])
 
   const days = useMemo(() => {
     const start = startOfMonth(currentDate)
@@ -17,8 +27,6 @@ export function CalendarWidget() {
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1))
   const jumpToToday = () => setCurrentDate(getNowIST())
 
-  // Calculate empty padding for start of month (assuming Monday start = 1, Sunday start = 0)
-  // Let's assume week starts on Monday for OS12 standard, so getDay() where 1=Mon, 0=Sun.
   const startDayOfWeek = days[0].getDay()
   const emptyDays = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1
 
@@ -50,18 +58,57 @@ export function CalendarWidget() {
         ))}
         {days.map((day) => {
           const isToday = isSameDayIST(day, now)
+          const dateStr = formatIST(day, 'yyyy-MM-dd')
+          const isChecked = checkinSet.has(dateStr)
+          
+          const isPast = !isToday && isBefore(day, now)
+
+          let stateClasses = "text-foreground"
+          let tooltip = format(day, 'PP')
+
+          if (isChecked) {
+            stateClasses = "bg-green-500/20 text-green-600 dark:text-green-400 font-bold"
+            tooltip = "✓ Studied"
+          } else if (isPast) {
+            stateClasses = "bg-red-500/10 text-red-500/80"
+            tooltip = "✗ Missed"
+          } else if (isToday) {
+            stateClasses = "border border-primary text-primary font-bold"
+            tooltip = "Today"
+          } else {
+            // Future Day
+            stateClasses = "text-muted-foreground/50 cursor-default"
+          }
+
           return (
             <div 
               key={day.toISOString()} 
-              className={`flex h-7 items-center justify-center rounded-sm text-xs font-medium transition-colors
-                ${isToday ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted/50 text-foreground cursor-pointer'}
-              `}
-              title={format(day, 'PP')}
+              className={cn(
+                "flex h-7 items-center justify-center rounded-sm text-xs transition-colors",
+                stateClasses
+              )}
+              title={tooltip}
             >
               {format(day, 'd')}
             </div>
           )
         })}
+      </div>
+
+      {/* Legend */}
+      <div className="mt-3 flex items-center justify-center gap-3 text-[10px] font-medium text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded-full bg-green-500/80" />
+          <span>Studied</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded-full bg-red-500/80" />
+          <span>Missed</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-2 h-2 rounded-full bg-muted border border-border/50" />
+          <span>Future</span>
+        </div>
       </div>
     </div>
   )

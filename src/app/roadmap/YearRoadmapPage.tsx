@@ -12,7 +12,6 @@ import { CalendarRange, Search } from 'lucide-react'
 import { YearTimeline } from '@/features/roadmap/components/YearTimeline'
 import { MonthDashboard } from '@/features/roadmap/components/MonthDashboard'
 import { WeeklyBreakdown } from '@/features/roadmap/components/WeeklyBreakdown'
-import { RoadmapSidebar } from '@/features/roadmap/components/RoadmapSidebar'
 
 export default function YearRoadmapPage() {
   const { data: phases = [] } = useRoadmapPhases()
@@ -74,10 +73,10 @@ export default function YearRoadmapPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] h-[calc(100vh-4rem)] flex flex-col md:flex-row overflow-hidden pb-16 md:pb-0">
+    <div className="w-full h-[calc(100vh-4rem)] flex flex-col overflow-hidden pb-16 md:pb-0">
       
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 flex flex-col h-full overflow-hidden w-full">
         
         {/* Sticky Header */}
         <header className="sticky top-0 z-10 flex-shrink-0 flex items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3 md:px-6">
@@ -138,16 +137,6 @@ export default function YearRoadmapPage() {
 
         </div>
       </div>
-
-      {/* Right Sidebar (Desktop Only) */}
-      <div className="hidden lg:block w-80 shrink-0 border-l border-border/50 bg-sidebar/30 h-full overflow-y-auto custom-scrollbar">
-        <RoadmapSidebar 
-          currentPhase={displayPhase} 
-          currentMonth={displayMonth} 
-          milestones={allMilestones} 
-        />
-      </div>
-
     </div>
   )
 }
