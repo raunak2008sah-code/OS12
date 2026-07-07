@@ -96,7 +96,7 @@ export default function ChapterDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4 pb-8">
+    <div className="mx-auto max-w-6xl space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-[350ms] ease-[cubic-bezier(0,0,0.2,1)] pb-8">
       <ChapterHeader 
         chapter={chapter}
         subject={subject}
@@ -105,9 +105,9 @@ export default function ChapterDetailPage() {
         completionPercent={completionPercent}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start pb-8">
         {/* Left Column - Workflow, Resources, Revisions */}
-        <div className="lg:col-span-7 space-y-4 lg:sticky lg:top-24">
+        <div className="lg:col-span-7 space-y-5 lg:sticky lg:top-24">
           <ChapterWorkflow 
             currentStatus={currentStatus}
             onStatusChange={handleStatusChange}

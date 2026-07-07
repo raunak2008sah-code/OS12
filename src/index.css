@@ -40,6 +40,12 @@
 
   --radius: 16px;
   /* 16px as standard premium radius */
+
+  /* Motion Tokens */
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  --default-transition-duration: 220ms;
+  --animate-accordion-down: accordion-down 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-accordion-up: accordion-up 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @layer base {

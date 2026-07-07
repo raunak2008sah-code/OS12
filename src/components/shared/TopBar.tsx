@@ -53,10 +53,10 @@ export default function TopBar() {
       <div className="flex items-center gap-4">
         <span className="text-xl font-bold tracking-tight text-foreground md:hidden">OS12</span>
         
-        <button onClick={handleSearchClick} className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/40 hover:bg-muted/80 border border-transparent hover:border-border rounded-lg transition-all w-64 shadow-sm group">
-          <Search className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+        <button onClick={handleSearchClick} className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/40 hover:bg-muted/80 border border-transparent hover:border-border/60 rounded-lg transition-all duration-[150ms] w-64 shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          <Search className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity duration-[150ms]" />
           <span>Search everything...</span>
-          <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded bg-background px-1.5 font-mono text-[10px] font-medium opacity-100 shadow-sm border">
+          <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded bg-background/80 px-1.5 font-mono text-[10px] font-medium opacity-100 shadow-sm border border-border/50">
             <span className="text-xs">⌘</span>K
           </kbd>
         </button>
@@ -64,14 +64,14 @@ export default function TopBar() {
 
       <div className="flex items-center gap-3">
         {/* Date and Time Indicator */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/50 text-sm font-medium text-muted-foreground mr-2">
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/40 text-sm font-medium text-muted-foreground mr-2">
           <CalendarIcon className="h-4 w-4 text-primary/70" />
           <span>{formatIST(now, 'EEE, MMM d')}</span>
-          <span className="w-px h-3 bg-border mx-1" />
+          <span className="w-px h-3 bg-border/60 mx-1" />
           <span>{formatIST(now, 'h:mm a')}</span>
         </div>
 
-        <button onClick={handleSearchClick} className="md:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors">
+        <button onClick={handleSearchClick} className="md:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors duration-[150ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Search className="h-5 w-5" />
         </button>
 
@@ -79,23 +79,22 @@ export default function TopBar() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full hover:bg-muted transition-colors relative"
+            className="rounded-full hover:bg-muted/50 transition-colors duration-[150ms] relative"
             onClick={() => setShowNotifications(!showNotifications)}
             aria-label="Notifications"
           >
             <Bell className="h-5 w-5 text-muted-foreground" />
             {notifications.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 ring-2 ring-background"></span>
+              <span className="absolute top-2 right-2 flex h-2 w-2">
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 ring-2 ring-background"></span>
               </span>
             )}
           </Button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 rounded-xl border border-border bg-card shadow-xl p-2 animate-in fade-in zoom-in-95 duration-200">
-              <div className="p-3 border-b font-semibold text-sm">Notifications</div>
-              <div className="max-h-[300px] overflow-y-auto p-1 py-2 space-y-1">
+            <div className="absolute right-0 mt-2 w-80 rounded-xl border border-border/60 bg-card/95 backdrop-blur-md shadow-lg p-2 animate-in fade-in zoom-in-[0.98] slide-in-from-top-1 duration-[220ms] ease-[cubic-bezier(0,0,0.2,1)]">
+              <div className="p-3 border-b border-border/40 font-semibold text-sm">Notifications</div>
+              <div className="max-h-[300px] overflow-y-auto p-1 py-2 space-y-1 custom-scrollbar">
                 {notifications.length === 0 ? (
                   <div className="p-4 text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
                     <Bell className="h-8 w-8 opacity-20" />
@@ -103,7 +102,7 @@ export default function TopBar() {
                   </div>
                 ) : (
                   notifications.map(n => (
-                    <div key={n.id} className="p-3 text-sm hover:bg-muted rounded-lg cursor-pointer transition-colors">
+                    <div key={n.id} className="p-3 text-sm hover:bg-muted/50 rounded-lg cursor-pointer transition-colors duration-[150ms]">
                       <div className="font-semibold">{n.title}</div>
                       <div className="text-muted-foreground text-xs mt-1">{n.message}</div>
                     </div>
@@ -117,7 +116,7 @@ export default function TopBar() {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full hover:bg-muted transition-colors"
+          className="rounded-full hover:bg-muted/50 transition-colors duration-[150ms]"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           aria-label="Toggle theme"
         >
@@ -131,7 +130,7 @@ export default function TopBar() {
         <div className="relative ml-1" ref={profileRef}>
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 hover:ring-2 ring-primary/20 ring-offset-2 ring-offset-background transition-all"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 hover:ring-2 ring-primary/20 ring-offset-2 ring-offset-background transition-all duration-[150ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className="text-sm font-semibold text-primary">
               {user?.email?.charAt(0).toUpperCase() || 'U'}
@@ -139,7 +138,7 @@ export default function TopBar() {
           </button>
           
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-card shadow-xl p-1 animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border/60 bg-card/95 backdrop-blur-md shadow-lg p-1 animate-in fade-in zoom-in-[0.98] slide-in-from-top-1 duration-[220ms] ease-[cubic-bezier(0,0,0.2,1)]">
               <div className="px-3 py-2 border-b border-border/50 mb-1">
                 <p className="text-sm font-medium truncate">{user?.email}</p>
                 <p className="text-xs text-muted-foreground">Premium User</p>

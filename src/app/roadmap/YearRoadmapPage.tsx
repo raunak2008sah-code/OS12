@@ -73,18 +73,18 @@ export default function YearRoadmapPage() {
   }
 
   return (
-    <div className="w-full h-[calc(100vh-4rem)] flex flex-col overflow-hidden pb-16 md:pb-0">
+    <div className="w-full h-[calc(100vh-4rem)] flex flex-col overflow-hidden pb-16 md:pb-0 animate-in fade-in slide-in-from-bottom-2 duration-[350ms] ease-[cubic-bezier(0,0,0.2,1)]">
       
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full">
         
         {/* Sticky Header */}
-        <header className="sticky top-0 z-10 flex-shrink-0 flex items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3 md:px-6">
+        <header className="sticky top-0 z-10 flex-shrink-0 flex items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-xl px-4 py-4 md:px-6">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-3">
                 {displayMonth.name}
-                <span className="text-sm font-normal text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md">
+                <span className="text-xs font-semibold text-muted-foreground/80 bg-muted/40 px-2.5 py-1 rounded-md uppercase tracking-wider">
                   {displayPhase?.name} Phase
                 </span>
               </h1>
@@ -93,23 +93,23 @@ export default function YearRoadmapPage() {
           <div className="flex items-center gap-3">
             <button 
               onClick={handleJumpToToday}
-              className="hidden md:flex items-center gap-2 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors"
+              className="hidden md:flex items-center gap-2 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors duration-[150ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <CalendarRange className="w-3.5 h-3.5" /> Jump to Today
             </button>
             <button 
               onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground bg-muted/30 hover:bg-muted/60 border border-border/50 rounded-lg transition-colors"
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground bg-muted/20 hover:bg-muted/50 border border-border/40 hover:border-border/60 rounded-lg transition-colors duration-[150ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Search className="w-3.5 h-3.5" />
+              <Search className="w-3.5 h-3.5 opacity-60" />
               <span>Search...</span>
-              <kbd className="ml-2 px-1.5 py-0.5 bg-background border border-border/50 rounded text-[10px] font-mono">⌘K</kbd>
+              <kbd className="ml-2 px-1.5 py-0.5 bg-background border border-border/50 rounded text-[10px] font-mono shadow-sm">⌘K</kbd>
             </button>
           </div>
         </header>
 
         {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto p-3 md:p-4 lg:p-5 custom-scrollbar bg-muted/10 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-muted/[0.02] space-y-5">
           
           {/* Section 1: Horizontal Month Timeline */}
           <section className="bg-card/50 border border-border/50 rounded-xl p-2 md:p-3">

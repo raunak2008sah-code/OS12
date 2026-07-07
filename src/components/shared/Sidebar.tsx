@@ -55,11 +55,11 @@ export default function Sidebar() {
                     to={item.to}
                     className={({ isActive }) =>
                       cn(
-                        'group relative flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300',
+                        'group relative flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-[150ms] ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                         'md:justify-center lg:justify-start lg:gap-3',
                         isActive
                           ? 'bg-primary/5 text-primary shadow-sm'
-                          : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                          : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground'
                       )
                     }
                     title={item.name}
@@ -67,9 +67,9 @@ export default function Sidebar() {
                     {({ isActive }) => (
                       <>
                         {isActive && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full" />
                         )}
-                        <Icon className={cn("h-5 w-5 shrink-0 transition-transform duration-300", isActive && "scale-110")} strokeWidth={isActive ? 2.5 : 2} />
+                        <Icon className={cn("h-5 w-5 shrink-0 transition-all duration-[220ms]", isActive && "scale-105")} strokeWidth={isActive ? 2.5 : 2} />
                         <span className="hidden lg:block whitespace-nowrap">{item.name}</span>
                       </>
                     )}

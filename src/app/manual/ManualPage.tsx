@@ -144,14 +144,14 @@ export default function ManualPage() {
   const [activeSection, setActiveSection] = useState('belief')
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-4 pb-8">
+    <div className="mx-auto max-w-[1400px] space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-[350ms] ease-[cubic-bezier(0,0,0.2,1)] p-4 md:p-6 lg:p-8 pt-4 pb-8">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
+      <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/40">
         <div className="flex items-center gap-3">
           <BookOpen className="h-6 w-6 text-primary" />
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Operating Manual</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">The canonical specification of OS12.</p>
+            <p className="text-[13px] text-muted-foreground/80 mt-1">The canonical specification of OS12.</p>
           </div>
         </div>
       </header>
@@ -170,8 +170,8 @@ export default function ManualPage() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
                   activeSection === s.id 
-                    ? 'bg-primary/10 text-primary' 
-                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                    ? 'bg-primary/10 text-primary shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] border border-primary/20' 
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground border border-transparent hover:border-border/40'
                 }`}
               >
                 <Icon className={`h-4 w-4 ${s.color}`} />
@@ -182,18 +182,18 @@ export default function ManualPage() {
         </div>
 
         {/* Content */}
-        <div className="md:col-span-9 space-y-4">
+        <div className="md:col-span-9 space-y-5">
           {SECTIONS.map(s => {
             const Icon = s.icon
             return (
-              <Card key={s.id} id={`section-${s.id}`} className="overflow-hidden border-border/50">
-                <div className="p-5 border-b border-border/30 bg-muted/10">
-                  <h2 className="text-lg font-bold flex items-center gap-2.5">
+              <Card key={s.id} id={`section-${s.id}`} className="overflow-hidden border-border/40 shadow-sm hover:border-border/60 transition-colors duration-[220ms] ease-out">
+                <div className="p-5 border-b border-border/30 bg-muted/20">
+                  <h2 className="text-lg font-bold flex items-center gap-2.5 tracking-tight">
                     <Icon className={`h-5 w-5 ${s.color}`} />
                     {s.title}
                   </h2>
                 </div>
-                <CardContent className="p-4">
+                <CardContent className="p-6">
                   {s.content}
                 </CardContent>
               </Card>
@@ -201,10 +201,10 @@ export default function ManualPage() {
           })}
 
           {/* Footer */}
-          <div className="text-center py-4">
+          <div className="text-center py-6">
             <Sparkles className="h-8 w-8 text-primary mx-auto mb-3 opacity-50" />
-            <p className="text-sm text-muted-foreground font-medium">OS12 — Built for Raunak & Sahmo</p>
-            <p className="text-xs text-muted-foreground/50 mt-1">Version 1.3 • Premium Edition</p>
+            <p className="text-sm text-muted-foreground/80 font-medium tracking-tight">OS12 — Built for Raunak & Sahmo</p>
+            <p className="text-[11px] uppercase tracking-widest text-muted-foreground/50 mt-2 font-bold">Version 1.3 • Premium Edition</p>
           </div>
         </div>
       </div>

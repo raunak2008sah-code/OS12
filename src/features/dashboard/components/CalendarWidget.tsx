@@ -31,28 +31,28 @@ export function CalendarWidget() {
   const emptyDays = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1
 
   return (
-    <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm p-3">
-      <div className="flex items-center justify-between mb-2">
+    <div className="flex flex-col rounded-xl border border-border/40 bg-card shadow-sm p-4">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-4 w-4 text-primary" />
-          <h2 className="font-semibold text-sm text-foreground tracking-tight">Calendar</h2>
+          <h2 className="font-semibold text-xs tracking-wider uppercase text-muted-foreground">Calendar</h2>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={prevMonth} className="p-1 hover:bg-muted rounded-md text-muted-foreground"><ChevronLeft className="h-3.5 w-3.5" /></button>
-          <button onClick={jumpToToday} className="text-[10px] font-medium px-1.5 py-0.5 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80">Today</button>
-          <button onClick={nextMonth} className="p-1 hover:bg-muted rounded-md text-muted-foreground"><ChevronRight className="h-3.5 w-3.5" /></button>
+          <button onClick={prevMonth} className="p-1 hover:bg-muted/50 rounded-md text-muted-foreground transition-colors duration-[150ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ChevronLeft className="h-3.5 w-3.5" /></button>
+          <button onClick={jumpToToday} className="text-[10px] font-medium px-2 py-0.5 bg-secondary/50 text-secondary-foreground rounded hover:bg-secondary transition-colors duration-[150ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Today</button>
+          <button onClick={nextMonth} className="p-1 hover:bg-muted/50 rounded-md text-muted-foreground transition-colors duration-[150ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ChevronRight className="h-3.5 w-3.5" /></button>
         </div>
       </div>
       
-      <div className="text-center font-semibold text-xs mb-2 text-foreground">
+      <div className="text-center font-bold text-[13px] mb-3 text-foreground tracking-tight">
         {format(currentDate, 'MMMM yyyy')}
       </div>
 
-      <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-medium text-muted-foreground mb-1">
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-muted-foreground/60 mb-1 tracking-wider uppercase">
         <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
       </div>
       
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: emptyDays }).map((_, i) => (
           <div key={`empty-${i}`} className="h-7 rounded-sm" />
         ))}
@@ -63,28 +63,28 @@ export function CalendarWidget() {
           
           const isPast = !isToday && isBefore(day, now)
 
-          let stateClasses = "text-foreground"
+          let stateClasses = "text-foreground hover:bg-muted/30"
           let tooltip = format(day, 'PP')
 
           if (isChecked) {
-            stateClasses = "bg-green-500/20 text-green-600 dark:text-green-400 font-bold"
+            stateClasses = "bg-green-500/10 text-green-600 dark:text-green-400 font-bold shadow-[inset_0_0_0_1px_rgba(34,197,94,0.2)]"
             tooltip = "✓ Studied"
           } else if (isPast) {
-            stateClasses = "bg-red-500/10 text-red-500/80"
+            stateClasses = "bg-red-500/5 text-red-500/70 shadow-[inset_0_0_0_1px_rgba(239,68,68,0.1)]"
             tooltip = "✗ Missed"
           } else if (isToday) {
-            stateClasses = "border border-primary text-primary font-bold"
+            stateClasses = "border border-primary text-primary font-bold shadow-[inset_0_0_0_1px_var(--color-primary)] bg-primary/5"
             tooltip = "Today"
           } else {
             // Future Day
-            stateClasses = "text-muted-foreground/50 cursor-default"
+            stateClasses = "text-muted-foreground/40 hover:bg-muted/30 cursor-default"
           }
 
           return (
             <div 
               key={day.toISOString()} 
               className={cn(
-                "flex h-7 items-center justify-center rounded-sm text-xs transition-colors",
+                "flex h-7 items-center justify-center rounded-md text-[11px] transition-colors duration-[150ms] cursor-pointer",
                 stateClasses
               )}
               title={tooltip}
@@ -96,17 +96,17 @@ export function CalendarWidget() {
       </div>
 
       {/* Legend */}
-      <div className="mt-3 flex items-center justify-center gap-3 text-[10px] font-medium text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-green-500/80" />
+      <div className="mt-4 flex items-center justify-center gap-4 text-[10px] font-medium text-muted-foreground/80">
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.4)]" />
           <span>Studied</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-red-500/80" />
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-500/80 shadow-[0_0_4px_rgba(239,68,68,0.3)]" />
           <span>Missed</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-muted border border-border/50" />
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-muted border border-border/50" />
           <span>Future</span>
         </div>
       </div>

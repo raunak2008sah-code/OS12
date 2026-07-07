@@ -52,9 +52,9 @@ export function YearDashboardCard() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {metrics.map((m) => (
-        <Card key={m.label} className={`overflow-hidden shadow-sm border-border/60 ${m.highlight ? m.highlight : 'bg-card'}`}>
-          <div className="p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+        <Card key={m.label} className={`overflow-hidden shadow-sm border-border/40 hover:border-border/60 transition-colors duration-[220ms] ease-out group ${m.highlight ? m.highlight : 'bg-card'}`}>
+          <div className="p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 mb-2">
               {m.label}
             </p>
             <div className="text-sm font-medium">

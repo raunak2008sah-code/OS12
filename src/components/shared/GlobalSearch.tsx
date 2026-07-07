@@ -107,7 +107,7 @@ export function GlobalSearch() {
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] sm:pt-[20vh] bg-background/80 backdrop-blur-xl">
       <div className="fixed inset-0" onClick={() => setIsOpen(false)} />
       
-      <div className="relative w-full max-w-2xl rounded-2xl border border-border/50 bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-border/60 bg-card/95 backdrop-blur-md shadow-[0_12px_48px_rgba(0,0,0,0.12)] overflow-hidden animate-in fade-in zoom-in-[0.97] duration-[220ms] ease-[cubic-bezier(0,0,0.2,1)]">
         {/* Input area */}
         <div className="flex items-center border-b border-border/50 px-4 py-4">
           <Search className="h-5 w-5 text-muted-foreground mr-3 shrink-0" />
@@ -122,7 +122,7 @@ export function GlobalSearch() {
               setSelectedIndex(0)
             }}
           />
-          <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-border/50 bg-muted/30 px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+          <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-border/60 bg-muted/30 px-1.5 font-mono text-[10px] font-medium text-muted-foreground shadow-sm">
             <span className="text-xs">esc</span>
           </kbd>
         </div>
@@ -147,9 +147,10 @@ export function GlobalSearch() {
                     key={`${item.type}-${item.id}`}
                     onClick={() => handleSelect(item.path)}
                     onMouseEnter={() => setSelectedIndex(index)}
-                    className={`w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all text-left group ${
-                      isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50 text-foreground'
+                    className={`w-full flex items-center justify-between px-3 py-3 rounded-xl transition-colors duration-[150ms] text-left group animate-in fade-in slide-in-from-bottom-2 ${
+                      isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-muted/40 text-foreground'
                     }`}
+                    style={{ animationDuration: '220ms', animationDelay: `${Math.min(index * 20, 120)}ms`, animationFillMode: 'both' }}
                   >
                     <div className="flex items-center gap-4 overflow-hidden">
                       <div className={`p-1.5 rounded-md ${isSelected ? 'bg-primary/20' : 'bg-muted'} ${item.color}`}>

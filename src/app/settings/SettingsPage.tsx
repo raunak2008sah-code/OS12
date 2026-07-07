@@ -71,16 +71,16 @@ export default function SettingsPage() {
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-4">
+    <div className="mx-auto max-w-[1400px] space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-[350ms] ease-[cubic-bezier(0,0,0.2,1)] p-4 md:p-6 lg:p-8 pt-4">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30">
+      <header className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/40">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-3">
               <Settings className="h-6 w-6 text-primary" />
               Settings
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Manage your account, preferences, and OS12 behavior.</p>
+            <p className="text-[13px] text-muted-foreground/80 mt-1">Manage your account, preferences, and OS12 behavior.</p>
           </div>
         </div>
       </header>
@@ -101,22 +101,22 @@ export default function SettingsPage() {
           {/* Profile Section */}
           <section className="space-y-4">
             <div>
-              <h2 className="text-lg font-bold">Profile</h2>
-              <p className="text-sm text-muted-foreground">Manage your personal profile and data.</p>
+              <h2 className="text-lg font-bold tracking-tight">Profile</h2>
+              <p className="text-[13px] text-muted-foreground/80 mt-1">Manage your personal profile and data.</p>
             </div>
-            <Card>
-              <CardContent className="p-4 sm:p-5">
+            <Card className="border-border/40 shadow-sm hover:border-border/60 transition-colors duration-[220ms] ease-out">
+              <CardContent className="p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div className="flex items-center gap-5">
-                    <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl font-black text-primary shadow-inner border border-primary/20">
+                    <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl font-black text-primary shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] border border-primary/20">
                       {user?.email?.charAt(0).toUpperCase() || <User className="h-8 w-8" />}
                     </div>
                     <div>
-                      <p className="font-bold text-xl">{user?.email}</p>
-                      <p className="text-sm text-muted-foreground mt-1">Authorized OS12 User • Premium</p>
+                      <p className="font-bold text-xl tracking-tight">{user?.email}</p>
+                      <p className="text-[13px] font-medium text-muted-foreground mt-1">Authorized OS12 User • Premium</p>
                     </div>
                   </div>
-                  <Button onClick={signOut} variant="outline" className="shrink-0 border-border/50 hover:bg-muted">
+                  <Button onClick={signOut} variant="outline" className="shrink-0 border-border/40 hover:bg-muted/50 transition-colors duration-[150ms]">
                     Sign Out
                   </Button>
                 </div>
@@ -127,13 +127,13 @@ export default function SettingsPage() {
           {/* Appearance Section */}
           <section className="space-y-4">
             <div>
-              <h2 className="text-lg font-bold">Appearance</h2>
-              <p className="text-sm text-muted-foreground">Customize how OS12 looks and feels.</p>
+              <h2 className="text-lg font-bold tracking-tight">Appearance</h2>
+              <p className="text-[13px] text-muted-foreground/80 mt-1">Customize how OS12 looks and feels.</p>
             </div>
-            <Card>
-              <CardContent className="p-4 sm:p-5 space-y-4">
+            <Card className="border-border/40 shadow-sm hover:border-border/60 transition-colors duration-[220ms] ease-out">
+              <CardContent className="p-5 sm:p-6 space-y-5">
                 <div className="space-y-4">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Theme Preference</label>
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">Theme Preference</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <ThemeButton 
                       icon={Sun} label="Light" active={theme === 'light'} 
@@ -156,17 +156,17 @@ export default function SettingsPage() {
           {/* Regional & Time Section */}
           <section className="space-y-4">
             <div>
-              <h2 className="text-lg font-bold">Regional & Time</h2>
-              <p className="text-sm text-muted-foreground">Configure timezone and calendar preferences.</p>
+              <h2 className="text-lg font-bold tracking-tight">Regional & Time</h2>
+              <p className="text-[13px] text-muted-foreground/80 mt-1">Configure timezone and calendar preferences.</p>
             </div>
-            <Card>
-              <CardContent className="p-4 sm:p-5 space-y-4">
+            <Card className="border-border/40 shadow-sm hover:border-border/60 transition-colors duration-[220ms] ease-out">
+              <CardContent className="p-5 sm:p-6 space-y-6">
                 <div className="space-y-3">
                   <label className="text-sm font-semibold text-foreground">Timezone</label>
-                  <select disabled className="w-full sm:max-w-md rounded-xl border border-border/50 bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all cursor-not-allowed opacity-70">
+                  <select disabled className="w-full sm:max-w-md rounded-xl border border-border/40 bg-muted/20 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors cursor-not-allowed opacity-70">
                     <option value="Asia/Kolkata">Asia/Kolkata (IST) — Locked</option>
                   </select>
-                  <p className="text-xs text-muted-foreground">Timezone is locked to Asia/Kolkata (IST) per the Operating Manual.</p>
+                  <p className="text-[11px] text-muted-foreground/80 font-medium">Timezone is locked to Asia/Kolkata (IST) per the Operating Manual.</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6 pt-6 border-t border-border/30">
                   <div className="flex-1 space-y-3">
@@ -174,7 +174,7 @@ export default function SettingsPage() {
                     <select 
                       value={timeFormat}
                       onChange={e => setTimeFormat(e.target.value)}
-                      className="w-full rounded-xl border border-border/50 bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                      className="w-full rounded-xl border border-border/40 bg-muted/20 hover:bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors duration-[150ms]"
                     >
                       <option value="12h">12-hour (1:00 PM)</option>
                       <option value="24h">24-hour (13:00)</option>
@@ -185,7 +185,7 @@ export default function SettingsPage() {
                     <select 
                       value={weekStart}
                       onChange={e => setWeekStart(e.target.value)}
-                      className="w-full rounded-xl border border-border/50 bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                      className="w-full rounded-xl border border-border/40 bg-muted/20 hover:bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors duration-[150ms]"
                     >
                       <option value="1">Monday</option>
                       <option value="0">Sunday</option>
@@ -199,10 +199,10 @@ export default function SettingsPage() {
           {/* Notifications Section */}
           <section className="space-y-4">
             <div>
-              <h2 className="text-lg font-bold">Notifications</h2>
-              <p className="text-sm text-muted-foreground">Control your alerts and reminders.</p>
+              <h2 className="text-lg font-bold tracking-tight">Notifications</h2>
+              <p className="text-[13px] text-muted-foreground/80 mt-1">Control your alerts and reminders.</p>
             </div>
-            <Card>
+            <Card className="border-border/40 shadow-sm hover:border-border/60 transition-colors duration-[220ms] ease-out">
               <CardContent className="p-0">
                 <div className="divide-y divide-border/30">
                   <NotificationToggle label="Daily Revision Reminders" desc="Get notified about pending spaced repetition tasks." checked={notifRevision} onChange={setNotifRevision} />
@@ -217,24 +217,24 @@ export default function SettingsPage() {
           {/* Danger Zone */}
           <section className="space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-red-500">Danger Zone</h2>
-              <p className="text-sm text-muted-foreground">Destructive actions and data exports.</p>
+              <h2 className="text-lg font-bold text-red-500 tracking-tight">Danger Zone</h2>
+              <p className="text-[13px] text-muted-foreground/80 mt-1">Destructive actions and data exports.</p>
             </div>
-            <Card className="border-red-500/20 bg-red-500/5">
-              <CardContent className="p-4 sm:p-5 space-y-4">
-                <Button onClick={handleExport} variant="outline" className="w-full border-red-500/20 hover:bg-red-500/10 text-foreground">
+            <Card className="border-red-500/20 bg-red-500/5 shadow-sm">
+              <CardContent className="p-5 sm:p-6 space-y-5">
+                <Button onClick={handleExport} variant="outline" className="w-full border-red-500/20 hover:bg-red-500/10 text-foreground transition-colors duration-[150ms]">
                   <Download className="h-4 w-4 mr-2" /> Export JSON Backup
                 </Button>
                 <div className="pt-6 border-t border-red-500/10">
                   {!showResetConfirm ? (
-                    <Button onClick={() => setShowResetConfirm(true)} className="w-full bg-red-500 hover:bg-red-600 text-white font-bold">
+                    <Button onClick={() => setShowResetConfirm(true)} className="w-full bg-red-500 hover:bg-red-600 text-white font-bold transition-colors duration-[150ms] shadow-sm">
                       <Trash2 className="h-4 w-4 mr-2" /> Factory Reset OS12
                     </Button>
                   ) : (
-                    <div className="space-y-3">
-                      <p className="text-sm font-bold text-red-500 text-center">Are you absolutely sure? This will delete ALL your progress.</p>
+                    <div className="space-y-4">
+                      <p className="text-[13px] font-bold text-red-500 text-center uppercase tracking-wider">Are you absolutely sure? This will delete ALL your progress.</p>
                       <div className="flex gap-3">
-                        <Button onClick={() => setShowResetConfirm(false)} variant="outline" className="flex-1">
+                        <Button onClick={() => setShowResetConfirm(false)} variant="outline" className="flex-1 border-border/40 hover:bg-muted/50 transition-colors duration-[150ms]">
                           Cancel
                         </Button>
                         <Button 
@@ -254,14 +254,14 @@ export default function SettingsPage() {
                             localStorage.clear()
                             window.location.href = '/'
                           }} 
-                          className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold"
+                          className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold transition-colors duration-[150ms] shadow-sm"
                         >
                           <Trash2 className="h-4 w-4 mr-2" /> Confirm Reset
                         </Button>
                       </div>
                     </div>
                   )}
-                  <p className="text-xs text-center text-red-500/70 mt-3 font-medium">This will permanently delete all progress, notes, and mistakes. This action cannot be undone.</p>
+                  <p className="text-[11px] text-center text-red-500/70 mt-4 font-semibold uppercase tracking-wider">This will permanently delete all progress, notes, and mistakes. This action cannot be undone.</p>
                 </div>
               </CardContent>
             </Card>

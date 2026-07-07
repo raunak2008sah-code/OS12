@@ -27,39 +27,42 @@ export function TodaysFocus() {
   }, [chapters, progress, notes, resources, revisions, subjects])
 
   return (
-    <Card className="border-border/60 shadow-sm overflow-hidden">
-      <div className="bg-primary/5 px-6 py-4 border-b border-border/50 flex items-center gap-2">
-        <Target className="h-5 w-5 text-primary" />
-        <h2 className="font-semibold text-foreground tracking-tight">Today&apos;s Focus</h2>
+    <Card className="group relative border-border/40 shadow-sm overflow-hidden hover:border-border/60 transition-all duration-[220ms] ease-out">
+      {/* Subtle hover glow behind the card content */}
+      <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/[0.02] transition-colors duration-[220ms] pointer-events-none" />
+      
+      <div className="bg-primary/[0.03] px-5 py-3 border-b border-border/40 flex items-center gap-2">
+        <Target className="h-4 w-4 text-primary" />
+        <h2 className="font-semibold text-xs tracking-wider uppercase text-muted-foreground">Today's Focus</h2>
       </div>
-      <CardContent className="p-4 sm:p-5">
+      <CardContent className="p-5">
         {focusChapter ? (
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="space-y-1.5 z-10 relative">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
                 {focusChapter.subject?.name ?? 'Unknown Subject'}
               </p>
               <Link
                 to={`/chapters/${focusChapter.chapter.id}`}
-                className="text-2xl font-bold tracking-tight text-foreground hover:text-primary transition-colors inline-block"
+                className="text-2xl font-bold tracking-tight text-foreground hover:text-primary transition-colors duration-[150ms] inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
               >
                 {focusChapter.chapter.name}
               </Link>
             </div>
 
-            <div className="flex items-center gap-3 bg-muted/30 p-3 rounded-xl border border-border/50">
+            <div className="flex items-center gap-3 bg-muted/20 px-4 py-2.5 rounded-lg border border-border/40 z-10 relative shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
               {focusChapter.status && (
                 <>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span className="text-sm font-medium text-muted-foreground line-through">{focusChapter.status}</span>
+                  <div className="flex items-center gap-2 opacity-60">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                    <span className="text-[13px] font-medium line-through">{focusChapter.status}</span>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/50" />
                 </>
               )}
-              <div className="flex items-center gap-2">
-                <Circle className="h-4 w-4 text-primary" />
-                <span className="text-sm font-bold text-primary">{focusChapter.nextStep}</span>
+              <div className="flex items-center gap-2 bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20">
+                <Circle className="h-3.5 w-3.5 text-primary fill-primary/20" />
+                <span className="text-[13px] font-bold text-primary">{focusChapter.nextStep}</span>
               </div>
             </div>
           </div>
