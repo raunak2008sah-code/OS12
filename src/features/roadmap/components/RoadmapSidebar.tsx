@@ -1,7 +1,7 @@
 import { formatIST } from '@/lib/time'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { RoadmapPhase, RoadmapMonth, Milestone } from '@/lib/supabase/types'
-import { Calendar, Target, Clock, AlertTriangle, ArrowRight, BookOpen } from 'lucide-react'
+import { Calendar, Target, Clock, ArrowRight, BookOpen } from 'lucide-react'
 
 interface RoadmapSidebarProps {
   currentPhase: RoadmapPhase | null
@@ -84,19 +84,6 @@ export function RoadmapSidebar({ currentPhase, currentMonth, milestones }: Roadm
         </CardContent>
       </Card>
 
-      {/* Backlog Alert */}
-      <Card className="shadow-none border-orange-500/30 bg-orange-500/5">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2 text-orange-600 uppercase tracking-wider">
-            <AlertTriangle className="w-4 h-4" /> Backlog
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-foreground">
-            You have <span className="font-bold">3 tasks</span> overdue from last week. Try to complete them this weekend.
-          </p>
-        </CardContent>
-      </Card>
 
     </div>
   )

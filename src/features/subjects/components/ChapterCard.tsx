@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
-import { BookOpen, AlertCircle, AlertTriangle, FileText, CheckCircle2, PenTool, Circle } from 'lucide-react'
+import { BookOpen, AlertTriangle, FileText, CheckCircle2, PenTool, Circle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { isChapterDone, chapterWorkflowPercent } from '@/lib/progress'
 import type { 
   Chapter, ChapterProgress, ResourceProgress, Note, 
-  Mistake, FormulaSheet, Revision, Backlog, RoadmapPhase, RoadmapMonth 
+  Mistake, FormulaSheet, Revision, RoadmapPhase, RoadmapMonth 
 } from '@/lib/supabase/types'
 
 interface ChapterCardProps {
@@ -15,18 +15,16 @@ interface ChapterCardProps {
   mistakes: Mistake[]
   formulaSheets: FormulaSheet[]
   revisions: Revision[]
-  backlog: Backlog[]
   phases: RoadmapPhase[]
   months: RoadmapMonth[]
 }
 
 export function ChapterCard({
-  chapter, progress, resources, notes, mistakes, formulaSheets, revisions, backlog, phases, months
+  chapter, progress, resources, notes, mistakes, formulaSheets, revisions, phases, months
 }: ChapterCardProps) {
   const currentPhase = phases.find(p => p.id === chapter.phase)
   const currentMonth = months.find(m => m.id === chapter.month)
 
-  const activeBacklog = backlog.find(b => b.chapter_id === chapter.id)
 
   const isCompleted = isChapterDone(progress?.status)
   const completionPercent = chapterWorkflowPercent(progress?.status)
@@ -37,11 +35,7 @@ export function ChapterCard({
   const revisionDays = [1, 3, 7, 21, 45]
   
   return (
-    <Card className={`relative overflow-hidden transition-all ${isCompleted ? 'border-green-500/30 bg-green-500/5' : activeBacklog ? 'border-orange-500/50' : 'hover:border-primary/50'}`}>
-      {/* Backlog Indicator Tape */}
-      {activeBacklog && (
-        <div className={`absolute top-0 left-0 w-1 h-full ${activeBacklog.escalation_level === 'red' ? 'bg-red-500' : activeBacklog.escalation_level === 'orange' ? 'bg-orange-500' : 'bg-yellow-500'}`} />
-      )}
+    <Card className={`relative overflow-hidden transition-all ${isCompleted ? 'border-green-500/30 bg-green-500/5' : 'hover:border-primary/50'}`}>
       
       <CardHeader className="pb-3 flex flex-row justify-between items-start">
         <div className="space-y-1 pl-2">
@@ -136,11 +130,6 @@ export function ChapterCard({
         <div className="space-y-2 border-t border-border/50 pt-4">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Spaced Repetition</span>
-            {activeBacklog && (
-              <span className="text-xs font-bold text-orange-500 flex items-center gap-1">
-                <AlertCircle className="h-3.5 w-3.5" /> BACKLOG
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {revisionDays.map(day => {

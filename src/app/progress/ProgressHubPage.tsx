@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Activity, Target, Clock, AlertCircle, TrendingUp, CalendarDays, BarChart3, Flame } from 'lucide-react'
+import { Activity, Target, Clock, TrendingUp, CalendarDays, BarChart3, Flame } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { subjectProgress, isChapterDone } from '@/lib/progress'
@@ -7,7 +7,6 @@ import {
   useChapters, 
   useAllChapterProgress, 
   useAllResourceProgress, 
-  useBacklog, 
   useAllNotes, 
   useAllRevisions, 
   useMistakes,
@@ -23,7 +22,6 @@ export default function ProgressHubPage() {
   const { data: chapters = [] } = useChapters()
   const { data: chapterProgress = [] } = useAllChapterProgress(userId)
   const { data: resourceProgress = [] } = useAllResourceProgress(userId)
-  const { data: backlog = [] } = useBacklog(userId)
   const { data: notes = [] } = useAllNotes(userId)
   const { data: revisions = [] } = useAllRevisions(userId)
   const { data: mistakes = [] } = useMistakes(undefined, userId)
@@ -39,7 +37,6 @@ export default function ProgressHubPage() {
       .filter(ch => chapterProgress.some(p => p.chapter_id === ch.id && isChapterDone(p.status)))
       .reduce((sum, ch) => sum + (ch.estimated_hours || 0), 0)
     
-    const activeBacklogs = backlog.length
     const resolvedMistakes = mistakes.filter(m => m.is_resolved).length
     const totalMistakes = mistakes.length
 
@@ -70,7 +67,6 @@ export default function ProgressHubPage() {
       totalChapters,
       totalEstHours,
       completedHours,
-      activeBacklogs,
       resolvedMistakes,
       totalMistakes,
       completedResources,
@@ -81,7 +77,7 @@ export default function ProgressHubPage() {
       mostDifficult,
       weeklyTargetStatus
     }
-  }, [chapters, chapterProgress, backlog, mistakes, resourceProgress, revisions, notes, formulas, subjects])
+  }, [chapters, chapterProgress, mistakes, resourceProgress, revisions, notes, formulas, subjects])
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
@@ -106,7 +102,6 @@ export default function ProgressHubPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard title="Overall" value={`${stats.overallPercent}%`} sub={`${stats.completedChapters}/${stats.totalChapters} chapters`} icon={Target} color="text-green-500" accent="bg-green-500" />
         <MetricCard title="Study Hours" value={`${stats.completedHours}h`} sub={`of ${stats.totalEstHours}h estimated`} icon={Clock} color="text-blue-500" accent="bg-blue-500" />
-        <MetricCard title="Backlogs" value={stats.activeBacklogs.toString()} sub="Require attention" icon={AlertCircle} color={stats.activeBacklogs > 0 ? "text-orange-500" : "text-muted-foreground"} accent="bg-orange-500" />
         <MetricCard title="Mistakes" value={`${stats.resolvedMistakes}/${stats.totalMistakes}`} sub="Resolved / Total" icon={Flame} color="text-purple-500" accent="bg-purple-500" />
       </div>
 
@@ -190,7 +185,6 @@ export default function ProgressHubPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <InsightRow label="Burnout Risk" value={stats.activeBacklogs > 5 ? 'High' : stats.activeBacklogs > 2 ? 'Medium' : 'Low'} status={stats.activeBacklogs > 5 ? 'danger' : stats.activeBacklogs > 2 ? 'warning' : 'success'} />
               <InsightRow label="Chapters Done" value={`${stats.completedChapters}`} status={stats.completedChapters > 0 ? 'success' : 'warning'} />
               <InsightRow label="Weekly Target" value={stats.weeklyTargetStatus} status={stats.weeklyTargetStatus === 'On Track' ? 'success' : 'warning'} />
               <InsightRow label="Weakest Subject" value={stats.mostDifficult} status="warning" />
@@ -198,9 +192,7 @@ export default function ProgressHubPage() {
               <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/10">
                 <h4 className="font-bold text-primary text-sm mb-1.5">Next Best Action</h4>
                 <p className="text-sm text-foreground leading-relaxed">
-                  {stats.activeBacklogs > 0 
-                    ? "Focus on clearing your backlogs before starting new chapters." 
-                    : "Start the next pending lecture in your weakest subject."}
+                  Start the next pending lecture in your weakest subject.
                 </p>
               </div>
             </CardContent>

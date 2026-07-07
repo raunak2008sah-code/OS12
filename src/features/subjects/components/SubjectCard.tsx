@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { BookOpen, AlertCircle, Clock, ChevronRight, TrendingUp } from 'lucide-react'
+import { BookOpen, Clock, ChevronRight, TrendingUp } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import type { Subject, Chapter, ChapterProgress, Backlog } from '@/lib/supabase/types'
+import type { Subject, Chapter, ChapterProgress } from '@/lib/supabase/types'
 import { subjectProgress, isChapterDone, getCurrentChapter } from '@/lib/progress'
 import { useAuth } from '@/hooks/useAuth'
 import { useAllNotes, useFormulaSheets, useMistakes, useAllComments } from '@/lib/supabase/queries'
@@ -10,10 +10,9 @@ interface SubjectCardProps {
   subject: Subject
   chapters: Chapter[]
   progress: ChapterProgress[]
-  backlog: Backlog[]
 }
 
-export function SubjectCard({ subject, chapters, progress, backlog }: SubjectCardProps) {
+export function SubjectCard({ subject, chapters, progress }: SubjectCardProps) {
   const { user } = useAuth()
   const { data: notes = [] } = useAllNotes(user?.id)
   const { data: formulas = [] } = useFormulaSheets(user?.id)
@@ -33,9 +32,7 @@ export function SubjectCard({ subject, chapters, progress, backlog }: SubjectCar
     .reduce((acc, curr) => acc + (curr.estimated_hours || 0), 0)
   const remainingHours = estimatedHours - completedHours
   
-  const activeBacklog = backlog.filter(b => 
-    chapters.some(c => c.id === b.chapter_id)
-  )
+
 
   // Find the "current" chapter (most recently interacted incomplete chapter)
   const currentChapterInfo = getCurrentChapter(chapters, progress, notes, formulas, mistakes, comments, [subject])
@@ -104,13 +101,6 @@ export function SubjectCard({ subject, chapters, progress, backlog }: SubjectCar
             </div>
             
             <div className="flex items-center gap-1.5">
-              {activeBacklog.length > 0 && (
-                <div className="flex items-center gap-1 font-bold text-orange-500 bg-orange-500/10 px-1.5 py-0.5 rounded-md">
-                  <AlertCircle className="h-3 w-3" />
-                  {activeBacklog.length}
-                </div>
-              )}
-
               {weaknessLevel !== 'Low' && (
                 <div className={`flex items-center gap-1 font-bold px-1.5 py-0.5 rounded-md ${
                   weaknessLevel === 'High' ? 'text-red-500 bg-red-500/10' : 'text-yellow-500 bg-yellow-500/10'

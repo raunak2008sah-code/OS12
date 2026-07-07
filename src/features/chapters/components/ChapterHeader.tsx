@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom'
-import { ChevronRight, Clock, Activity, AlertCircle, Zap, BookOpen } from 'lucide-react'
-import type { Chapter, Subject, ChapterProgress, RoadmapPhase, Backlog } from '@/lib/supabase/types'
+import { ChevronRight, Clock, Activity, Zap, BookOpen } from 'lucide-react'
+import type { Chapter, Subject, ChapterProgress, RoadmapPhase } from '@/lib/supabase/types'
 
 interface ChapterHeaderProps {
   chapter: Chapter
   subject: Subject
   progress?: ChapterProgress
   phase?: RoadmapPhase
-  backlog?: Backlog
+
   completionPercent: number
 }
 
-export function ChapterHeader({ chapter, subject, phase, backlog, completionPercent }: ChapterHeaderProps) {
+export function ChapterHeader({ chapter, subject, phase, completionPercent }: ChapterHeaderProps) {
   return (
     <div className="sticky top-0 z-10 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 bg-background/80 backdrop-blur-xl border-b border-border/30 space-y-3">
       {/* Breadcrumbs */}
@@ -31,15 +31,6 @@ export function ChapterHeader({ chapter, subject, phase, backlog, completionPerc
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold tracking-tight text-foreground">{chapter.name}</h1>
-              {backlog && (
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 ${
-                  backlog.escalation_level === 'red' ? 'bg-red-500/10 text-red-500' :
-                  backlog.escalation_level === 'orange' ? 'bg-orange-500/10 text-orange-500' :
-                  'bg-yellow-500/10 text-yellow-500'
-                }`}>
-                  <AlertCircle className="h-3 w-3" /> BACKLOG
-                </span>
-              )}
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-muted-foreground">
               {phase && (

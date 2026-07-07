@@ -3,7 +3,7 @@ import { supabase } from './client'
 import type { 
   Subject, RoadmapPhase, RoadmapMonth, Chapter, Note, Comment, Profile, 
   RoadmapMonthWorkload, RoadmapMonthResource, Mistake, ChapterProgress, 
-  MonthlyReview, Backlog, ResourceProgress, WeeklyReview, FormulaSheet,
+  MonthlyReview, DailyCheckin, ResourceProgress, WeeklyReview, FormulaSheet,
   RoadmapWeek, Milestone, Revision
 } from './types'
 
@@ -27,7 +27,7 @@ export const queryKeys = {
   comments: (chapterId: string) => ['comments', chapterId] as const,
   friendProfile: (currentUserId?: string) => ['friendProfile', currentUserId] as const,
   allChapterProgress: (userId?: string) => ['allChapterProgress', userId] as const,
-  backlog: (userId?: string) => ['backlog', userId] as const,
+  dailyCheckins: (userId?: string) => ['dailyCheckins', userId] as const,
   latestWeeklyReview: (userId?: string) => ['latestWeeklyReview', userId] as const,
   formulaSheets: (userId?: string) => ['formulaSheets', userId] as const,
   allNotes: (userId?: string) => ['allNotes', userId] as const,
@@ -415,21 +415,50 @@ export function useFriendProfile(currentUserId?: string) {
   })
 }
 
-export function useBacklog(userId?: string) {
+export function useDailyCheckins(userId?: string) {
   return useQuery({
-    queryKey: queryKeys.backlog(userId),
+    queryKey: queryKeys.dailyCheckins(userId),
     queryFn: async () => {
       if (!userId) return []
       const { data, error } = await supabase
-        .from('backlog')
+        .from('daily_checkins')
         .select('*')
         .eq('user_id', userId)
-        .is('cleared_at', null)
-        .order('created_at', { ascending: false })
+        .order('date', { ascending: false })
       if (error) throw error
-      return data as Backlog[]
+      return data as DailyCheckin[]
     },
     enabled: !!userId,
+  })
+}
+
+export function useCreateDailyCheckin() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ userId, date }: { userId: string; date: string }) => {
+      const { error } = await supabase.from('daily_checkins').insert({ user_id: userId, date } as any)
+      if (error) throw error
+    },
+    onMutate: async ({ userId, date }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.dailyCheckins(userId) })
+      const previous = queryClient.getQueryData(queryKeys.dailyCheckins(userId))
+      
+      queryClient.setQueryData(queryKeys.dailyCheckins(userId), (old: any) => {
+        if (!Array.isArray(old)) return [{ user_id: userId, date, checked_at: new Date().toISOString() }]
+        return [{ user_id: userId, date, checked_at: new Date().toISOString() }, ...old]
+      })
+
+      return { previous, userId }
+    },
+    onError: (_err, _newVal, context: any) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.dailyCheckins(context.userId), context.previous)
+      }
+    },
+    onSettled: (_data, _error, variables) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dailyCheckins(variables.userId) })
+      // We also invalidate profile/dashboard related queries if necessary, but this relies on dailyCheckins cache
+    },
   })
 }
 

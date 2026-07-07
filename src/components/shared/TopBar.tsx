@@ -3,7 +3,7 @@ import { Moon, Sun, LogOut, Bell, Search, Settings as SettingsIcon, Calendar as 
 import { useTheme } from '@/hooks/useTheme'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
-import { useBacklog, useAllRevisions } from '@/lib/supabase/queries'
+import { useAllRevisions } from '@/lib/supabase/queries'
 import { useTime } from '@/hooks/useTime'
 import { isSundayIST, formatIST } from '@/lib/time'
 import { useNavigate } from 'react-router-dom'
@@ -31,15 +31,15 @@ export default function TopBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const { data: backlogs = [] } = useBacklog(user?.id)
+
   const { data: revisions = [] } = useAllRevisions(user?.id)
 
   const now = useTime(60000) // update every minute
-  const activeBacklogs = backlogs.length
+
   const pendingRevisions = revisions.filter(r => r.status === 'pending').length
 
   const notifications = []
-  if (activeBacklogs > 0) notifications.push({ id: 1, title: 'Backlog Alert', message: `You have ${activeBacklogs} active backlogs.`, type: 'warning' })
+
   if (pendingRevisions > 0) notifications.push({ id: 2, title: 'Revision Due', message: `You have ${pendingRevisions} pending revisions.`, type: 'info' })
   if (isSundayIST(now)) notifications.push({ id: 3, title: 'Sunday Ritual', message: 'Time for your weekly review and planning.', type: 'action' })
 

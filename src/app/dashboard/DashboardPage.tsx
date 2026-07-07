@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { useMilestones, useAllRevisions, useChapters } from '@/lib/supabase/queries'
 import { Calendar, Sparkles, ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { YearDashboardCard } from '@/features/dashboard/components/YearDashboardCard'
-import { BacklogBanner } from '@/features/dashboard/components/BacklogBanner'
 import { TodaysFocus } from '@/features/dashboard/components/TodaysFocus'
 import { CalendarWidget } from '@/features/dashboard/components/CalendarWidget'
 import { CountdownWidget } from '@/features/dashboard/components/CountdownWidget'
 import { FriendActivityWidget } from '@/features/dashboard/components/FriendActivityWidget'
+import { DailyCheckinWidget } from '@/features/dashboard/components/DailyCheckinWidget'
 import { isSundayIST } from '@/lib/time'
 import { useTime } from '@/hooks/useTime'
 import { cn } from '@/lib/utils'
@@ -78,76 +76,21 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <BacklogBanner />
       <SundayRitualPrompt />
 
       <div className="grid gap-6 md:grid-cols-12 items-start mt-2">
         <div className="md:col-span-8 space-y-4">
           <TodaysFocus />
           <YearDashboardCard />
+          <DailyCheckinWidget />
           <FriendActivityWidget />
         </div>
         
         <div className="md:col-span-4 space-y-4 lg:sticky lg:top-24">
           <CalendarWidget />
           <CountdownWidget />
-          
-          <SidebarWidgets />
         </div>
       </div>
-    </div>
-  )
-}
-
-function SidebarWidgets() {
-  const { user } = useAuth()
-  const { data: milestones = [] } = useMilestones()
-  const { data: revisions = [] } = useAllRevisions(user?.id)
-  const { data: chapters = [] } = useChapters()
-
-  // Find next milestone based on target_date
-  const sortedMilestones = [...milestones]
-    .filter(m => m.target_date)
-    .sort((a, b) => new Date(a.target_date!).getTime() - new Date(b.target_date!).getTime())
-  
-  const nextMilestone = sortedMilestones.find(m => new Date(m.target_date!) >= new Date()) || sortedMilestones[0]
-
-  // Find upcoming revision
-  const pendingRevisions = revisions.filter(r => r.status !== 'Completed')
-  const nextRevision = pendingRevisions[0]
-  const nextRevChapter = nextRevision ? chapters.find(c => c.id === nextRevision.chapter_id) : null
-
-  if (!nextMilestone && !nextRevChapter) return null;
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 mt-4">
-      {nextRevChapter && nextRevision && (
-        <Card className="shadow-sm border-border/60">
-          <CardContent className="p-4 flex items-center justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Upcoming Revision</p>
-              <p className="font-medium text-sm mt-0.5 truncate">{nextRevChapter.name}</p>
-            </div>
-            <div className="text-[10px] bg-orange-500/10 text-orange-500 font-bold px-2 py-1 rounded whitespace-nowrap">
-              Day {nextRevision.revision_day}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {nextMilestone && (
-        <Card className="shadow-sm border-border/60">
-          <CardContent className="p-4 flex items-center justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Next Milestone</p>
-              <p className="font-medium text-sm mt-0.5 truncate">{nextMilestone.name}</p>
-            </div>
-            <div className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-1 rounded whitespace-nowrap">
-              {nextMilestone.target_date ? new Date(nextMilestone.target_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Soon'}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

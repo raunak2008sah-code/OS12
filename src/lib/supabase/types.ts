@@ -177,12 +177,11 @@ export interface Revision {
   completed_at: string | null
 }
 
-export interface Backlog {
+export interface DailyCheckin {
   id: string
   user_id: string
-  chapter_id: string
-  escalation_level: string
-  cleared_at: string | null
+  date: string
+  checked_at: string
   created_at: string
 }
 
@@ -237,7 +236,7 @@ export interface Database {
       milestones: { Row: Milestone; Insert: Partial<Milestone>; Update: Partial<Milestone> }
       formula_sheet: { Row: FormulaSheet; Insert: Partial<FormulaSheet>; Update: Partial<FormulaSheet> }
       revision: { Row: Revision; Insert: Partial<Revision>; Update: Partial<Revision> }
-      backlog: { Row: Backlog; Insert: Partial<Backlog>; Update: Partial<Backlog> }
+      daily_checkins: { Row: DailyCheckin; Insert: Partial<DailyCheckin>; Update: Partial<DailyCheckin> }
       monthly_reviews: { Row: MonthlyReview; Insert: Partial<MonthlyReview>; Update: Partial<MonthlyReview> }
       weekly_reviews: { Row: WeeklyReview; Insert: Partial<WeeklyReview>; Update: Partial<WeeklyReview> }
       compare_profiles: { Row: CompareProfile; Insert: Partial<CompareProfile>; Update: Partial<CompareProfile> }

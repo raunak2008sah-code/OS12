@@ -1,6 +1,6 @@
 import { useAuth } from '@/hooks/useAuth'
 import { SubjectCard } from '@/features/subjects/components/SubjectCard'
-import { useSubjects, useChapters, useAllChapterProgress, useBacklog } from '@/lib/supabase/queries'
+import { useSubjects, useChapters, useAllChapterProgress } from '@/lib/supabase/queries'
 import { BookOpen, BarChart3 } from 'lucide-react'
 import { subjectProgress } from '@/lib/progress'
 
@@ -9,9 +9,8 @@ export default function SubjectListPage() {
   const { data: subjects = [], isLoading: loadingSubjects } = useSubjects()
   const { data: allChapters = [], isLoading: loadingChapters } = useChapters()
   const { data: progress = [], isLoading: loadingProgress } = useAllChapterProgress(user?.id)
-  const { data: backlog = [], isLoading: loadingBacklog } = useBacklog(user?.id)
 
-  const isLoading = loadingSubjects || loadingChapters || loadingProgress || loadingBacklog
+  const isLoading = loadingSubjects || loadingChapters || loadingProgress
 
   // Stats
   const totalChapters = allChapters.length
@@ -63,15 +62,17 @@ export default function SubjectListPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-          {subjects.map(subject => (
-            <SubjectCard 
-              key={subject.id} 
-              subject={subject} 
-              chapters={allChapters.filter(c => c.subject_id === subject.id)}
-              progress={progress}
-              backlog={backlog}
-            />
-          ))}
+          {subjects.map(subject => {
+            const subjectChapters = allChapters.filter(c => c.subject_id === subject.id)
+            return (
+              <SubjectCard 
+                key={subject.id} 
+                subject={subject} 
+                chapters={subjectChapters}
+                progress={progress.filter(p => subjectChapters.some(c => c.id === p.chapter_id))}
+              />
+            )
+          })}
         </div>
       )}
     </div>

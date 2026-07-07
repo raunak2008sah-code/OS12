@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ChevronRight, Book, Clock, AlertCircle, Target } from 'lucide-react'
+import { ChevronRight, Book, Clock, Target } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { subjectProgress, isChapterDone } from '@/lib/progress'
 import { FilterBar } from '@/features/subjects/components/FilterBar'
@@ -12,7 +12,6 @@ import {
   useAllResourceProgress, 
   useMistakes, 
   useFormulaSheets, 
-  useBacklog, 
   useAllNotes, 
   useAllRevisions,
   useRoadmapPhases,
@@ -30,7 +29,6 @@ export default function SubjectDetailPage() {
   const { data: resources = [], isLoading: loadingResources } = useAllResourceProgress(user?.id)
   const { data: mistakes = [], isLoading: loadingMistakes } = useMistakes(undefined, user?.id)
   const { data: formulaSheets = [], isLoading: loadingFormula } = useFormulaSheets(user?.id)
-  const { data: backlog = [], isLoading: loadingBacklog } = useBacklog(user?.id)
   const { data: notes = [], isLoading: loadingNotes } = useAllNotes(user?.id)
   const { data: revisions = [], isLoading: loadingRevisions } = useAllRevisions(user?.id)
   
@@ -42,20 +40,18 @@ export default function SubjectDetailPage() {
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedDifficulty, setSelectedDifficulty] = useState('all')
 
-  const isLoading = loadingSubject || loadingChapters || loadingProgress || loadingResources || loadingMistakes || loadingFormula || loadingBacklog || loadingNotes || loadingRevisions
+  const isLoading = loadingSubject || loadingChapters || loadingProgress || loadingResources || loadingMistakes || loadingFormula || loadingNotes || loadingRevisions
 
   const { filteredChapters, completionStats } = useMemo(() => {
     let filtered = chapters
     let completedCount = 0
     let totalEstimated = 0
-    let activeBacklogCount = 0
 
     // Compute stats
     chapters.forEach(ch => {
       totalEstimated += ch.estimated_hours || 0
       const p = progress.find(pr => pr.chapter_id === ch.id)
       if (isChapterDone(p?.status)) completedCount++
-      if (backlog.some(b => b.chapter_id === ch.id)) activeBacklogCount++
     })
 
     if (searchQuery) {
@@ -81,11 +77,10 @@ export default function SubjectDetailPage() {
         total: chapters.length,
         completed: completedCount,
         percent: subjectProgress(chapters.map(c => c.id), progress),
-        estimatedHours: totalEstimated,
-        backlogs: activeBacklogCount
+        estimatedHours: totalEstimated
       }
     }
-  }, [chapters, progress, backlog, searchQuery, selectedPhase, selectedStatus, selectedDifficulty])
+  }, [chapters, progress, searchQuery, selectedPhase, selectedStatus, selectedDifficulty])
 
   const phaseOptions = useMemo(() => phases.map(p => ({ label: p.name, value: p.id })), [phases])
   const statusOptions = [
@@ -149,7 +144,6 @@ export default function SubjectDetailPage() {
           <div className="flex items-center gap-3 shrink-0 flex-wrap">
             <StatPill icon={Target} label="Progress" value={`${completionStats.percent}%`} color="text-primary" />
             <StatPill icon={Clock} label="Est. Time" value={`${completionStats.estimatedHours}h`} color="text-blue-500" />
-            <StatPill icon={AlertCircle} label="Backlogs" value={completionStats.backlogs.toString()} color={completionStats.backlogs > 0 ? 'text-orange-500' : 'text-muted-foreground'} />
           </div>
         </div>
       </header>
@@ -194,7 +188,6 @@ export default function SubjectDetailPage() {
             mistakes={mistakes} 
             formulaSheets={formulaSheets} 
             revisions={revisions} 
-            backlog={backlog} 
             phases={phases} 
             months={months} 
           />

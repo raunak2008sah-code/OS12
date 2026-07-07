@@ -8,7 +8,6 @@ import {
   useChapterProgress, 
   useToggleChapterProgress,
   useRoadmapPhases,
-  useBacklog,
   useResourceProgress,
   useToggleResourceProgress,
   useResources,
@@ -23,7 +22,6 @@ import {
   useSaveFormulaSheet,
   useComments,
   useAddComment
-  // onDeleteComment is not implemented in queries.ts, we'll omit or add it if needed
 } from '@/lib/supabase/queries'
 import { chapterWorkflowPercent } from '@/lib/progress'
 
@@ -50,7 +48,6 @@ export default function ChapterDetailPage() {
   const { data: subject, isLoading: loadingSubject } = useSubject(chapter?.subject_id || '')
   const { data: progress } = useChapterProgress(userId, chapterId)
   const { data: phases } = useRoadmapPhases()
-  const { data: backlog = [] } = useBacklog(userId)
   const { data: resourceProgress = [] } = useResourceProgress(userId, chapterId)
   const { data: allResources = [] } = useResources()
   const { data: revisions = [] } = useRevisions(userId, chapterId)
@@ -83,7 +80,6 @@ export default function ChapterDetailPage() {
 
   const currentStatus = progress?.status || 'Lecture Pending'
   const activePhase = phases?.find(p => p.id === chapter.phase)
-  const activeBacklog = backlog.find(b => b.chapter_id === chapter.id)
 
   const completionPercent = chapterWorkflowPercent(currentStatus)
 
@@ -142,7 +138,6 @@ export default function ChapterDetailPage() {
         subject={subject}
         progress={progress || undefined}
         phase={activePhase}
-        backlog={activeBacklog}
         completionPercent={completionPercent}
       />
 
