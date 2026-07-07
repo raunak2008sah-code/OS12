@@ -129,27 +129,28 @@ export function FriendActivityWidget() {
             </div>
           </div>
 
-          <div className="bg-primary/5 rounded-lg p-3 border border-primary/10 space-y-3">
-            <div>
-              <p className="text-[10px] uppercase font-bold tracking-wider text-primary/70 mb-1">Current Chapter</p>
-              <p className="font-semibold text-foreground truncate">{currentChapterName}</p>
-            </div>
-            
-            {latestActivity && (
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-primary/70 mb-1">Latest Activity</p>
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 font-medium text-foreground">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                    <span className="truncate max-w-[120px]">{latestActivity.status}</span>
-                  </div>
-                  <span className="text-muted-foreground">{formatRelativeTime(latestActivity.completedAt)}</span>
-                </div>
+          <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+            <div className="grid grid-cols-2 gap-3 items-start">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase font-bold tracking-wider text-primary/70 mb-1 truncate">Current Chapter</p>
+                <p className="font-semibold text-foreground truncate text-sm">{currentChapterName}</p>
               </div>
-            )}
+              
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase font-bold tracking-wider text-primary/70 mb-1 truncate">Latest Activity</p>
+                {latestActivity ? (
+                  <div className="flex items-center gap-1.5 font-medium text-foreground text-sm">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="truncate">{latestActivity.status}</span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic truncate">No completed steps yet</p>
+                )}
+              </div>
+            </div>
 
             {completedTodayCount > 0 && (
-              <div className="pt-2 border-t border-primary/10">
+              <div className="pt-2 mt-3 border-t border-primary/10">
                 <p className="text-xs text-muted-foreground">
                   Completed Today: <span className="font-semibold text-foreground">{completedTodayCount}</span> workflow stages
                 </p>
