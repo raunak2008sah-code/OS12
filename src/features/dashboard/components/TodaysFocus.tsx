@@ -54,11 +54,15 @@ export function TodaysFocus() {
             </div>
 
             <div className="flex items-center gap-3 bg-muted/30 p-3 rounded-xl border border-border/50">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm font-medium text-muted-foreground line-through">{focusChapter.status}</span>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              {focusChapter.status && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-medium text-muted-foreground line-through">{focusChapter.status}</span>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </>
+              )}
               <div className="flex items-center gap-2">
                 <Circle className="h-4 w-4 text-primary" />
                 <span className="text-sm font-bold text-primary">{focusChapter.nextStep}</span>

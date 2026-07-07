@@ -198,18 +198,28 @@ export function getCurrentChapter(
   const chProgress = progress.find(p => p.chapter_id === current.chapter.id)
   const status = chProgress?.status || 'Lecture Pending'
   
-  // Resolve subject-aware workflow for correct nextStep
+  // Resolve subject-aware workflow for correct steps
   const currentSubject = subjects.find(s => s.id === current.chapter.subject_id)
   const config = getSubjectConfig(currentSubject?.slug)
   const stages = getWorkflowForChapter(config, current.chapter.name)
+  
   const idx = stages.indexOf(status)
-  const nextStep = (idx === -1 || idx >= stages.length - 1) ? 'Done' : stages[idx + 1]
+  const safeIdx = idx === -1 ? 0 : idx
+  
+  let completedStep = null
+  if (status === 'Done') {
+    completedStep = 'Done'
+  } else if (safeIdx > 0) {
+    completedStep = stages[safeIdx - 1]
+  }
+
+  const activeStep = status === 'Done' ? 'Done' : stages[safeIdx]
 
   return {
     chapter: current.chapter,
     subject: currentSubject,
-    status,
-    nextStep
+    status: completedStep || '', // Fix TS error (string | null to string)
+    nextStep: activeStep // Previously this was activeStep + 1
   }
 }
 
