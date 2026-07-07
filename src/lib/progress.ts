@@ -1,4 +1,5 @@
 import type { Chapter, ChapterProgress, Note, FormulaSheet, Mistake, Comment, Subject } from '@/lib/supabase/types'
+import { getSubjectConfig, getWorkflowForChapter } from '@/lib/subjectProfiles'
 
 /**
  * Canonical workflow stages for OS12.
@@ -85,6 +86,51 @@ export function subjectProgress(
   return Math.round((completedWorkflowSteps / totalWorkflowSteps) * 100)
 }
 
+// ---------------------------------------------------------------------------
+// Dynamic (subject-aware) progress helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the completed steps for a chapter against a specific workflow.
+ */
+export function getCompletedStepsForWorkflow(status: string | undefined | null, stages: string[]): number {
+  if (!status) return 0
+  if (status === 'Done') return stages.length
+  const idx = stages.indexOf(status)
+  return idx === -1 ? 0 : idx
+}
+
+/**
+ * Compute the workflow completion percentage for a SINGLE chapter
+ * against a specific set of workflow stages.
+ */
+export function chapterWorkflowPercentDynamic(status: string | undefined | null, stages: string[]): number {
+  return Math.round((getCompletedStepsForWorkflow(status, stages) / stages.length) * 100)
+}
+
+/**
+ * Compute subject progress where each chapter may have a different
+ * number of workflow stages (e.g. Chemistry categories).
+ */
+export function subjectProgressDynamic(
+  chapters: Chapter[],
+  progress: { chapter_id: string; status: string }[],
+  subjects: Subject[]
+): number {
+  if (chapters.length === 0) return 0
+  let totalSteps = 0
+  let completedSteps = 0
+  for (const ch of chapters) {
+    const subject = subjects.find(s => s.id === ch.subject_id)
+    const config = getSubjectConfig(subject?.slug)
+    const stages = getWorkflowForChapter(config, ch.name)
+    totalSteps += stages.length
+    const p = progress.find(pr => pr.chapter_id === ch.id)
+    completedSteps += getCompletedStepsForWorkflow(p?.status, stages)
+  }
+  return totalSteps === 0 ? 0 : Math.round((completedSteps / totalSteps) * 100)
+}
+
 /**
  * Select the most recently interacted incomplete chapter.
  * Priority:
@@ -161,12 +207,16 @@ export function getCurrentChapter(
   const chProgress = progress.find(p => p.chapter_id === current.chapter.id)
   const status = chProgress?.status || 'Lecture Pending'
   
-  const idx = WORKFLOW_STAGES.indexOf(status as any)
-  const nextStep = (idx === -1 || idx >= WORKFLOW_STAGES.length - 1) ? 'Done' : WORKFLOW_STAGES[idx + 1]
+  // Resolve subject-aware workflow for correct nextStep
+  const currentSubject = subjects.find(s => s.id === current.chapter.subject_id)
+  const config = getSubjectConfig(currentSubject?.slug)
+  const stages = getWorkflowForChapter(config, current.chapter.name)
+  const idx = stages.indexOf(status)
+  const nextStep = (idx === -1 || idx >= stages.length - 1) ? 'Done' : stages[idx + 1]
 
   return {
     chapter: current.chapter,
-    subject: subjects.find(s => s.id === current.chapter.subject_id),
+    subject: currentSubject,
     status,
     nextStep
   }

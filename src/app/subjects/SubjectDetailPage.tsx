@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ChevronRight, Book, Clock, Target } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { subjectProgress, isChapterDone } from '@/lib/progress'
+import { subjectProgressDynamic, isChapterDone } from '@/lib/progress'
 import { FilterBar } from '@/features/subjects/components/FilterBar'
 import { ChapterCard } from '@/features/subjects/components/ChapterCard'
 import { 
@@ -76,11 +76,11 @@ export default function SubjectDetailPage() {
       completionStats: {
         total: chapters.length,
         completed: completedCount,
-        percent: subjectProgress(chapters.map(c => c.id), progress),
+        percent: subject ? subjectProgressDynamic(chapters, progress, [subject]) : 0,
         estimatedHours: totalEstimated
       }
     }
-  }, [chapters, progress, searchQuery, selectedPhase, selectedStatus, selectedDifficulty])
+  }, [chapters, progress, searchQuery, selectedPhase, selectedStatus, selectedDifficulty, subject])
 
   const phaseOptions = useMemo(() => phases.map(p => ({ label: p.name, value: p.id })), [phases])
   const statusOptions = [
@@ -189,7 +189,8 @@ export default function SubjectDetailPage() {
             formulaSheets={formulaSheets} 
             revisions={revisions} 
             phases={phases} 
-            months={months} 
+            months={months}
+            subjectSlug={subject?.slug}
           />
         )}
       </div>
@@ -220,6 +221,7 @@ function ChapterGroups({ chapters, progress, ...props }: any) {
                 key={chapter.id}
                 chapter={chapter}
                 progress={progress.find((p: any) => p.chapter_id === chapter.id)}
+                subjectSlug={props.subjectSlug}
                 {...props}
               />
             ))}
@@ -243,6 +245,7 @@ function ChapterGroups({ chapters, progress, ...props }: any) {
                   key={chapter.id}
                   chapter={chapter}
                   progress={progress.find((p: any) => p.chapter_id === chapter.id)}
+                  subjectSlug={props.subjectSlug}
                   {...props}
                 />
               ))}

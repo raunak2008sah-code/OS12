@@ -1,30 +1,32 @@
 import { useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { subjectProgress } from '@/lib/progress'
+import { subjectProgressDynamic } from '@/lib/progress'
 import {
   useChapters,
   useAllChapterProgress,
+  useSubjects,
 } from '@/lib/supabase/queries'
 import { useAuth } from '@/hooks/useAuth'
 import type { Chapter, ChapterProgress } from '@/lib/supabase/types'
 
-function computeBoardsProgress(chapters: Chapter[], progress: ChapterProgress[]): number {
-  return subjectProgress(chapters.map(c => c.id), progress)
+function computeBoardsProgress(chapters: Chapter[], progress: ChapterProgress[], subjects: any[]): number {
+  return subjectProgressDynamic(chapters, progress, subjects)
 }
 
-function computeJeeProgress(chapters: Chapter[], progress: ChapterProgress[]): number {
+function computeJeeProgress(chapters: Chapter[], progress: ChapterProgress[], subjects: any[]): number {
   const jeeChapters = chapters.filter(c => c.jee_weight !== 'none')
-  return subjectProgress(jeeChapters.map(c => c.id), progress)
+  return subjectProgressDynamic(jeeChapters, progress, subjects)
 }
 
 export function YearDashboardCard() {
   const { user } = useAuth()
   const { data: chapters = [] } = useChapters()
   const { data: progress = [] } = useAllChapterProgress(user?.id)
+  const { data: subjects = [] } = useSubjects()
 
-  const boardsProgress = useMemo(() => computeBoardsProgress(chapters, progress), [chapters, progress])
-  const jeeProgress = useMemo(() => computeJeeProgress(chapters, progress), [chapters, progress])
+  const boardsProgress = useMemo(() => computeBoardsProgress(chapters, progress, subjects), [chapters, progress, subjects])
+  const jeeProgress = useMemo(() => computeJeeProgress(chapters, progress, subjects), [chapters, progress, subjects])
 
   const metrics: Array<{ label: string; value: React.ReactNode; highlight?: string }> = [
     {

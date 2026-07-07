@@ -9,10 +9,11 @@ import {
   useAllNotes,
   useFormulaSheets,
   useAllComments,
-  useChapters
+  useChapters,
+  useSubjects
 } from '@/lib/supabase/queries'
 import { 
-  subjectProgress, 
+  subjectProgressDynamic, 
   getCurrentChapter, 
   calculateStudyStreak, 
   formatRelativeTime 
@@ -29,11 +30,12 @@ export function FriendActivityWidget() {
   const { data: formulas = [] } = useFormulaSheets(friend?.id)
   const { data: comments = [] } = useAllComments(friend?.id)
   const { data: chapters = [] } = useChapters()
+  const { data: subjects = [] } = useSubjects()
 
   if (!friend) return null
 
-  // Calculate overall progress % using canonical formula
-  const friendPercent = subjectProgress(chapters.map(c => c.id), progress)
+  // Calculate overall progress % using dynamic formula
+  const friendPercent = subjectProgressDynamic(chapters, progress, subjects)
 
   // Collect all timestamps for Last Seen and Streak
   const allTimestamps: string[] = []

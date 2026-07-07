@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { BookOpen, AlertTriangle, FileText, CheckCircle2, PenTool, Circle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { isChapterDone, chapterWorkflowPercent } from '@/lib/progress'
+import { isChapterDone, chapterWorkflowPercentDynamic } from '@/lib/progress'
+import { getSubjectConfig, getWorkflowForChapter } from '@/lib/subjectProfiles'
 import type { 
   Chapter, ChapterProgress, ResourceProgress, Note, 
   Mistake, FormulaSheet, Revision, RoadmapPhase, RoadmapMonth 
@@ -17,17 +18,20 @@ interface ChapterCardProps {
   revisions: Revision[]
   phases: RoadmapPhase[]
   months: RoadmapMonth[]
+  subjectSlug?: string
 }
 
 export function ChapterCard({
-  chapter, progress, resources, notes, mistakes, formulaSheets, revisions, phases, months
+  chapter, progress, resources, notes, mistakes, formulaSheets, revisions, phases, months, subjectSlug
 }: ChapterCardProps) {
   const currentPhase = phases.find(p => p.id === chapter.phase)
   const currentMonth = months.find(m => m.id === chapter.month)
 
 
   const isCompleted = isChapterDone(progress?.status)
-  const completionPercent = chapterWorkflowPercent(progress?.status)
+  const config = getSubjectConfig(subjectSlug)
+  const stages = getWorkflowForChapter(config, chapter.name)
+  const completionPercent = chapterWorkflowPercentDynamic(progress?.status, stages)
   const hasNotes = notes.some(n => n.chapter_id === chapter.id && n.content && n.content.trim().length > 0)
   const activeMistakes = mistakes.filter(m => m.chapter_id === chapter.id && !m.is_resolved)
   const hasFormula = formulaSheets.some(f => f.chapter_id === chapter.id)

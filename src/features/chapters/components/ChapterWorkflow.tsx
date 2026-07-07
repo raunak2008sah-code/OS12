@@ -2,19 +2,19 @@ import { Check, ChevronRight, Activity } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { cn } from '@/lib/utils'
-import { WORKFLOW_STAGES } from '@/lib/progress'
 
 interface ChapterWorkflowProps {
   currentStatus: string
   onStatusChange: (status: any) => void
+  stages: string[]
 }
 
-export function ChapterWorkflow({ currentStatus, onStatusChange }: ChapterWorkflowProps) {
+export function ChapterWorkflow({ currentStatus, onStatusChange, stages }: ChapterWorkflowProps) {
   const [isExpanded, setIsExpanded] = useLocalStorage('os12-workflow-expanded', true)
-  const currentIndex = WORKFLOW_STAGES.indexOf(currentStatus as any)
+  const currentIndex = stages.indexOf(currentStatus)
   const safeIndex = currentIndex === -1 ? 0 : currentIndex
 
-  const completionPercent = Math.round(((safeIndex + (currentStatus === 'Done' ? 1 : 0)) / WORKFLOW_STAGES.length) * 100)
+  const completionPercent = Math.round(((safeIndex + (currentStatus === 'Done' ? 1 : 0)) / stages.length) * 100)
 
   return (
     <Card className="overflow-hidden border-border/50 bg-card/50 transition-all duration-300">
@@ -41,8 +41,8 @@ export function ChapterWorkflow({ currentStatus, onStatusChange }: ChapterWorkfl
               {/* Vertical timeline line */}
               <div className="absolute left-[15px] top-4 bottom-4 w-px bg-border/50" />
               
-              {WORKFLOW_STAGES.map((stage, idx) => {
-                const isCompleted = idx < safeIndex || (stage === 'Done' && safeIndex === 9)
+              {stages.map((stage, idx) => {
+                const isCompleted = idx < safeIndex || (stage === 'Done' && safeIndex === stages.length - 1)
                 const isCurrent = idx === safeIndex
                 
                 let buttonStyle = 'text-muted-foreground/60 hover:bg-muted/50 hover:text-foreground'
@@ -86,3 +86,4 @@ export function ChapterWorkflow({ currentStatus, onStatusChange }: ChapterWorkfl
     </Card>
   )
 }
+

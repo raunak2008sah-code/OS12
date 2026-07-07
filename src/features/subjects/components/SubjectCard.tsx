@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { BookOpen, Clock, ChevronRight, TrendingUp } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Subject, Chapter, ChapterProgress } from '@/lib/supabase/types'
-import { subjectProgress, isChapterDone, getCurrentChapter } from '@/lib/progress'
+import { subjectProgressDynamic, isChapterDone, getCurrentChapter } from '@/lib/progress'
 import { useAuth } from '@/hooks/useAuth'
 import { useAllNotes, useFormulaSheets, useMistakes, useAllComments } from '@/lib/supabase/queries'
 
@@ -18,10 +18,8 @@ export function SubjectCard({ subject, chapters, progress }: SubjectCardProps) {
   const { data: formulas = [] } = useFormulaSheets(user?.id)
   const { data: mistakes = [] } = useMistakes(undefined, user?.id)
   const { data: comments = [] } = useAllComments(user?.id)
-
   const totalChapters = chapters.length
-  const chapterIds = chapters.map(ch => ch.id)
-  const completionPercent = subjectProgress(chapterIds, progress)
+  const completionPercent = subjectProgressDynamic(chapters, progress, [subject])
   
   const estimatedHours = chapters.reduce((acc, curr) => acc + (curr.estimated_hours || 0), 0)
   const completedHours = chapters

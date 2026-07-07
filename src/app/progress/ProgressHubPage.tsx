@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Activity, Target, Clock, TrendingUp, CalendarDays, BarChart3, Flame } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { subjectProgress, isChapterDone } from '@/lib/progress'
+import { subjectProgressDynamic, isChapterDone } from '@/lib/progress'
 import { 
   useChapters, 
   useAllChapterProgress, 
@@ -30,7 +30,7 @@ export default function ProgressHubPage() {
   const stats = useMemo(() => {
     const totalChapters = chapters.length
     const completedChapters = chapterProgress.filter(p => isChapterDone(p.status)).length
-    const overallPercent = subjectProgress(chapters.map(c => c.id), chapterProgress)
+    const overallPercent = subjectProgressDynamic(chapters, chapterProgress, subjects)
 
     const totalEstHours = chapters.reduce((sum, ch) => sum + (ch.estimated_hours || 0), 0)
     const completedHours = chapters
@@ -49,7 +49,7 @@ export default function ProgressHubPage() {
       const subCompleted = subChapters.filter(ch => 
         chapterProgress.some(p => p.chapter_id === ch.id && isChapterDone(p.status))
       ).length
-      const pct = subjectProgress(subChapters.map(c => c.id), chapterProgress)
+      const pct = subjectProgressDynamic(subChapters, chapterProgress, [s])
       return { name: s.name, completed: subCompleted, total: subChapters.length, percent: pct }
     })
 

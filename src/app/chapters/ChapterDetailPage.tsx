@@ -23,7 +23,8 @@ import {
   useComments,
   useAddComment
 } from '@/lib/supabase/queries'
-import { chapterWorkflowPercent } from '@/lib/progress'
+import { chapterWorkflowPercentDynamic } from '@/lib/progress'
+import { getSubjectConfig, getWorkflowForChapter, getResourcesForChapter } from '@/lib/subjectProfiles'
 
 import { ChapterHeader } from '@/features/chapters/components/ChapterHeader'
 import { ChapterWorkflow } from '@/features/chapters/components/ChapterWorkflow'
@@ -81,7 +82,17 @@ export default function ChapterDetailPage() {
   const currentStatus = progress?.status || 'Lecture Pending'
   const activePhase = phases?.find(p => p.id === chapter.phase)
 
-  const completionPercent = chapterWorkflowPercent(currentStatus)
+  // Resolve subject-specific workflow and resources
+  const subjectConfig = getSubjectConfig(subject.slug)
+  const resolvedStages = getWorkflowForChapter(subjectConfig, chapter.name)
+  const resolvedResourceNames = getResourcesForChapter(subjectConfig, chapter.name)
+
+  // Filter global resources to only show ones relevant to this subject
+  const filteredResources = allResources.filter(r =>
+    resolvedResourceNames.some(name => r.name.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(r.name.toLowerCase()))
+  )
+
+  const completionPercent = chapterWorkflowPercentDynamic(currentStatus, resolvedStages)
 
   // Handlers
   const handleStatusChange = async (status: string) => {
@@ -147,9 +158,10 @@ export default function ChapterDetailPage() {
           <ChapterWorkflow 
             currentStatus={currentStatus}
             onStatusChange={handleStatusChange}
+            stages={resolvedStages}
           />
           <ChapterResources 
-            resources={allResources}
+            resources={filteredResources}
             progress={resourceProgress}
             onToggle={handleResourceToggle}
           />
