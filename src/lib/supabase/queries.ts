@@ -190,9 +190,48 @@ export function useToggleChapterProgress() {
       const { error } = await supabase.from('chapter_progress').upsert({ user_id: userId, chapter_id: chapterId, status } as any, { onConflict: 'user_id,chapter_id' })
       if (error) throw error
     },
-    onSuccess: (_, { userId, chapterId }) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.chapterProgress(userId) })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.chapterProgress(userId, chapterId) })
+    onMutate: async ({ userId, chapterId, status }) => {
+      // Cancel any in-flight queries that would overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: queryKeys.chapterProgress(userId, chapterId) })
+      await queryClient.cancelQueries({ queryKey: queryKeys.allChapterProgress(userId) })
+
+      // Snapshot previous values for rollback
+      const previousProgress = queryClient.getQueryData(queryKeys.chapterProgress(userId, chapterId))
+      const previousAllProgress = queryClient.getQueryData(queryKeys.allChapterProgress(userId))
+
+      // Optimistically update the single-chapter cache
+      queryClient.setQueryData(queryKeys.chapterProgress(userId, chapterId), (old: any) => ({
+        ...old,
+        user_id: userId,
+        chapter_id: chapterId,
+        status
+      }))
+
+      // Optimistically update the allChapterProgress cache (used by SubjectListPage, ProgressHub, Compare, Dashboard)
+      queryClient.setQueryData(queryKeys.allChapterProgress(userId), (old: any) => {
+        if (!Array.isArray(old)) return old
+        const exists = old.some((p: any) => p.chapter_id === chapterId)
+        if (exists) {
+          return old.map((p: any) => p.chapter_id === chapterId ? { ...p, status } : p)
+        }
+        // If this chapter has no progress row yet, add one
+        return [...old, { user_id: userId, chapter_id: chapterId, status }]
+      })
+
+      return { previousProgress, previousAllProgress, userId, chapterId }
+    },
+    onError: (_err, _variables, context: any) => {
+      if (context?.previousProgress !== undefined) {
+        queryClient.setQueryData(queryKeys.chapterProgress(context.userId, context.chapterId), context.previousProgress)
+      }
+      if (context?.previousAllProgress !== undefined) {
+        queryClient.setQueryData(queryKeys.allChapterProgress(context.userId), context.previousAllProgress)
+      }
+    },
+    onSettled: (_data, _error, variables) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.chapterProgress(variables.userId) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.chapterProgress(variables.userId, variables.chapterId) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allChapterProgress(variables.userId) })
     },
   })
 }
@@ -484,9 +523,23 @@ export function useToggleRevision() {
       } as any, { onConflict: 'user_id,chapter_id,revision_day' })
       if (error) throw error
     },
-    onSuccess: (_, { userId, chapterId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['revisions', userId, chapterId] })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.allRevisions(userId) })
+    onMutate: async ({ userId, chapterId, revisionDay, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['revisions', userId, chapterId] })
+      const previousRevisions = queryClient.getQueryData(['revisions', userId, chapterId])
+      queryClient.setQueryData(['revisions', userId, chapterId], (old: any) => {
+        if (!old) return old
+        return old.map((r: any) => r.revision_day === revisionDay ? { ...r, status } : r)
+      })
+      return { previousRevisions, userId, chapterId }
+    },
+    onError: (_err, _variables, context: any) => {
+      if (context?.previousRevisions) {
+        queryClient.setQueryData(['revisions', context.userId, context.chapterId], context.previousRevisions)
+      }
+    },
+    onSettled: (_data, _error, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['revisions', variables.userId, variables.chapterId] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allRevisions(variables.userId) })
     },
   })
 }
@@ -521,9 +574,23 @@ export function useToggleResourceProgress() {
       } as any, { onConflict: 'user_id,chapter_id,resource_id' })
       if (error) throw error
     },
-    onSuccess: (_, { userId, chapterId }) => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.resourceProgress(userId, chapterId) })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.allResourceProgress(userId) })
+    onMutate: async ({ userId, chapterId, resourceId, status }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.resourceProgress(userId, chapterId) })
+      const previousProgress = queryClient.getQueryData(queryKeys.resourceProgress(userId, chapterId))
+      queryClient.setQueryData(queryKeys.resourceProgress(userId, chapterId), (old: any) => {
+        if (!old) return old
+        return old.map((p: any) => p.resource_id === resourceId ? { ...p, status } : p)
+      })
+      return { previousProgress, userId, chapterId }
+    },
+    onError: (_err, _variables, context: any) => {
+      if (context?.previousProgress) {
+        queryClient.setQueryData(queryKeys.resourceProgress(context.userId, context.chapterId), context.previousProgress)
+      }
+    },
+    onSettled: (_data, _error, variables) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.resourceProgress(variables.userId, variables.chapterId) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.allResourceProgress(variables.userId) })
     },
   })
 }
@@ -586,6 +653,7 @@ export function useAddMistake() {
     },
     onSuccess: (_, { user_id, chapter_id }) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.mistakes(chapter_id, user_id) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.mistakes(undefined, user_id) })
     },
   })
 }

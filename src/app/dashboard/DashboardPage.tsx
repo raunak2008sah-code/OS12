@@ -15,18 +15,29 @@ import { cn } from '@/lib/utils'
 function SundayRitualPrompt() {
   const now = useTime(60000)
   const isSunday = isSundayIST(now)
-  const [expanded, setExpanded] = useState(isSunday)
+  const [expanded, setExpanded] = useState(() => {
+    const saved = sessionStorage.getItem('os12-sunday-ritual-expanded')
+    if (saved !== null) return saved === 'true'
+    return isSunday
+  })
 
   useEffect(() => {
-    setExpanded(isSunday)
+    if (isSunday && sessionStorage.getItem('os12-sunday-ritual-expanded') === null) {
+      setExpanded(true)
+    }
   }, [isSunday])
 
+  const handleToggle = (newState: boolean) => {
+    setExpanded(newState)
+    sessionStorage.setItem('os12-sunday-ritual-expanded', String(newState))
+  }
+
   return (
-    <Card className={cn("border-primary/30 transition-all duration-300", expanded ? "bg-primary/5" : "bg-card cursor-pointer hover:bg-muted/50")} onClick={() => !expanded && setExpanded(true)}>
+    <Card className={cn("border-primary/30 transition-all duration-300", expanded ? "bg-primary/5" : "bg-card cursor-pointer hover:bg-muted/50")} onClick={() => !expanded && handleToggle(true)}>
       <CardContent className={cn("flex items-start gap-4", expanded ? "py-4" : "py-3")}>
         <div className="mt-0.5 shrink-0 flex items-center gap-3">
           <button 
-            onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
+            onClick={(e) => { e.stopPropagation(); handleToggle(!expanded) }}
             className="text-muted-foreground hover:text-foreground"
           >
             {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -54,7 +65,7 @@ function SundayRitualPrompt() {
 
 export default function DashboardPage() {
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-6 lg:p-8 pt-6 max-w-[1600px] mx-auto">
+    <div className="flex-1 space-y-4 p-4 md:p-6 lg:p-8 pt-4 max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <Sparkles className="h-6 w-6 text-primary" />
@@ -70,12 +81,12 @@ export default function DashboardPage() {
       <SundayRitualPrompt />
 
       <div className="grid gap-6 md:grid-cols-12 items-start mt-2">
-        <div className="md:col-span-8 space-y-6">
+        <div className="md:col-span-8 space-y-4">
           <TodaysFocus />
           <YearDashboardCard />
         </div>
         
-        <div className="md:col-span-4 space-y-6 lg:sticky lg:top-24">
+        <div className="md:col-span-4 space-y-4 lg:sticky lg:top-24">
           <CalendarWidget />
           <CountdownWidget />
           

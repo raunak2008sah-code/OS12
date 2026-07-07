@@ -36,7 +36,7 @@ export default function SettingsPage() {
         supabase.from('chapter_progress').select('*').eq('user_id', user.id),
         supabase.from('notes').select('*').eq('user_id', user.id),
         supabase.from('mistakes').select('*').eq('user_id', user.id),
-        supabase.from('formula_sheets').select('*').eq('user_id', user.id),
+        supabase.from('formula_sheet').select('*').eq('user_id', user.id),
         supabase.from('revisions').select('*').eq('user_id', user.id),
         supabase.from('backlog').select('*').eq('user_id', user.id),
       ])
@@ -246,7 +246,7 @@ export default function SettingsPage() {
                               supabase.from('resource_progress').delete().eq('user_id', user.id),
                               supabase.from('notes').delete().eq('user_id', user.id),
                               supabase.from('mistakes').delete().eq('user_id', user.id),
-                              supabase.from('formula_sheets').delete().eq('user_id', user.id),
+                              supabase.from('formula_sheet').delete().eq('user_id', user.id),
                               supabase.from('revisions').delete().eq('user_id', user.id),
                               supabase.from('backlog').delete().eq('user_id', user.id),
                               supabase.from('comments').delete().eq('user_id', user.id),

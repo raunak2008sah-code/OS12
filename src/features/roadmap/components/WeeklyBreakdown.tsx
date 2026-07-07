@@ -43,9 +43,9 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
         
         {/* Column 1: Weekly Tasks */}
         <Card className="border-border/50 bg-card/50 flex flex-col">
-          <div className="flex items-center gap-2 p-3 bg-muted/20 border-b border-border/50">
-            <CheckSquare className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-sm">Weekly Tasks</span>
+          <div className="flex items-center gap-2 p-2 bg-muted/20 border-b border-border/50">
+            <CheckSquare className="w-3.5 h-3.5 text-primary" />
+            <span className="font-semibold text-xs uppercase tracking-wide">Weekly Tasks</span>
           </div>
           <CardContent className="p-3 space-y-3 flex-1 overflow-y-auto custom-scrollbar max-h-[300px]">
             {activeWeek ? (
@@ -71,9 +71,9 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
 
         {/* Column 2: Resource Matrix */}
         <Card className="border-border/50 bg-card/50 flex flex-col">
-          <div className="flex items-center gap-2 p-3 bg-muted/20 border-b border-border/50">
-            <LayoutGrid className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-sm">Resource Matrix</span>
+          <div className="flex items-center gap-2 p-2 bg-muted/20 border-b border-border/50">
+            <LayoutGrid className="w-3.5 h-3.5 text-primary" />
+            <span className="font-semibold text-xs uppercase tracking-wide">Resource Matrix</span>
           </div>
           <CardContent className="p-3 space-y-2 flex-1 overflow-y-auto custom-scrollbar max-h-[300px]">
             {resources.length > 0 ? resources.map(resource => (
@@ -97,9 +97,9 @@ export function WeeklyBreakdown({ weeks, milestones, resources }: WeeklyBreakdow
 
         {/* Column 3: Deliverables */}
         <Card className="border-border/50 bg-card/50 flex flex-col">
-          <div className="flex items-center gap-2 p-3 bg-muted/20 border-b border-border/50">
-            <Flag className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-sm">Deliverables</span>
+          <div className="flex items-center gap-2 p-2 bg-muted/20 border-b border-border/50">
+            <Flag className="w-3.5 h-3.5 text-primary" />
+            <span className="font-semibold text-xs uppercase tracking-wide">Deliverables</span>
           </div>
           <CardContent className="p-3 flex-1 overflow-y-auto custom-scrollbar max-h-[300px]">
             <div className="relative border-l-2 border-primary/20 ml-2 pl-4 space-y-4">

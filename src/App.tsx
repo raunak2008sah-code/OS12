@@ -38,49 +38,55 @@ export default function App() {
             >
               <>
                 <Route index element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <DashboardPage />
                   </Suspense>
                 } />
                 <Route path="roadmap" element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <YearRoadmapPage />
                   </Suspense>
                 } />
                 <Route path="subjects" element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <SubjectListPage />
                   </Suspense>
                 } />
                 <Route path="subjects/:subjectId" element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <SubjectDetailPage />
                   </Suspense>
                 } />
                 <Route path="chapters/:chapterId" element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <ChapterDetailPage />
                   </Suspense>
                 } />
                 <Route path="progress" element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <ProgressHubPage />
                   </Suspense>
                 } />
                 <Route path="compare" element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <ComparePage />
                   </Suspense>
                 } />
                 <Route path="manual" element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <ManualPage />
                   </Suspense>
                 } />
                 <Route path="settings" element={
-                  <Suspense fallback={<div className="flex h-[50vh] items-center justify-center text-muted-foreground">Loading...</div>}>
+                  <Suspense fallback={<div className="flex h-[calc(100vh-4rem)] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
                     <SettingsPage />
                   </Suspense>
+                } />
+                <Route path="*" element={
+                  <div className="flex h-[50vh] flex-col items-center justify-center space-y-4">
+                    <h2 className="text-2xl font-bold">404 - Not Found</h2>
+                    <p className="text-muted-foreground">The page you are looking for doesn't exist.</p>
+                  </div>
                 } />
               </>
             </Route>
