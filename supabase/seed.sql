@@ -10,7 +10,7 @@ values
 on conflict (id) do nothing;
 
 update public.profiles set display_name = 'Raunak' where email = 'raunak@os12.app';
-update public.profiles set display_name = 'Aartuu' where email = 'aartuu@os12.app';
+update public.profiles set display_name = 'Aartii' where email = 'aartuu@os12.app';
 
 -- ============================================================
 -- Reference Data: Subjects
